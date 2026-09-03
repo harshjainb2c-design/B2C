@@ -1,0 +1,75 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Database
+supabase/
+
+# IDE and Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Testing
+coverage/
+.nyc_output/
+test/
+
+# Kiro IDE
+.kiro/
+
+# Documentation (keep only essential ones)
+ADMIN_PANEL_INTEGRATION.md
+ADMIN_SESSION_FIX.md
+API_CONSOLIDATION.md
+AUTH_IMPLEMENTATION.md
+BEIGE-COLORS.md
+CATEGORIES-COLLECTIONS-REFERENCE.md
+EMERGENCY_FIX.md
+ERROR_HANDLING_SUMMARY.md
+INDIAN_LOCALIZATION.md
+PRODUCTION_DEPLOYMENT.md
+RAZORPAY_MIGRATION_SUMMARY.md
+RAZORPAY_SETUP.md
+RESPONSIVE_IMPROVEMENTS.md
+SHIPPING_ADDRESS_UPDATE.md
+TESTING_GUIDE.md
+TROUBLESHOOTING.md
+
+# SQL files (if not needed in repo)
+apply-migration.sql
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Vercel
+.vercel
