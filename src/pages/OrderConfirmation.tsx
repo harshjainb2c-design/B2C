@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useOrder } from '../hooks/useOrders';
 import { useCartStore } from '../stores/cartStore';
-import { formatCurrency } from '../lib/razorpay';
+import { formatCurrency } from '../lib/currency';
 
 export const OrderConfirmation = () => {
   const { orderId } = useParams<{ orderId: string }>();

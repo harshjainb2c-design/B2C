@@ -54,9 +54,8 @@ async function createServer() {
         // /api/products or /api/products/123 -> /api/products.ts
         filePath = join(__dirname, 'api', 'products.ts');
         if (segments[1] && !queryParams.id) queryParams.id = segments[1];
-      } else if (segments[0] === 'payments') {
-        // /api/payments or /api/payments/webhook -> /api/payments.ts
-        filePath = join(__dirname, 'api', 'payments.ts');
+      } else if (segments[0] === 'shiprocket') {
+        filePath = join(__dirname, 'api', 'shiprocket.ts');
         if (segments[1] === 'webhook' && !queryParams.action) queryParams.action = 'webhook';
       } else if (segments[0] === 'admin') {
         // /api/admin?resource=orders or /api/admin/orders -> /api/admin.ts

@@ -1,281 +1,146 @@
 import { useState } from 'react';
-import { Elements } from '@stripe/react-stripe-js';
-import { useStripe, useElements } from '@stripe/react-stripe-js';
+import { PackageCheck, Truck } from 'lucide-react';
 import { ShippingForm } from './ShippingForm';
-import { PaymentForm } from './PaymentForm';
 import { OrderSummary } from './OrderSummary';
-import { ShippingAddressInput } from '../../lib/validation';
+import { apiClient } from '../../lib/api-client';
 import { useCartStore } from '../../stores/cartStore';
-import { useCheckout } from '../../hooks/useCheckout';
-import { getStripe } from '../../lib/stripe';
-import { createOrderDirect } from '../../lib/orders-client';
+import { CreateOrderRequest, Order, ShippingAddress } from '../../types/order';
 
-type CheckoutStep = 'shipping' | 'payment';
+type CheckoutStep = 'shipping' | 'review';
 
 interface CheckoutFormProps {
   onSuccess: (orderId: string) => void;
 }
 
-const CheckoutFormContent = ({ onSuccess }: CheckoutFormProps) => {
+export const CheckoutForm = ({ onSuccess }: CheckoutFormProps) => {
   const [step, setStep] = useState<CheckoutStep>('shipping');
-  const [shippingAddress, setShippingAddress] = useState<ShippingAddressInput | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'cod'>('cod');
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
-  const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
+  const [shippingAddress, setShippingAddress] = useState<ShippingAddress | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const stripe = useStripe();
-  const elements = useElements();
   const { items, getTotal, clearCart } = useCartStore();
-  const { createPaymentIntent, createOrder } = useCheckout();
-
   const total = getTotal();
 
-  const handleShippingSubmit = async (data: ShippingAddressInput) => {
-    setShippingAddress(data);
+  const handleShippingSubmit = (address: ShippingAddress) => {
+    setShippingAddress(address);
     setError(null);
-    setStep('payment');
+    setStep('review');
   };
 
-  const handleCODOrder = async () => {
+  const placeOrder = async () => {
     if (!shippingAddress) return;
 
+    setIsSubmitting(true);
     setError(null);
 
     try {
-      // Create order directly in Supabase (bypassing API)
-      const order = await createOrderDirect({
-        items: items.map((item) => ({
-          productId: item.productId,
-          product: item.product,
-          quantity: item.quantity,
-          price: item.price,
-        })),
+      const request: CreateOrderRequest = {
+        items: items.map(({ productId, quantity, size }) => ({ productId, quantity, size })),
         shippingAddress,
-        paymentIntentId: 'cod_' + Date.now(), // Generate a COD reference ID
-      });
+        paymentMethod: 'cod',
+      };
+      const order = await apiClient.post<Order>('/orders', request, { requiresAuth: true });
 
-      // Clear cart and redirect to confirmation
       clearCart();
       onSuccess(order.id);
-    } catch (err: any) {
-      setError(err instanceof Error ? err.message : 'Failed to create order');
-    }
-  };
-
-  const handlePaymentSubmit = async () => {
-    if (paymentMethod === 'cod') {
-      return handleCODOrder();
-    }
-
-    if (!stripe || !elements || !shippingAddress || !paymentIntentId) {
-      return;
-    }
-
-    setError(null);
-
-    try {
-      // Create payment intent first
-      const result = await createPaymentIntent.mutateAsync({
-        amount: total,
-        currency: 'usd',
-      });
-
-      setClientSecret(result.clientSecret);
-      setPaymentIntentId(result.paymentIntentId);
-
-      // Confirm payment with Stripe
-      const { error: stripeError, paymentIntent } = await stripe.confirmPayment({
-        elements,
-        redirect: 'if_required',
-      });
-
-      if (stripeError) {
-        setError(stripeError.message || 'Payment failed');
-        return;
-      }
-
-      if (paymentIntent?.status === 'succeeded') {
-        // Create order in database
-        const order = await createOrder.mutateAsync({
-          items: items.map((item) => ({
-            productId: item.productId,
-            product: item.product,
-            quantity: item.quantity,
-            price: item.price,
-          })),
-          shippingAddress,
-          paymentIntentId: result.paymentIntentId,
-        });
-
-        // Clear cart and redirect to confirmation
-        clearCart();
-        onSuccess(order.id);
-      } else {
-        setError('Payment was not successful. Please try again.');
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to process order');
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : 'Unable to place your order');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   if (items.length === 0) {
     return (
-      <div className="text-center py-12 bg-[#faf8f5] min-h-screen">
-        <p className="text-[#8b7355]">Your cart is empty</p>
+      <div className="min-h-screen bg-[#faf8f5] py-16 text-center">
+        <p className="text-[#8b7355]">Your cart is empty.</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 bg-[#faf8f5] min-h-screen">
-      <h1 className="text-3xl font-bold text-[#3d3228] mb-8">Checkout</h1>
+    <div className="min-h-screen bg-[#faf8f5] py-6 sm:py-8">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <h1 className="mb-8 text-3xl font-bold text-[#3d3228]">Checkout</h1>
 
-      {error && (
-        <div className="mb-6 p-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
-          {error}
-        </div>
-      )}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-8">
+          <div className="lg:col-span-2">
+            <div className="rounded-lg border border-[#d4c5b0] bg-white p-4 shadow-sm sm:p-6 lg:p-8">
+              <div className="mb-8 flex items-center">
+                <div className={`flex items-center ${step === 'shipping' ? 'text-[#3d3228]' : 'text-[#8b7355]'}`}>
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-full border-2 font-bold ${step === 'shipping' ? 'border-[#c9a87c] bg-[#8b7355] text-white' : 'border-[#d4c5b0]'}`}>
+                    1
+                  </div>
+                  <span className="ml-2 text-sm font-semibold sm:text-base">Shipping</span>
+                </div>
+                <div className="mx-3 h-0.5 flex-1 bg-[#d4c5b0] sm:mx-4" />
+                <div className={`flex items-center ${step === 'review' ? 'text-[#3d3228]' : 'text-[#8b7355]'}`}>
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-full border-2 font-bold ${step === 'review' ? 'border-[#c9a87c] bg-[#8b7355] text-white' : 'border-[#d4c5b0]'}`}>
+                    2
+                  </div>
+                  <span className="ml-2 text-sm font-semibold sm:text-base">Review</span>
+                </div>
+              </div>
 
-      {/* Mobile: Single column, Desktop: Two-column (form left, summary right) */}
-      <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-        {/* Form Section - Left side on desktop, full width on mobile */}
-        <div className="w-full lg:w-2/3">
-          {/* Step indicator */}
-          <div className="mb-6 lg:mb-8">
-            <div className="flex items-center">
-              <div className={`flex items-center ${step === 'shipping' ? 'text-[#3d3228]' : 'text-[#8b7355]'}`}>
-                <div className={`w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center border-2 rounded-full font-bold ${
-                  step === 'shipping' ? 'border-[#c9a87c] bg-gradient-to-r from-[#8b7355] to-[#6b5a4d] text-white' : 'border-[#d4c5b0] text-[#8b7355]'
-                } touch-manipulation`}>
-                  1
+              {error && (
+                <div className="mb-6 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                  {error}
                 </div>
-                <span className="ml-2 text-sm sm:text-base font-semibold">Shipping</span>
-              </div>
-              <div className="flex-1 h-0.5 mx-3 sm:mx-4 bg-[#d4c5b0]"></div>
-              <div className={`flex items-center ${step === 'payment' ? 'text-[#3d3228]' : 'text-[#8b7355]'}`}>
-                <div className={`w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center border-2 rounded-full font-bold ${
-                  step === 'payment' ? 'border-[#c9a87c] bg-gradient-to-r from-[#8b7355] to-[#6b5a4d] text-white' : 'border-[#d4c5b0] text-[#8b7355]'
-                } touch-manipulation`}>
-                  2
+              )}
+
+              {step === 'shipping' ? (
+                <>
+                  <h2 className="mb-6 text-lg font-bold text-[#3d3228]">Shipping information</h2>
+                  <ShippingForm onSubmit={handleShippingSubmit} isLoading={isSubmitting} defaultValues={shippingAddress || undefined} />
+                </>
+              ) : (
+                <div>
+                  <div className="mb-6 flex items-start justify-between gap-4 rounded-lg bg-[#faf8f5] p-4">
+                    <div>
+                      <h2 className="mb-2 text-lg font-bold text-[#3d3228]">Delivery address</h2>
+                      <p className="text-sm text-[#6b5a4d]">
+                        {shippingAddress?.fullName}<br />
+                        {shippingAddress?.addressLine1}<br />
+                        {shippingAddress?.addressLine2 && <>{shippingAddress.addressLine2}<br /></>}
+                        {shippingAddress?.city}, {shippingAddress?.state} {shippingAddress?.postalCode}<br />
+                        {shippingAddress?.phone}
+                      </p>
+                    </div>
+                    <button type="button" onClick={() => setStep('shipping')} className="text-sm font-medium text-[#8b7355] underline">
+                      Edit
+                    </button>
+                  </div>
+
+                  <div className="mb-6 rounded-lg border border-[#d4c5b0] p-4">
+                    <div className="flex gap-3">
+                      <Truck className="mt-0.5 h-5 w-5 flex-shrink-0 text-[#8b7355]" />
+                      <div>
+                        <h2 className="font-semibold text-[#3d3228]">Cash on Delivery</h2>
+                        <p className="mt-1 text-sm text-[#6b5a4d]">Pay when your Shiprocket delivery arrives.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={placeOrder}
+                    disabled={isSubmitting}
+                    className="flex min-h-12 w-full items-center justify-center gap-2 rounded-md bg-[#8b7355] px-6 py-4 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-[#6b5a4d] disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <PackageCheck className="h-5 w-5" />
+                    {isSubmitting ? 'Creating shipment...' : `Place COD order · ₹${total.toFixed(0)}`}
+                  </button>
                 </div>
-                <span className="ml-2 text-sm sm:text-base font-semibold">Payment</span>
-              </div>
+              )}
             </div>
           </div>
 
-          {/* Forms */}
-          {step === 'shipping' && (
-            <div className="bg-white rounded-lg shadow-sm border border-[#d4c5b0] p-4 sm:p-6 lg:p-8">
-              <h2 className="text-lg font-bold text-[#3d3228] mb-6">Shipping Information</h2>
-              <ShippingForm
-                onSubmit={handleShippingSubmit}
-                isLoading={createPaymentIntent.isPending}
-                defaultValues={shippingAddress || undefined}
-              />
+          <div className="lg:col-span-1">
+            <div className="lg:sticky lg:top-8">
+              <OrderSummary items={items} total={total} />
             </div>
-          )}
-
-          {step === 'payment' && (
-            <div className="bg-white rounded-lg shadow-sm border border-[#d4c5b0] p-4 sm:p-6 lg:p-8">
-              <h2 className="text-lg font-bold text-[#3d3228] mb-6">Payment Method</h2>
-              <button
-                onClick={() => setStep('shipping')}
-                className="mb-6 min-h-[44px] flex items-center text-sm text-[#6b5a4d] hover:text-[#c9a87c] font-medium"
-              >
-                ← Back to Shipping
-              </button>
-
-              {/* Payment Method Selection */}
-              <div className="mb-6 space-y-3">
-                <label className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-colors ${
-                  paymentMethod === 'cod' ? 'border-[#c9a87c] bg-[#faf8f5]' : 'border-[#d4c5b0] hover:border-[#c9a87c]'
-                }`}>
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="cod"
-                    checked={paymentMethod === 'cod'}
-                    onChange={() => setPaymentMethod('cod')}
-                    className="w-4 h-4 text-[#c9a87c] focus:ring-[#c9a87c]"
-                  />
-                  <div className="ml-3">
-                    <div className="text-sm font-semibold text-[#3d3228]">Cash on Delivery</div>
-                    <div className="text-xs text-[#8b7355]">Pay when you receive your order</div>
-                  </div>
-                </label>
-
-                <label className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-colors ${
-                  paymentMethod === 'card' ? 'border-[#c9a87c] bg-[#faf8f5]' : 'border-[#d4c5b0] hover:border-[#c9a87c]'
-                }`}>
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="card"
-                    checked={paymentMethod === 'card'}
-                    onChange={() => setPaymentMethod('card')}
-                    className="w-4 h-4 text-[#c9a87c] focus:ring-[#c9a87c]"
-                  />
-                  <div className="ml-3">
-                    <div className="text-sm font-semibold text-[#3d3228]">Credit/Debit Card</div>
-                    <div className="text-xs text-[#8b7355]">Pay securely with your card</div>
-                  </div>
-                </label>
-              </div>
-
-              {/* Show payment form only for card payment */}
-              {paymentMethod === 'card' && clientSecret ? (
-                <PaymentForm
-                  onSubmit={handlePaymentSubmit}
-                  isLoading={createOrder.isPending}
-                />
-              ) : paymentMethod === 'cod' ? (
-                <button
-                  onClick={handlePaymentSubmit}
-                  disabled={createOrder.isPending}
-                  className="w-full px-6 py-4 text-sm font-semibold text-white bg-gradient-to-r from-[#8b7355] to-[#6b5a4d] disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider min-h-[44px]"
-                >
-                  {createOrder.isPending ? 'Placing Order...' : 'Place Order'}
-                </button>
-              ) : null}
-            </div>
-          )}
-        </div>
-
-        {/* Order Summary - Right side on desktop, full width on mobile */}
-        <div className="w-full lg:w-1/3">
-          <div className="lg:sticky lg:top-8">
-            <OrderSummary items={items} total={total} />
           </div>
         </div>
       </div>
     </div>
-  );
-};
-
-export const CheckoutForm = (props: CheckoutFormProps) => {
-  const [stripePromise] = useState(() => getStripe());
-  const { items } = useCartStore();
-  const total = useCartStore((state) => state.getTotal());
-
-  // Don't render Stripe Elements if cart is empty
-  if (items.length === 0) {
-    return <CheckoutFormContent {...props} />;
-  }
-
-  return (
-    <Elements
-      stripe={stripePromise}
-      options={{
-        mode: 'payment',
-        amount: Math.round(total * 100), // Convert to cents
-        currency: 'usd',
-        appearance: {
-          theme: 'stripe',
-        },
-      }}
-    >
-      <CheckoutFormContent {...props} />
-    </Elements>
   );
 };

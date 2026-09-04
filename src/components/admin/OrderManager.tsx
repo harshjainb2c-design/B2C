@@ -291,9 +291,14 @@ export const OrderManager = () => {
                         </div>
 
                         <div className="mt-5 sm:mt-6 pt-5 sm:pt-6 border-t border-gray-200">
-                          <p className="text-xs text-gray-500 font-mono break-all">
-                            Payment Intent ID: {order.paymentIntentId}
+                          <p className="text-xs text-gray-500 break-all">
+                            Payment: Cash on Delivery · {order.paymentStatus.replace('_', ' ')}
                           </p>
+                          {order.shiprocketShipmentId && (
+                            <p className="mt-1 text-xs text-gray-500 font-mono break-all">
+                              Shiprocket shipment: {order.shiprocketShipmentId}
+                            </p>
+                          )}
                         </div>
                       </div>
                     )}

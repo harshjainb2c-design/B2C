@@ -139,9 +139,14 @@ export const OrderDetail = ({ order }: OrderDetailProps) => {
             {formatPrice(order.total)}
           </span>
         </div>
-        <p className="text-xs text-gray-500 mt-2 break-all">
-          Payment Intent: {order.paymentIntentId}
+        <p className="text-xs text-gray-500 mt-2">
+          Payment: Cash on Delivery · {order.paymentStatus.replace('_', ' ')}
         </p>
+        {order.awbCode && (
+          <p className="text-xs text-gray-500 mt-1 break-all">
+            Shiprocket AWB: {order.awbCode}{order.courierName ? ` · ${order.courierName}` : ''}
+          </p>
+        )}
       </div>
     </div>
   );

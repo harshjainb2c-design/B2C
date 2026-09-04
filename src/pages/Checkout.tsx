@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { RazorpayCheckoutForm } from '../components/checkout/RazorpayCheckoutForm';
+import { CheckoutForm } from '../components/checkout/CheckoutForm';
 
 export const Checkout = () => {
   const navigate = useNavigate();
@@ -9,5 +9,5 @@ export const Checkout = () => {
     navigate(`/order-confirmation/${orderId}`);
   };
 
-  return <RazorpayCheckoutForm onSuccess={handleSuccess} />;
+  return <CheckoutForm onSuccess={handleSuccess} />;
 };

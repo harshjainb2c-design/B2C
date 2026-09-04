@@ -8,6 +8,16 @@ export enum OrderStatus {
   CANCELLED = 'cancelled'
 }
 
+export type PaymentMethod = 'cod';
+export type PaymentStatus = 'pending_collection' | 'collected';
+export type FulfillmentStatus =
+  | 'pending'
+  | 'shipment_created'
+  | 'failed'
+  | 'shipped'
+  | 'delivered'
+  | 'cancelled';
+
 export interface ShippingAddress {
   fullName: string;
   addressLine1: string;
@@ -26,7 +36,14 @@ export interface Order {
   total: number;
   status: OrderStatus;
   shippingAddress: ShippingAddress;
-  paymentIntentId: string;
+  paymentMethod: PaymentMethod;
+  paymentStatus: PaymentStatus;
+  fulfillmentStatus: FulfillmentStatus;
+  shiprocketOrderId?: string;
+  shiprocketShipmentId?: string;
+  awbCode?: string;
+  courierName?: string;
+  trackingStatus?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -37,7 +54,7 @@ export interface OrderListResponse {
 }
 
 export interface CreateOrderRequest {
-  items: CartItem[];
+  items: Array<Pick<CartItem, 'productId' | 'quantity' | 'size'>>;
   shippingAddress: ShippingAddress;
-  paymentIntentId: string;
+  paymentMethod: PaymentMethod;
 }

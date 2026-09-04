@@ -12,8 +12,7 @@
     { "source": "/api/cart/sync", "destination": "/api/cart?action=sync" },
     { "source": "/api/orders/:id", "destination": "/api/orders?id=:id" },
     { "source": "/api/products/:id", "destination": "/api/products?id=:id" },
-    { "source": "/api/payments/create-intent", "destination": "/api/payments" },
-    { "source": "/api/payments/webhook", "destination": "/api/payments?action=webhook" },
+    { "source": "/api/shiprocket/webhook", "destination": "/api/shiprocket?action=webhook" },
     { "source": "/api/admin/orders", "destination": "/api/admin?resource=orders" },
     { "source": "/api/admin/products", "destination": "/api/admin?resource=products" }
   ]

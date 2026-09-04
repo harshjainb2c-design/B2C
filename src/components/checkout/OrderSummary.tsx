@@ -1,5 +1,5 @@
 import { CartItem } from '../../types/cart';
-import { formatCurrency } from '../../lib/razorpay';
+import { formatCurrency } from '../../lib/currency';
 
 interface OrderSummaryProps {
   items: CartItem[];

@@ -17,8 +17,8 @@ export const DiagnosticPage = () => {
     
     // Test 1: Environment variables
     addResult('\n📋 Test 1: Environment Variables');
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    const supabaseUrl = __SUPABASE_URL__;
+    const supabaseKey = __SUPABASE_ANON_KEY__;
     
     if (supabaseUrl && supabaseKey) {
       addResult(`✅ URL: ${supabaseUrl}`);
