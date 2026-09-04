@@ -1,6 +1,5 @@
 # Dependencies
 node_modules/
-package-lock.json
 
 # Environment variables
 .env
@@ -40,7 +39,7 @@ lerna-debug.log*
 # Testing
 coverage/
 .nyc_output/
-test/
+/test/
 
 # Kiro IDE
 .kiro/
