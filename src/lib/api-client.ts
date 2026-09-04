@@ -127,7 +127,12 @@ export class APIClient {
       refresh_token: storedSession.refreshToken,
     });
 
-    return restoreError ? null : restoredSession.session?.access_token || null;
+    if (!restoreError && restoredSession.session?.access_token) {
+      return restoredSession.session.access_token;
+    }
+
+    // A valid access token is still usable when session restoration is unavailable.
+    return storedSession.accessToken;
   }
 
   /**
