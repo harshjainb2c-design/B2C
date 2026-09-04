@@ -1,4 +1,5 @@
 import { useAuthStore } from '../stores/authStore';
+import { supabase } from './supabase';
 
 /**
  * Error codes for API responses
@@ -106,12 +107,27 @@ export class APIClient {
   }
 
   /**
-   * Get authentication token from auth store
+   * Get a current authentication token for protected requests
    */
   private async getAuthToken(): Promise<string | null> {
-    // Get token from Zustand store (which persists the session)
-    const session = useAuthStore.getState().session;
-    return session?.accessToken || null;
+    // Use Supabase's session so expired access tokens are refreshed before a request.
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (!sessionError && sessionData.session?.access_token) {
+      return sessionData.session.access_token;
+    }
+
+    // Restore sessions persisted by the app before Supabase session persistence was enabled.
+    const storedSession = useAuthStore.getState().session;
+    if (!storedSession?.refreshToken) {
+      return null;
+    }
+
+    const { data: restoredSession, error: restoreError } = await supabase.auth.setSession({
+      access_token: storedSession.accessToken,
+      refresh_token: storedSession.refreshToken,
+    });
+
+    return restoreError ? null : restoredSession.session?.access_token || null;
   }
 
   /**
