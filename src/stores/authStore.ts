@@ -68,14 +68,38 @@ export const useAuthStore = create<AuthStore>()(
           return;
         }
         
-        // Check if we already have persisted user/session from Zustand
-        if (state.user && state.session) {
-          set({ isInitialized: true });
+        const { data: sessionData, error } = await supabase.auth.getSession();
+        if (error || !sessionData.session) {
+          set({ user: null, session: null, isInitialized: true });
           return;
         }
-        
-        // No persisted session, mark as initialized
-        set({ isInitialized: true });
+
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', sessionData.session.user.id)
+          .single();
+
+        if (!profile) {
+          set({ user: null, session: null, isInitialized: true });
+          return;
+        }
+
+        set({
+          user: {
+            id: profile.id,
+            email: sessionData.session.user.email || '',
+            fullName: profile.full_name,
+            role: profile.role,
+            createdAt: profile.created_at,
+          },
+          session: {
+            accessToken: sessionData.session.access_token,
+            refreshToken: sessionData.session.refresh_token || '',
+            expiresAt: sessionData.session.expires_at || 0,
+          },
+          isInitialized: true,
+        });
       },
 
       reset: () => set(initialState),

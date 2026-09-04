@@ -135,19 +135,20 @@ export const useAuth = () => {
         throw new Error('Failed to create account');
       }
 
-      // Create profile in profiles table
-      await supabase.from('profiles').insert({
-        id: authData.user.id,
-        full_name: data.fullName,
-        role: 'customer',
-      });
+      if (!authData.session) {
+        throw new Error('Account created. Please confirm your email before signing in.');
+      }
 
-      // Fetch the created profile
-      const { data: profile } = await supabase
+      // The database trigger creates the profile independently of client authentication.
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', authData.user.id)
         .single();
+
+      if (profileError || !profile) {
+        throw new Error('Account was created, but its profile could not be loaded. Please try signing in again.');
+      }
 
       // Map to our types
       const mappedUser: User = {
@@ -158,15 +159,13 @@ export const useAuth = () => {
         createdAt: authData.user.created_at,
       };
 
-      const mappedSession: Session | null = authData.session
-        ? {
-            accessToken: authData.session.access_token,
-            refreshToken: authData.session.refresh_token,
-            expiresAt: authData.session.expires_at || 0,
-          }
-        : null;
+      const mappedSession: Session = {
+        accessToken: authData.session.access_token,
+        refreshToken: authData.session.refresh_token,
+        expiresAt: authData.session.expires_at || 0,
+      };
 
-      return { user: mappedUser, session: mappedSession! };
+      return { user: mappedUser, session: mappedSession };
     },
     onSuccess: (data) => {
       setUser(data.user);
