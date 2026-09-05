@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useRef } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
@@ -8,12 +8,11 @@ import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { ScrollToTop } from './components/common/ScrollToTop';
 import { useAuthStore } from './stores/authStore';
 
-// Loading component for suspense fallback
 const PageLoader = () => (
-  <div className="min-h-screen bg-cream flex items-center justify-center">
+  <div className="min-h-screen bg-black text-white flex items-center justify-center">
     <div className="text-center">
-      <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-terracotta"></div>
-      <p className="mt-4 text-taupe">Loading...</p>
+      <div className="inline-block animate-spin rounded-full h-10 w-10 border-2 border-white/20 border-t-white"></div>
+      <p className="mt-4 text-xs font-mono tracking-widest text-neutral-400 uppercase">Loading Archive...</p>
     </div>
   </div>
 );
@@ -79,9 +78,8 @@ const AppContent = () => {
     }
   }, []); // Empty dependency array - only run once on mount
 
-  // Don't wait for auth - render immediately
   return (
-    <div className="min-h-screen bg-cream flex flex-col">
+    <div className="min-h-screen bg-black text-white flex flex-col">
       <ScrollToTop />
       <Header />
       <main className="flex-1">
@@ -91,6 +89,10 @@ const AppContent = () => {
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<Products />} />
           <Route path="/products/:id" element={<ProductDetailPage />} />
+          <Route path="/men" element={<Navigate to="/products?gender=men" replace />} />
+          <Route path="/women" element={<Navigate to="/products?gender=women" replace />} />
+          <Route path="/sneakers" element={<Navigate to="/products?category=footwear" replace />} />
+          <Route path="/mywishlist" element={<Navigate to="/products" replace />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />

@@ -12,7 +12,6 @@ export const ProductFiltersWrapper = ({
 }: ProductFiltersWrapperProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Close drawer when screen size changes to desktop
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 1024) {
@@ -24,7 +23,6 @@ export const ProductFiltersWrapper = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Prevent body scroll when drawer is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -43,60 +41,55 @@ export const ProductFiltersWrapper = ({
 
   return (
     <>
-      {/* Mobile Toggle Button - Only visible on mobile/tablet */}
       <button
+        type="button"
         onClick={() => setIsOpen(true)}
-        className="lg:hidden w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-gray-900 bg-white border border-gray-300 hover:bg-gray-50 transition-colors"
+        className="lg:hidden w-full flex items-center justify-center gap-2 px-4 py-3 text-xs sm:text-sm font-bold uppercase tracking-wider text-white bg-neutral-950 border border-neutral-800 hover:border-neutral-700 transition-colors select-none"
         aria-label="Open filters"
       >
-        <SlidersHorizontal className="w-5 h-5" />
+        <SlidersHorizontal className="w-4 h-4" />
         <span>Filters</span>
         {activeFilterCount > 0 && (
-          <span className="ml-1 px-2 py-0.5 text-xs font-medium text-white bg-gray-900 rounded-full">
+          <span className="ml-1 px-2 py-0.5 text-xs font-bold text-black bg-white rounded-full">
             {activeFilterCount}
           </span>
         )}
       </button>
 
-      {/* Desktop Sidebar - Always visible on desktop */}
       <div className="hidden lg:block">
         {children}
       </div>
 
-      {/* Mobile Drawer */}
       {isOpen && (
         <>
-          {/* Backdrop Overlay */}
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 lg:hidden"
             onClick={() => setIsOpen(false)}
             aria-hidden="true"
           />
 
-          {/* Drawer */}
-          <div className="fixed inset-y-0 left-0 w-full max-w-sm bg-white z-50 lg:hidden overflow-y-auto">
-            {/* Drawer Header */}
-            <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-4 flex items-center justify-between">
-              <h2 className="text-lg font-medium text-gray-900">Filters</h2>
+          <div className="fixed inset-y-0 left-0 w-full max-w-sm bg-neutral-950 border-r border-neutral-900 text-white z-50 lg:hidden overflow-y-auto">
+            <div className="sticky top-0 bg-neutral-950 border-b border-neutral-900 px-4 py-4 flex items-center justify-between z-10">
+              <h2 className="text-base font-bold uppercase tracking-wider text-white">Filters</h2>
               <button
+                type="button"
                 onClick={() => setIsOpen(false)}
-                className="p-2 -mr-2 text-gray-400 hover:text-gray-600 transition-colors"
+                className="p-2 -mr-2 text-neutral-400 hover:text-white transition-colors"
                 aria-label="Close filters"
               >
-                <X className="w-6 h-6" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Drawer Content */}
             <div className="p-4">
               {children}
             </div>
 
-            {/* Apply Filters Button */}
-            <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4">
+            <div className="sticky bottom-0 bg-neutral-950 border-t border-neutral-900 p-4">
               <button
+                type="button"
                 onClick={handleApplyFilters}
-                className="w-full px-4 py-3 text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 transition-colors"
+                className="w-full px-4 py-3 text-xs font-bold uppercase tracking-wider text-black bg-white hover:bg-neutral-200 transition-colors"
               >
                 Apply Filters
               </button>

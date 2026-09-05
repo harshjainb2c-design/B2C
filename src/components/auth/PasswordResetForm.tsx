@@ -2,7 +2,6 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { ResetPasswordRequest } from '../../types/user';
 
-// Validation schema
 const resetPasswordSchema = z.object({
   email: z.string().email('Invalid email format'),
 });
@@ -30,54 +29,52 @@ export const PasswordResetForm = ({
 
   const handleFormSubmit = async (data: ResetPasswordFormData) => {
     try {
-      // Validate with Zod
       const validatedData = resetPasswordSchema.parse(data);
       await onSubmit(validatedData);
-    } catch (err) {
-      // Handle validation error
+    } catch {
     }
   };
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
       {error && (
-        <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+        <div className="p-3 text-xs font-mono text-red-400 bg-red-950/30 border border-red-900/60">
           {error}
         </div>
       )}
 
       {success && (
-        <div className="p-3 text-sm text-green-600 bg-green-50 border border-green-200 rounded-md">
-          If an account exists with this email, a password reset link has been sent.
+        <div className="p-3 text-xs font-mono text-emerald-400 bg-emerald-950/30 border border-emerald-900/60">
+          If an account exists with this email, a password reset link has been dispatched.
         </div>
       )}
 
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-          Email
+        <label htmlFor="email" className="block text-xs font-mono uppercase tracking-[0.16em] text-neutral-300 mb-1.5 font-medium">
+          Email Address
         </label>
         <input
           id="email"
           type="email"
           {...register('email', { required: true })}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="you@example.com"
+          className="w-full px-3.5 py-3 border border-neutral-800 bg-black text-white text-sm placeholder-neutral-500 focus:outline-none focus:border-white transition-colors"
+          placeholder="your@email.com"
           disabled={isLoading || success}
         />
         {errors.email && (
-          <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+          <p className="mt-1.5 text-xs font-mono text-red-400">{errors.email.message}</p>
         )}
-        <p className="mt-1 text-xs text-gray-500">
-          Enter your email address and we'll send you a link to reset your password.
+        <p className="mt-2 text-[11px] font-mono text-neutral-500">
+          We will send a recovery link directly to your inbox.
         </p>
       </div>
 
       <button
         type="submit"
         disabled={isLoading || success}
-        className="w-full px-4 py-2.5 text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="w-full mt-2 py-3.5 px-4 text-xs sm:text-sm font-bold uppercase tracking-[0.16em] text-black bg-white hover:bg-neutral-200 disabled:bg-neutral-900 disabled:text-neutral-500 disabled:cursor-not-allowed transition-colors"
       >
-        {isLoading ? 'Sending...' : success ? 'Email Sent' : 'Send Reset Link'}
+        {isLoading ? 'Sending...' : success ? 'Email Dispatched' : 'Send Reset Link'}
       </button>
     </form>
   );

@@ -19,42 +19,39 @@ export const SizeSelector = ({ sizes, productName, onSelect, onClose }: SizeSele
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
       onClick={(e) => {
         e.stopPropagation();
         onClose();
       }}
     >
       <div 
-        className="bg-white rounded-lg shadow-2xl max-w-md w-full animate-in zoom-in-95 duration-200"
+        className="bg-neutral-950 border border-neutral-900 text-white max-w-md w-full animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-beige-200">
-          <h3 className="text-lg font-bold text-warmBrown">Select Size</h3>
+        <div className="flex items-center justify-between p-4 border-b border-neutral-900">
+          <h3 className="text-base font-mono uppercase tracking-wider font-bold text-white">Select Size</h3>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-sand rounded-full transition-colors"
+            className="p-1.5 hover:bg-neutral-900 text-neutral-400 hover:text-white transition-colors"
             aria-label="Close"
           >
-            <X className="w-5 h-5 text-taupe" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Content */}
         <div className="p-6">
-          <p className="text-sm text-taupe mb-4">{productName}</p>
+          <p className="text-xs font-mono text-neutral-400 mb-4 uppercase">{productName}</p>
           
-          {/* Size Grid */}
-          <div className="grid grid-cols-4 gap-3 mb-6">
+          <div className="grid grid-cols-4 gap-2.5 mb-6">
             {sizes.map((size) => (
               <button
                 key={size}
                 onClick={() => setSelectedSize(size)}
-                className={`py-3 px-4 text-sm font-semibold rounded-lg border-2 transition-all duration-200 ${
+                className={`py-3 px-4 text-xs font-mono font-bold border transition-all duration-200 ${
                   selectedSize === size
-                    ? 'border-warmBrown bg-warmBrown text-white'
-                    : 'border-beige-300 text-warmBrown hover:border-warmBrown hover:bg-sand'
+                    ? 'border-white bg-white text-black'
+                    : 'border-neutral-800 bg-neutral-900 text-neutral-300 hover:border-neutral-700 hover:text-white'
                 }`}
               >
                 {size}
@@ -62,20 +59,19 @@ export const SizeSelector = ({ sizes, productName, onSelect, onClose }: SizeSele
             ))}
           </div>
 
-          {/* Action Buttons */}
           <div className="flex gap-3">
             <button
               onClick={onClose}
-              className="flex-1 py-3 px-4 text-sm font-semibold text-warmBrown border-2 border-beige-300 rounded-lg hover:bg-sand transition-colors"
+              className="flex-1 py-3 px-4 text-xs font-mono font-bold uppercase tracking-wider text-neutral-300 border border-neutral-800 hover:bg-neutral-900 transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={handleConfirm}
               disabled={!selectedSize}
-              className="flex-1 py-3 px-4 text-sm font-semibold text-white bg-warmBrown rounded-lg hover:bg-taupe disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex-1 py-3 px-4 text-xs font-mono font-bold uppercase tracking-wider text-black bg-white hover:bg-neutral-200 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:border-neutral-800 disabled:cursor-not-allowed transition-colors"
             >
-              Add to Cart
+              Confirm
             </button>
           </div>
         </div>

@@ -19,37 +19,39 @@ export const CartSummary = ({
     }).format(price);
   };
 
-  const estimatedTax = total * 0.08; // 8% tax estimate
+  const estimatedTax = Math.round(total * 0.05);
   const estimatedTotal = total + estimatedTax;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-[#d4c5b0] p-6">
-      <h2 className="text-lg font-bold text-[#3d3228] mb-4">Order Summary</h2>
+    <div className="bg-black border border-neutral-800 p-6 text-white select-none">
+      <h2 className="text-sm font-mono uppercase tracking-[0.2em] text-white font-bold mb-4 pb-3 border-b border-neutral-900">
+        Order Summary
+      </h2>
 
-      <div className="space-y-3 mb-4">
-        <div className="flex justify-between text-sm">
-          <span className="text-[#8b7355]">
+      <div className="space-y-3 mb-6 font-mono text-xs">
+        <div className="flex justify-between">
+          <span className="text-neutral-400">
             Subtotal ({itemCount} {itemCount === 1 ? 'item' : 'items'})
           </span>
-          <span className="font-semibold text-[#3d3228]">{formatPrice(total)}</span>
+          <span className="font-bold text-white">{formatPrice(total)}</span>
         </div>
 
-        <div className="flex justify-between text-sm">
-          <span className="text-[#8b7355]">Estimated Tax</span>
-          <span className="font-semibold text-[#3d3228]">{formatPrice(estimatedTax)}</span>
+        <div className="flex justify-between">
+          <span className="text-neutral-400">Estimated GST (5%)</span>
+          <span className="font-bold text-white">{formatPrice(estimatedTax)}</span>
         </div>
 
-        <div className="flex justify-between text-sm">
-          <span className="text-[#8b7355]">Shipping</span>
-          <span className="font-semibold text-[#3d3228]">Calculated at checkout</span>
+        <div className="flex justify-between">
+          <span className="text-neutral-400">Express Delivery</span>
+          <span className="font-bold text-emerald-400">FREE</span>
         </div>
 
-        <div className="border-t border-[#d4c5b0] pt-3 mt-3">
-          <div className="flex justify-between">
-            <span className="text-base font-bold text-[#3d3228]">
-              Estimated Total
+        <div className="border-t border-neutral-800 pt-3 mt-3">
+          <div className="flex justify-between items-baseline">
+            <span className="text-xs uppercase tracking-wider text-neutral-300 font-bold">
+              Total Due
             </span>
-            <span className="text-xl font-bold text-[#3d3228]">
+            <span className="text-xl font-bold text-white">
               {formatPrice(estimatedTotal)}
             </span>
           </div>
@@ -58,16 +60,17 @@ export const CartSummary = ({
 
       {showCheckoutButton && (
         <button
+          type="button"
           onClick={onCheckout}
           disabled={itemCount === 0}
-          className="w-full px-6 py-4 text-sm font-semibold text-white bg-gradient-to-r from-[#8b7355] to-[#6b5a4d] disabled:opacity-50 disabled:cursor-not-allowed disabled:from-[#d4c5b0] disabled:to-[#d4c5b0] uppercase tracking-wider"
+          className="w-full py-4 px-6 text-xs sm:text-sm font-bold uppercase tracking-[0.16em] text-black bg-white hover:bg-neutral-200 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:cursor-not-allowed transition-all"
         >
-          Proceed to Checkout
+          Proceed To Checkout
         </button>
       )}
 
-      <p className="text-xs text-[#8b7355] text-center mt-4">
-        Taxes and shipping calculated at checkout
+      <p className="text-[11px] font-mono text-neutral-500 text-center mt-4">
+        Applicable taxes and delivery calculated at checkout
       </p>
     </div>
   );

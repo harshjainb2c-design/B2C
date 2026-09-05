@@ -1,87 +1,85 @@
 export const Shipping = () => {
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h1 className="text-3xl font-medium text-gray-900 mb-6">Shipping Policy</h1>
-        
-        <div className="prose prose-gray max-w-none space-y-6">
-          <section>
-            <h2 className="text-xl font-medium text-gray-900 mb-3">Delivery Areas</h2>
-            <p className="text-gray-600 mb-4">
-              We currently deliver to Indore and surrounding areas in Madhya Pradesh. 
-              For deliveries outside Indore, please contact us for availability and shipping charges.
+    <div className="min-h-screen bg-black text-white select-none">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+        <div className="mb-8 border-b border-neutral-800 pb-6">
+          <span className="text-[11px] font-mono tracking-[0.24em] text-neutral-400 uppercase">
+            B2C Logistics
+          </span>
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white uppercase mt-2">
+            Shipping Policy
+          </h1>
+          <p className="text-xs font-mono text-neutral-400 mt-2">
+            Nationwide & Express Indore Dispatch · Indore, India
+          </p>
+        </div>
+
+        <div className="space-y-8 text-sm leading-relaxed text-neutral-300 font-sans">
+          <section className="border-b border-neutral-900 pb-6">
+            <h2 className="text-base font-mono uppercase tracking-wider text-white mb-3 font-semibold">
+              01. Delivery Coverage
+            </h2>
+            <p className="text-neutral-400">
+              We ship nationwide across all pin codes in India, with hyper-local same-day or next-day express delivery across Indore. 
+              Orders are packaged in tamper-evident sealed archive polybags.
             </p>
           </section>
-          
-          <section>
-            <h2 className="text-xl font-medium text-gray-900 mb-3">Delivery Time</h2>
-            <ul className="list-disc list-inside text-gray-600 space-y-2 mb-4">
-              <li><strong>Within Indore:</strong> 1-2 business days</li>
-              <li><strong>Nearby areas:</strong> 3-5 business days</li>
-              <li><strong>Bulk orders:</strong> Delivery time may vary based on order size</li>
+
+          <section className="border-b border-neutral-900 pb-6">
+            <h2 className="text-base font-mono uppercase tracking-wider text-white mb-3 font-semibold">
+              02. Estimated Transit Timelines
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono">
+              <div className="p-4 bg-black border border-neutral-800">
+                <span className="text-white font-bold block mb-1">Within Indore:</span>
+                <p className="text-neutral-400">24 to 48 hours direct express courier dispatch.</p>
+              </div>
+              <div className="p-4 bg-black border border-neutral-800">
+                <span className="text-white font-bold block mb-1">Metro Cities (Delhi, Mumbai, BLR):</span>
+                <p className="text-neutral-400">2 to 4 business days air freight delivery.</p>
+              </div>
+              <div className="p-4 bg-black border border-neutral-800">
+                <span className="text-white font-bold block mb-1">Rest of India:</span>
+                <p className="text-neutral-400">3 to 6 business days with live SMS tracking.</p>
+              </div>
+              <div className="p-4 bg-black border border-neutral-800">
+                <span className="text-white font-bold block mb-1">Wholesale & Bulk Shipments:</span>
+                <p className="text-neutral-400">Surface transport arranged via verified logistics fleet.</p>
+              </div>
+            </div>
+          </section>
+
+          <section className="border-b border-neutral-900 pb-6">
+            <h2 className="text-base font-mono uppercase tracking-wider text-white mb-3 font-semibold">
+              03. Shipping Charges
+            </h2>
+            <ul className="list-disc list-inside space-y-1.5 text-neutral-400 font-mono text-xs">
+              <li>Free Express Shipping on all prepaid orders across India</li>
+              <li>Cash on Delivery available on select postal codes with ₹50 nominal handling</li>
+              <li>Wholesale bulk consignments invoiced with customized discounted freight rates</li>
             </ul>
-            <p className="text-gray-600 mb-4">
-              Orders placed before 2:00 PM are typically processed the same day. 
-              Orders placed after 2:00 PM will be processed the next business day.
+          </section>
+
+          <section className="border-b border-neutral-900 pb-6">
+            <h2 className="text-base font-mono uppercase tracking-wider text-white mb-3 font-semibold">
+              04. Real-Time Tracking
+            </h2>
+            <p className="text-neutral-400">
+              Immediately following courier handover, an automated tracking link with Airway Bill (AWB) is dispatched via WhatsApp and email. 
+              Track directly from your account or courier partner portals (Shiprocket, Bluedart, Delhivery).
             </p>
           </section>
-          
-          <section>
-            <h2 className="text-xl font-medium text-gray-900 mb-3">Shipping Charges</h2>
-            <ul className="list-disc list-inside text-gray-600 space-y-2 mb-4">
-              <li>Orders above ₹2,000: <strong>Free delivery</strong> within Indore</li>
-              <li>Orders below ₹2,000: ₹50 delivery charge within Indore</li>
-              <li>Outside Indore: Charges vary based on location (contact us for details)</li>
-              <li>Bulk/Wholesale orders: Special rates available - contact us for details</li>
-            </ul>
-          </section>
-          
-          <section>
-            <h2 className="text-xl font-medium text-gray-900 mb-3">Order Tracking</h2>
-            <p className="text-gray-600 mb-4">
-              Once your order is shipped, you'll receive a confirmation email with tracking details. 
-              You can also track your order status by logging into your account and visiting the Orders page.
-            </p>
-          </section>
-          
-          <section>
-            <h2 className="text-xl font-medium text-gray-900 mb-3">Delivery Process</h2>
-            <ol className="list-decimal list-inside text-gray-600 space-y-2 mb-4">
-              <li>Order confirmation via email/SMS</li>
-              <li>Order processing and packaging</li>
-              <li>Dispatch notification with tracking details</li>
-              <li>Delivery to your specified address</li>
-              <li>Signature required upon delivery</li>
-            </ol>
-          </section>
-          
-          <section>
-            <h2 className="text-xl font-medium text-gray-900 mb-3">Failed Delivery</h2>
-            <p className="text-gray-600 mb-4">
-              If delivery fails due to incorrect address or unavailability, our delivery partner will attempt 
-              delivery again. After 2 failed attempts, the order will be returned to our warehouse. 
-              Re-delivery charges may apply.
-            </p>
-          </section>
-          
-          <section>
-            <h2 className="text-xl font-medium text-gray-900 mb-3">Bulk Orders</h2>
-            <p className="text-gray-600 mb-4">
-              For wholesale and bulk orders, we offer flexible delivery options. 
-              Contact us at <a href="mailto:harshjain2904@gmail.com" className="text-blue-600 hover:underline">harshjain2904@gmail.com</a> or 
-              <a href="tel:+919098178762" className="text-blue-600 hover:underline"> +91 9098178762</a> to discuss your requirements.
-            </p>
-          </section>
-          
-          <section>
-            <h2 className="text-xl font-medium text-gray-900 mb-3">Questions?</h2>
-            <p className="text-gray-600">
-              For any shipping-related queries, please contact our customer service team:
-            </p>
-            <p className="text-gray-600 mt-2">
-              <strong>Email:</strong> <a href="mailto:harshjain2904@gmail.com" className="text-blue-600 hover:underline">harshjain2904@gmail.com</a><br />
-              <strong>Phone/WhatsApp:</strong> <a href="tel:+919098178762" className="text-blue-600 hover:underline">+91 9098178762</a>, <a href="tel:+917489741505" className="text-blue-600 hover:underline">+91 7489741505</a>
-            </p>
+
+          <section className="pt-2">
+            <h2 className="text-base font-mono uppercase tracking-wider text-white mb-3 font-semibold">
+              05. Dispatch Hub
+            </h2>
+            <div className="bg-black border border-neutral-800 p-5 text-xs font-mono space-y-1.5 text-neutral-400">
+              <p className="text-white font-bold">B2C Logistics Desk</p>
+              <p>137 Malwa Mill, Indore, Madhya Pradesh - 452005</p>
+              <p>Helpline: +91 90981 78762 · +91 74897 41505</p>
+              <p>Email: logistics@b2cstreetwear.com</p>
+            </div>
           </section>
         </div>
       </div>

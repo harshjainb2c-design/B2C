@@ -86,30 +86,31 @@ export const ProductFilters = ({
     selectedValue?: string;
     onChange: (value: string | undefined) => void;
   }) => (
-    <div className="border-b border-gray-200 pb-2">
+    <div className="border-b border-neutral-900 pb-3">
       <button
+        type="button"
         onClick={() => toggleSection(sectionKey)}
-        className="flex items-center justify-between w-full py-1.5 text-left"
+        className="flex items-center justify-between w-full py-2 text-left group"
       >
-        <h4 className="text-xs font-semibold text-gray-900 uppercase tracking-wide">{title}</h4>
+        <h4 className="text-xs font-bold text-neutral-300 uppercase tracking-wide group-hover:text-white transition-colors">{title}</h4>
         {expandedSections[sectionKey] ? (
-          <ChevronUp className="w-3.5 h-3.5 text-gray-500" />
+          <ChevronUp className="w-3.5 h-3.5 text-neutral-500 group-hover:text-white transition-colors" />
         ) : (
-          <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
+          <ChevronDown className="w-3.5 h-3.5 text-neutral-500 group-hover:text-white transition-colors" />
         )}
       </button>
       
       {expandedSections[sectionKey] && (
-        <div className="mt-2 space-y-1">
+        <div className="mt-2 space-y-1.5">
           {options.map((option) => (
-            <label key={option.value} className="flex items-center cursor-pointer py-1">
+            <label key={option.value} className="flex items-center cursor-pointer py-1 group">
               <input
                 type="checkbox"
                 checked={selectedValue === option.value}
                 onChange={(e) => onChange(e.target.checked ? option.value : undefined)}
-                className="w-3.5 h-3.5 text-gray-900 focus:ring-gray-900 focus:ring-1 cursor-pointer rounded"
+                className="w-3.5 h-3.5 accent-white bg-neutral-900 border-neutral-700 cursor-pointer rounded-none"
               />
-              <span className={`ml-2 text-xs ${selectedValue === option.value ? 'font-medium text-gray-900' : 'text-gray-700'}`}>
+              <span className={`ml-2 text-xs transition-colors ${selectedValue === option.value ? 'font-bold text-white' : 'text-neutral-400 group-hover:text-neutral-200'}`}>
                 {option.label}
               </span>
             </label>
@@ -120,13 +121,14 @@ export const ProductFilters = ({
   );
 
   return (
-    <div className="lg:border lg:border-gray-200 lg:p-3">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wide">Filters</h3>
+    <div className="lg:border lg:border-neutral-900 bg-neutral-950 lg:p-4 text-white select-none">
+      <div className="flex items-center justify-between mb-3 pb-2 border-b border-neutral-900">
+        <h3 className="text-xs font-extrabold text-white uppercase tracking-wider">Filters</h3>
         {hasActiveFilters && (
           <button
+            type="button"
             onClick={clearAllFilters}
-            className="text-xs text-gray-600 hover:text-gray-900 underline"
+            className="text-xs text-neutral-400 hover:text-white underline cursor-pointer"
           >
             Clear
           </button>
@@ -134,7 +136,6 @@ export const ProductFilters = ({
       </div>
 
       <div className="space-y-3">
-        {/* Price Range Filter */}
         <FilterSection
           title="Price Range"
           sectionKey="price"
@@ -143,7 +144,6 @@ export const ProductFilters = ({
           onChange={(value) => handleFilterChange('priceRange', value)}
         />
 
-        {/* Gender Filter */}
         <FilterSection
           title="Gender"
           sectionKey="gender"
@@ -152,7 +152,6 @@ export const ProductFilters = ({
           onChange={(value) => handleFilterChange('gender', value)}
         />
 
-        {/* Clothing Type Filter */}
         <FilterSection
           title="Clothing Type"
           sectionKey="clothingType"
@@ -161,7 +160,6 @@ export const ProductFilters = ({
           onChange={(value) => handleFilterChange('clothingType', value)}
         />
 
-        {/* Item Type Filter */}
         <FilterSection
           title="Item Type"
           sectionKey="itemType"
@@ -171,11 +169,11 @@ export const ProductFilters = ({
         />
       </div>
 
-      {/* Clear Filters Button */}
       {hasActiveFilters && (
         <button
+          type="button"
           onClick={clearAllFilters}
-          className="mt-4 w-full px-3 py-2 text-xs font-medium text-gray-900 border border-gray-900 hover:bg-gray-900 hover:text-white transition-colors"
+          className="mt-4 w-full px-3 py-2 text-xs font-bold uppercase tracking-wider text-neutral-300 border border-neutral-800 hover:bg-white hover:text-black transition-colors"
         >
           Clear All Filters
         </button>

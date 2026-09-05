@@ -1,23 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');
+@import 'lenis/dist/lenis.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'Dirtyline';
+  src: url('/fonts/dirtyline.woff2') format('woff2'),
+       url('/fonts/dirtyline.woff') format('woff'),
+       url('/fonts/dirtyline.ttf') format('truetype'),
+       url('/fonts/dirtyline.otf') format('opentype');
+  font-style: normal;
+  font-weight: normal;
+  font-display: swap;
+}
+
 @layer base {
   :root {
-    /* Warm beige color system */
-    --background: 36 33% 98%;  /* Warm cream */
-    --foreground: 25 20% 30%;  /* Warm dark brown */
+    --background: 36 33% 98%;
+    --foreground: 25 20% 30%;
     --card: 36 33% 98%;
     --card-foreground: 25 20% 30%;
     --popover: 36 33% 98%;
     --popover-foreground: 25 20% 30%;
-    --primary: 25 30% 45%;  /* Taupe */
+    --primary: 25 30% 45%;
     --primary-foreground: 36 33% 98%;
-    --secondary: 36 25% 90%;  /* Light sand */
+    --secondary: 36 25% 90%;
     --secondary-foreground: 25 20% 30%;
     --muted: 36 25% 90%;
     --muted-foreground: 25 15% 50%;
-    --accent: 15 45% 58%;  /* Terracotta */
+    --accent: 15 45% 58%;
     --accent-foreground: 36 33% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 36 33% 98%;
@@ -32,24 +44,28 @@
   * {
     @apply border-border;
   }
-  body {
+  html, body {
     @apply bg-background text-foreground;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  ::-webkit-scrollbar {
+    display: none;
+    width: 0px;
+    height: 0px;
   }
 }
 
 @layer utilities {
-  /* Hide scrollbar for Chrome, Safari and Opera */
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
   
-  /* Hide scrollbar for IE, Edge and Firefox */
   .scrollbar-hide {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 
-  /* Smooth underline animation */
   .nav-link-underline {
     position: relative;
     display: inline-block;
@@ -68,5 +84,29 @@
   
   .nav-link-underline:hover::after {
     width: 100%;
+  }
+
+  .font-dirtyline {
+    font-family: 'Dirtyline', sans-serif;
+  }
+
+  .font-headline {
+    font-family: 'Anton', 'Impact', sans-serif;
+  }
+
+  .animate-marquee {
+    display: flex;
+    width: max-content;
+    animation: marquee 28s linear infinite;
+    will-change: transform;
+  }
+}
+
+@keyframes marquee {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
   }
 }

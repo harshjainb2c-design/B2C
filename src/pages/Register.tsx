@@ -13,7 +13,6 @@ export const Register = () => {
     try {
       setError(null);
       await registerUser(data);
-      // Redirect to home page after successful registration
       navigate('/');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create account');
@@ -21,40 +20,43 @@ export const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-black text-white py-12 px-4 sm:px-6 lg:px-8 select-none">
       <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-2xl font-medium text-gray-900">
-            Create your account
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
+        <div className="text-center">
+          <span className="text-[11px] font-mono tracking-[0.24em] text-neutral-400 uppercase">
+            B2C Archive
+          </span>
+          <h1 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight text-white uppercase">
+            Create Account
+          </h1>
+          <p className="mt-2 text-xs font-mono text-neutral-400">
+            Already have an account?{' '}
             <Link
               to="/login"
-              className="font-medium text-gray-900 hover:text-gray-700 underline"
+              className="text-white hover:text-neutral-300 underline underline-offset-4"
             >
-              sign in to your existing account
+              Sign In
             </Link>
           </p>
         </div>
 
-        <div className="mt-8 border border-gray-200 py-8 px-4 sm:px-10">
+        <div className="bg-black border border-neutral-800 p-6 sm:p-10 shadow-2xl">
           <RegisterForm
             onSubmit={handleRegister}
             isLoading={isLoading}
             error={error}
           />
 
-          <div className="mt-6">
-            <p className="text-xs text-center text-gray-500">
-              By creating an account, you agree to our{' '}
-              <a href="#" className="text-gray-900 hover:text-gray-700 underline">
-                Terms of Service
-              </a>{' '}
+          <div className="mt-6 pt-6 border-t border-neutral-900 text-center">
+            <p className="text-[11px] font-mono text-neutral-500">
+              By joining, you agree to our{' '}
+              <Link to="/terms" className="text-neutral-400 hover:text-white underline">
+                Terms
+              </Link>{' '}
               and{' '}
-              <a href="#" className="text-gray-900 hover:text-gray-700 underline">
-                Privacy Policy
-              </a>
+              <Link to="/privacy" className="text-neutral-400 hover:text-white underline">
+                Privacy
+              </Link>
             </p>
           </div>
         </div>

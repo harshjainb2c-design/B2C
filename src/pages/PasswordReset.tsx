@@ -22,24 +22,27 @@ export const PasswordReset = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-black text-white py-12 px-4 sm:px-6 lg:px-8 select-none">
       <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-2xl font-medium text-gray-900">
-            Reset your password
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Remember your password?{' '}
+        <div className="text-center">
+          <span className="text-[11px] font-mono tracking-[0.24em] text-neutral-400 uppercase">
+            B2C Archive
+          </span>
+          <h1 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight text-white uppercase">
+            Reset Password
+          </h1>
+          <p className="mt-2 text-xs font-mono text-neutral-400">
+            Remember your credentials?{' '}
             <Link
               to="/login"
-              className="font-medium text-gray-900 hover:text-gray-700 underline"
+              className="text-white hover:text-neutral-300 underline underline-offset-4"
             >
-              Sign in
+              Sign In
             </Link>
           </p>
         </div>
 
-        <div className="mt-8 border border-gray-200 py-8 px-4 sm:px-10">
+        <div className="bg-black border border-neutral-800 p-6 sm:p-10 shadow-2xl">
           <PasswordResetForm
             onSubmit={handleResetPassword}
             isLoading={isLoading}
@@ -48,12 +51,12 @@ export const PasswordReset = () => {
           />
 
           {resetPasswordSuccess && (
-            <div className="mt-6 text-center">
+            <div className="mt-6 pt-6 border-t border-neutral-900 text-center">
               <Link
                 to="/login"
-                className="text-sm font-medium text-gray-900 hover:text-gray-700 underline"
+                className="text-xs font-mono uppercase tracking-wider text-white hover:text-neutral-300 underline"
               >
-                Back to login
+                Back to Sign In
               </Link>
             </div>
           )}

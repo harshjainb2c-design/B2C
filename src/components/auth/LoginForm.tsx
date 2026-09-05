@@ -3,7 +3,6 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { LoginRequest } from '../../types/user';
 
-// Validation schema
 const loginSchema = z.object({
   email: z.string().email('Invalid email format'),
   password: z.string().min(1, 'Password is required'),
@@ -28,52 +27,47 @@ export const LoginForm = ({ onSubmit, isLoading, error }: LoginFormProps) => {
 
   const handleFormSubmit = async (data: LoginFormData) => {
     try {
-      // Validate with Zod
       const validatedData = loginSchema.parse(data);
       await onSubmit(validatedData);
-    } catch (err) {
-      // Handle validation error
+    } catch {
     }
   };
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
       {error && (
-        <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+        <div className="p-3 text-xs font-mono text-red-400 bg-red-950/30 border border-red-900/60">
           {error}
         </div>
       )}
 
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-          Email
+        <label htmlFor="email" className="block text-xs font-mono uppercase tracking-[0.16em] text-neutral-300 mb-1.5 font-medium">
+          Email Address
         </label>
         <input
           id="email"
           type="email"
           {...register('email', { required: true })}
-          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 transition-colors ${
+          className={`w-full px-3.5 py-3 border bg-black text-white text-sm placeholder-neutral-500 focus:outline-none transition-colors ${
             errors.email 
-              ? 'border-red-500 focus:ring-red-500 focus:border-red-500' 
-              : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+              ? 'border-red-500 focus:border-red-500' 
+              : 'border-neutral-800 focus:border-white'
           }`}
-          placeholder="you@example.com"
+          placeholder="your@email.com"
           disabled={isLoading}
           aria-invalid={errors.email ? 'true' : 'false'}
           aria-describedby={errors.email ? 'email-error' : undefined}
         />
         {errors.email && (
-          <p id="email-error" className="mt-1 text-sm text-red-600 flex items-start gap-1">
-            <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-            </svg>
+          <p id="email-error" className="mt-1.5 text-xs font-mono text-red-400">
             {errors.email.message}
           </p>
         )}
       </div>
 
       <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="password" className="block text-xs font-mono uppercase tracking-[0.16em] text-neutral-300 mb-1.5 font-medium">
           Password
         </label>
         <div className="relative">
@@ -81,10 +75,10 @@ export const LoginForm = ({ onSubmit, isLoading, error }: LoginFormProps) => {
             id="password"
             type={showPassword ? 'text' : 'password'}
             {...register('password', { required: true })}
-            className={`w-full px-3 py-2 pr-16 border rounded-md focus:outline-none focus:ring-2 transition-colors ${
+            className={`w-full px-3.5 py-3 pr-16 border bg-black text-white text-sm placeholder-neutral-500 focus:outline-none transition-colors ${
               errors.password 
-                ? 'border-red-500 focus:ring-red-500 focus:border-red-500' 
-                : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                ? 'border-red-500 focus:border-red-500' 
+                : 'border-neutral-800 focus:border-white'
             }`}
             placeholder="••••••••"
             disabled={isLoading}
@@ -94,17 +88,14 @@ export const LoginForm = ({ onSubmit, isLoading, error }: LoginFormProps) => {
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-600 hover:text-gray-800"
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-mono uppercase tracking-wider text-neutral-400 hover:text-white transition-colors"
             disabled={isLoading}
           >
             {showPassword ? 'Hide' : 'Show'}
           </button>
         </div>
         {errors.password && (
-          <p id="password-error" className="mt-1 text-sm text-red-600 flex items-start gap-1">
-            <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-            </svg>
+          <p id="password-error" className="mt-1.5 text-xs font-mono text-red-400">
             {errors.password.message}
           </p>
         )}
@@ -113,9 +104,9 @@ export const LoginForm = ({ onSubmit, isLoading, error }: LoginFormProps) => {
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full px-4 py-2.5 text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="w-full mt-2 py-3.5 px-4 text-xs sm:text-sm font-bold uppercase tracking-[0.16em] text-black bg-white hover:bg-neutral-200 disabled:bg-neutral-900 disabled:text-neutral-500 disabled:cursor-not-allowed transition-colors"
       >
-        {isLoading ? 'Signing in...' : 'Sign In'}
+        {isLoading ? 'Signing In...' : 'Sign In'}
       </button>
     </form>
   );

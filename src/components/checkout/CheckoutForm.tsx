@@ -51,53 +51,53 @@ export const CheckoutForm = ({ onSuccess }: CheckoutFormProps) => {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-[#faf8f5] py-16 text-center">
-        <p className="text-[#8b7355]">Your cart is empty.</p>
+      <div className="min-h-screen bg-black py-16 text-center">
+        <p className="text-neutral-400 text-sm">Your cart is empty.</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#faf8f5] py-6 sm:py-8">
+    <div className="min-h-screen bg-black py-6 sm:py-8 text-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <h1 className="mb-8 text-3xl font-bold text-[#3d3228]">Checkout</h1>
+        <h1 className="mb-8 text-2xl font-bold uppercase tracking-wider text-white">Checkout</h1>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-8">
           <div className="lg:col-span-2">
-            <div className="rounded-lg border border-[#d4c5b0] bg-white p-4 shadow-sm sm:p-6 lg:p-8">
+            <div className="border border-neutral-800 p-4 sm:p-6 lg:p-8">
               <div className="mb-8 flex items-center">
-                <div className={`flex items-center ${step === 'shipping' ? 'text-[#3d3228]' : 'text-[#8b7355]'}`}>
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-full border-2 font-bold ${step === 'shipping' ? 'border-[#c9a87c] bg-[#8b7355] text-white' : 'border-[#d4c5b0]'}`}>
+                <div className={`flex items-center ${step === 'shipping' ? 'text-white' : 'text-neutral-500'}`}>
+                  <div className={`flex h-10 w-10 items-center justify-center border-2 font-bold ${step === 'shipping' ? 'border-white bg-white text-black' : 'border-neutral-700'}`}>
                     1
                   </div>
-                  <span className="ml-2 text-sm font-semibold sm:text-base">Shipping</span>
+                  <span className="ml-2 text-xs font-bold uppercase tracking-wider sm:text-sm">Shipping</span>
                 </div>
-                <div className="mx-3 h-0.5 flex-1 bg-[#d4c5b0] sm:mx-4" />
-                <div className={`flex items-center ${step === 'review' ? 'text-[#3d3228]' : 'text-[#8b7355]'}`}>
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-full border-2 font-bold ${step === 'review' ? 'border-[#c9a87c] bg-[#8b7355] text-white' : 'border-[#d4c5b0]'}`}>
+                <div className="mx-3 h-0.5 flex-1 bg-neutral-800 sm:mx-4" />
+                <div className={`flex items-center ${step === 'review' ? 'text-white' : 'text-neutral-500'}`}>
+                  <div className={`flex h-10 w-10 items-center justify-center border-2 font-bold ${step === 'review' ? 'border-white bg-white text-black' : 'border-neutral-700'}`}>
                     2
                   </div>
-                  <span className="ml-2 text-sm font-semibold sm:text-base">Review</span>
+                  <span className="ml-2 text-xs font-bold uppercase tracking-wider sm:text-sm">Review</span>
                 </div>
               </div>
 
               {error && (
-                <div className="mb-6 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                <div className="mb-6 border border-red-900 bg-red-950/50 p-4 text-sm text-red-400">
                   {error}
                 </div>
               )}
 
               {step === 'shipping' ? (
                 <>
-                  <h2 className="mb-6 text-lg font-bold text-[#3d3228]">Shipping information</h2>
+                  <h2 className="mb-6 text-base font-bold uppercase tracking-wider text-white">Shipping information</h2>
                   <ShippingForm onSubmit={handleShippingSubmit} isLoading={isSubmitting} defaultValues={shippingAddress || undefined} />
                 </>
               ) : (
                 <div>
-                  <div className="mb-6 flex items-start justify-between gap-4 rounded-lg bg-[#faf8f5] p-4">
+                  <div className="mb-6 flex items-start justify-between gap-4 border border-neutral-800 p-4">
                     <div>
-                      <h2 className="mb-2 text-lg font-bold text-[#3d3228]">Delivery address</h2>
-                      <p className="text-sm text-[#6b5a4d]">
+                      <h2 className="mb-2 text-base font-bold uppercase tracking-wider text-white">Delivery address</h2>
+                      <p className="text-sm text-neutral-400">
                         {shippingAddress?.fullName}<br />
                         {shippingAddress?.addressLine1}<br />
                         {shippingAddress?.addressLine2 && <>{shippingAddress.addressLine2}<br /></>}
@@ -105,17 +105,17 @@ export const CheckoutForm = ({ onSuccess }: CheckoutFormProps) => {
                         {shippingAddress?.phone}
                       </p>
                     </div>
-                    <button type="button" onClick={() => setStep('shipping')} className="text-sm font-medium text-[#8b7355] underline">
+                    <button type="button" onClick={() => setStep('shipping')} className="text-xs font-bold uppercase tracking-wider text-neutral-400 hover:text-white underline transition-colors">
                       Edit
                     </button>
                   </div>
 
-                  <div className="mb-6 rounded-lg border border-[#d4c5b0] p-4">
+                  <div className="mb-6 border border-neutral-800 p-4">
                     <div className="flex gap-3">
-                      <Truck className="mt-0.5 h-5 w-5 flex-shrink-0 text-[#8b7355]" />
+                      <Truck className="mt-0.5 h-5 w-5 flex-shrink-0 text-neutral-400" />
                       <div>
-                        <h2 className="font-semibold text-[#3d3228]">Cash on Delivery</h2>
-                        <p className="mt-1 text-sm text-[#6b5a4d]">Pay when your Shiprocket delivery arrives.</p>
+                        <h2 className="font-bold text-white">Cash on Delivery</h2>
+                        <p className="mt-1 text-sm text-neutral-400">Pay when your Shiprocket delivery arrives.</p>
                       </div>
                     </div>
                   </div>
@@ -124,7 +124,7 @@ export const CheckoutForm = ({ onSuccess }: CheckoutFormProps) => {
                     type="button"
                     onClick={placeOrder}
                     disabled={isSubmitting}
-                    className="flex min-h-12 w-full items-center justify-center gap-2 rounded-md bg-[#8b7355] px-6 py-4 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-[#6b5a4d] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex min-h-12 w-full items-center justify-center gap-2 bg-white px-6 py-4 text-xs font-bold uppercase tracking-widest text-black hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
                   >
                     <PackageCheck className="h-5 w-5" />
                     {isSubmitting ? 'Creating shipment...' : `Place COD order · ₹${total.toFixed(0)}`}

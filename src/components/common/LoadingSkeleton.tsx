@@ -11,7 +11,7 @@ export const LoadingSkeleton = ({
   width,
   height,
 }: LoadingSkeletonProps) => {
-  const baseClasses = 'animate-pulse bg-gray-300';
+  const baseClasses = 'animate-pulse bg-neutral-800';
   
   const variantClasses = {
     text: 'rounded',
@@ -31,23 +31,17 @@ export const LoadingSkeleton = ({
   );
 };
 
-// Specialized skeleton components
 export const ProductCardSkeleton = () => (
-  <div className="w-full">
-    {/* Image skeleton - matches ProductCard aspect-square */}
-    <LoadingSkeleton className="aspect-square mb-3" />
-    
-    {/* Product info skeleton - matches ProductCard spacing */}
-    <div className="space-y-1">
-      {/* Product name - 2 lines */}
-      <LoadingSkeleton className="h-4 w-full" />
-      <LoadingSkeleton className="h-4 w-3/4 mb-1" />
-      
-      {/* Price */}
-      <LoadingSkeleton className="h-4 w-20" />
-      
-      {/* Button */}
-      <LoadingSkeleton className="h-[44px] w-full mt-2" />
+  <div className="flex flex-col bg-transparent animate-pulse w-full">
+    <div className="relative aspect-[3/4] overflow-hidden bg-neutral-900 rounded-sm">
+      <div className="absolute top-2.5 left-2.5 w-16 h-3 bg-neutral-800 rounded-sm" />
+      <div className="absolute top-2.5 right-2.5 w-6 h-6 bg-neutral-800 rounded-full" />
+      <div className="absolute bottom-2.5 left-2.5 w-24 h-3.5 bg-neutral-800 rounded-sm" />
+    </div>
+    <div className="pt-3 pb-2 px-1 text-left space-y-1.5">
+      <div className="h-3.5 bg-neutral-800 rounded w-4/5" />
+      <div className="h-2.5 bg-neutral-800/70 rounded w-1/2" />
+      <div className="h-3.5 bg-neutral-800 rounded w-1/3 pt-0.5" />
     </div>
   </div>
 );

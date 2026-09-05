@@ -1,17 +1,20 @@
-import { useState, useRef, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useRef, useEffect, FormEvent } from "react";
+import { Link, useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import {
-  ShoppingCart,
   Menu,
   X,
+  Search,
   User,
-  ChevronDown,
-  Shirt,
-  Wind,
+  Heart,
+  ShoppingCart,
+  Mic,
+  ChevronRight,
+  LogOut,
+  Package,
+  ShieldAlert,
+  Flame,
+  Layers,
   Sparkles,
-  Grid3x3,
-  Flower2,
-  Sun,
 } from "lucide-react";
 import { useCart } from "../../hooks/useCart";
 import { useAuthStore } from "../../stores/authStore";
@@ -19,744 +22,550 @@ import { CartDrawer } from "../cart/CartDrawer";
 
 export const Header = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { itemCount } = useCart();
   const { user, isAdmin, logout } = useAuthStore();
+
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
-  const [isWinterDropdownOpen, setIsWinterDropdownOpen] = useState(false);
-  const [isSummerDropdownOpen, setIsSummerDropdownOpen] = useState(false);
-  const [isMobileWinterOpen, setIsMobileWinterOpen] = useState(false);
-  const [isMobileSummerOpen, setIsMobileSummerOpen] = useState(false);
-  const profileDropdownRef = useRef<HTMLDivElement>(null);
-  const winterDropdownRef = useRef<HTMLDivElement>(null);
-  const summerDropdownRef = useRef<HTMLDivElement>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
+  const announcements = [
+    "LIMITED RELEASES. EXCLUSIVE DROPS. ELEGANCE IS NOW LIVE.",
+    "FREE EXPRESS DELIVERY ON ORDERS OVER ₹2,000",
+    "SPECIAL INTRODUCTORY OFFER • 10% OFF CODE: B2CFIRST",
+  ];
+  const [announcementIndex, setAnnouncementIndex] = useState(0);
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const timer = setInterval(() => {
+      setAnnouncementIndex((prev) => (prev + 1) % announcements.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [announcements.length]);
+
+  const profileMenuRef = useRef<HTMLDivElement>(null);
+
+  const currentGender = searchParams.get("gender")?.toLowerCase();
+  const currentCategory = searchParams.get("category")?.toLowerCase();
+  const currentPath = location.pathname.toLowerCase();
+
+  const isMenActive =
+    currentPath === "/men" ||
+    (currentPath === "/products" && currentGender === "men");
+  const isWomenActive =
+    currentPath === "/women" ||
+    (currentPath === "/products" && currentGender === "women");
+  const isSneakersActive =
+    currentPath === "/sneakers" ||
+    (currentPath === "/products" &&
+      (currentCategory === "footwear" || currentCategory === "sneakers"));
+
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
       if (
-        profileDropdownRef.current &&
-        !profileDropdownRef.current.contains(event.target as Node)
+        profileMenuRef.current &&
+        !profileMenuRef.current.contains(e.target as Node)
       ) {
-        setIsProfileDropdownOpen(false);
-      }
-      if (
-        winterDropdownRef.current &&
-        !winterDropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsWinterDropdownOpen(false);
-      }
-      if (
-        summerDropdownRef.current &&
-        !summerDropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsSummerDropdownOpen(false);
+        setIsProfileOpen(false);
       }
     };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, []);
+
+  useEffect(() => {
+    setIsDrawerOpen(false);
+    setIsProfileOpen(false);
+    setIsMobileSearchOpen(false);
+  }, [location.pathname, location.search]);
+
+  const handleSearchSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    if (!searchTerm.trim()) return;
+    navigate(`/products?search=${encodeURIComponent(searchTerm.trim())}`);
+  };
 
   const handleLogout = async () => {
     try {
       await logout();
       navigate("/login");
-    } catch (error) {
-      // Handle logout error silently
+    } catch {
     }
   };
 
   return (
     <>
-      <header className="sticky top-0 z-50 transition-all duration-500 bg-[#f5f1eb] shadow-lg">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-center justify-between h-20">
-            {/* Logo */}
-            <Link
-              to="/"
-              className="flex items-center min-w-[44px] min-h-[44px] group"
-            >
-              <div className="relative">
-                <h1
-                  className={`text-3xl font-bold tracking-[0.2em] transition-all duration-500 text-[#4a3f35]`}
-                >
-                  B2C
-                </h1>
-                <div
-                  className={`absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r transition-all duration-500 from-[#c9a87c] to-[#6b5a4d] w-0 group-hover:w-full`}
-                ></div>
-              </div>
-            </Link>
+      <div className="b2c-top-announcement-strip bg-[#262626] text-white text-[10px] sm:text-xs font-bold tracking-[0.22em] uppercase py-2 px-4 border-b border-neutral-800 select-none">
+        <div className="max-w-7xl mx-auto flex items-center justify-center text-center">
+          <span className="inline-block transition-all duration-300 truncate">
+            {announcements[announcementIndex]}
+          </span>
+        </div>
+      </div>
 
-            {/* Desktop Navigation - Centered */}
-            <nav className="hidden md:flex items-center space-x-8 lg:space-x-10 xl:space-x-12 absolute left-1/2 transform -translate-x-1/2">
-              {/* Winter Collection Dropdown */}
-              <div
-                className="relative"
-                ref={winterDropdownRef}
-                onMouseEnter={() => setIsWinterDropdownOpen(true)}
-                onMouseLeave={() => setIsWinterDropdownOpen(false)}
+      <header className="b2c-header-wrapper sticky top-0 z-40 bg-black text-white border-b border-neutral-900">
+        <div className="b2c-nav-shell max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-black">
+          <div className="b2c-nav-grid flex items-center justify-between h-16 md:h-20 gap-2 md:gap-6 bg-black">
+            <div className="b2c-left-section flex items-center gap-3 lg:gap-6 flex-1 min-w-0">
+              <button
+                type="button"
+                onClick={() => setIsDrawerOpen(true)}
+                className="b2c-drawer-btn p-2 -ml-2 rounded-lg text-white hover:bg-neutral-900 transition-colors"
+                aria-label="Open navigation menu"
               >
+                <Menu className="w-6 h-6 stroke-[2.2]" />
+              </button>
+
+              <nav className="b2c-gender-tabs hidden md:flex items-center space-x-1 lg:space-x-3">
                 <Link
-                  to="/products?collection=winter"
-                  className="group relative text-xs font-semibold tracking-[0.15em] transition-all duration-300 whitespace-nowrap text-[#3d3228] hover:text-[#c9a87c] flex items-center space-x-1 py-2"
+                  to="/products?gender=men"
+                  className={`b2c-tab-link px-3 py-1 text-xs lg:text-sm font-bold tracking-wider uppercase transition-all ${
+                    isMenActive ? "text-white" : "text-neutral-300 hover:text-white"
+                  }`}
                 >
-                  <span>WINTER COLLECTION</span>
-                  <ChevronDown
-                    className={`w-3 h-3 transition-transform duration-300 ${
-                      isWinterDropdownOpen ? "rotate-180" : ""
-                    }`}
-                  />
-                  <span
-                    className={`absolute -bottom-1 left-0 w-0 h-0.5 transition-all duration-300 group-hover:w-full bg-[#c9a87c]`}
-                  ></span>
+                  <span className="relative pb-1 inline-block">
+                    MEN
+                    {isMenActive && (
+                      <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-white rounded-full" />
+                    )}
+                  </span>
                 </Link>
+                <Link
+                  to="/products?gender=women"
+                  className={`b2c-tab-link px-3 py-1 text-xs lg:text-sm font-bold tracking-wider uppercase transition-all ${
+                    isWomenActive ? "text-white" : "text-neutral-300 hover:text-white"
+                  }`}
+                >
+                  <span className="relative pb-1 inline-block">
+                    WOMEN
+                    {isWomenActive && (
+                      <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-white rounded-full" />
+                    )}
+                  </span>
+                </Link>
+                <Link
+                  to="/products?category=footwear"
+                  className={`b2c-tab-link px-3 py-1 text-xs lg:text-sm font-bold tracking-wider uppercase transition-all ${
+                    isSneakersActive ? "text-white" : "text-neutral-300 hover:text-white"
+                  }`}
+                >
+                  <span className="relative pb-1 inline-block">
+                    SNEAKERS
+                    {isSneakersActive && (
+                      <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-white rounded-full" />
+                    )}
+                  </span>
+                </Link>
+              </nav>
+            </div>
 
-                {isWinterDropdownOpen && (
-                  <div className="absolute left-1/2 -translate-x-1/2 pt-2 w-[420px] z-50">
-                    <div className="bg-gradient-to-br from-white via-[#faf8f5] to-[#f5f1eb] rounded-xl shadow-2xl border border-[#d4c5b0]/40 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
-                      {/* <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#c9a87c] via-[#b8956b] to-[#6b5a4d]"></div> */}
-                      <div className="p-4">
-                        <div className="text-xs font-bold text-[#8b7355] uppercase tracking-[0.2em] mb-3 px-2">
-                          Shop by Category
-                        </div>
-                        <div className="grid grid-cols-2 gap-3">
-                          <Link
-                            to="/products?collection=winter&category=coats"
-                            onClick={() => setIsWinterDropdownOpen(false)}
-                            className="group relative bg-white/60 backdrop-blur-sm rounded-lg p-4 border border-[#d4c5b0]/30 hover:border-[#c9a87c] transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
-                          >
-                            <div className="absolute inset-0 bg-gradient-to-br from-[#c9a87c]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg"></div>
-                            <div className="relative">
-                              <div className="mb-3 w-10 h-10 rounded-full bg-gradient-to-br from-[#c9a87c]/20 to-[#b8956b]/20 flex items-center justify-center group-hover:from-[#c9a87c]/30 group-hover:to-[#b8956b]/30 transition-all duration-300">
-                                <Wind className="w-5 h-5 text-[#6b5a4d] group-hover:text-[#c9a87c] transition-colors duration-300" />
-                              </div>
-                              <div className="text-sm font-semibold text-[#3d3228] group-hover:text-[#c9a87c] transition-colors duration-300">
-                                Coats & Jackets
-                              </div>
-                              <div className="text-xs text-[#8b7355] mt-1">
-                                Stay warm in style
-                              </div>
-                            </div>
-                          </Link>
-                          <Link
-                            to="/products?collection=winter&category=sweaters"
-                            onClick={() => setIsWinterDropdownOpen(false)}
-                            className="group relative bg-white/60 backdrop-blur-sm rounded-lg p-4 border border-[#d4c5b0]/30 hover:border-[#c9a87c] transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
-                          >
-                            <div className="absolute inset-0 bg-gradient-to-br from-[#c9a87c]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg"></div>
-                            <div className="relative">
-                              <div className="mb-3 w-10 h-10 rounded-full bg-gradient-to-br from-[#c9a87c]/20 to-[#b8956b]/20 flex items-center justify-center group-hover:from-[#c9a87c]/30 group-hover:to-[#b8956b]/30 transition-all duration-300">
-                                <Shirt className="w-5 h-5 text-[#6b5a4d] group-hover:text-[#c9a87c] transition-colors duration-300" />
-                              </div>
-                              <div className="text-sm font-semibold text-[#3d3228] group-hover:text-[#c9a87c] transition-colors duration-300">
-                                Sweaters
-                              </div>
-                              <div className="text-xs text-[#8b7355] mt-1">
-                                Cozy essentials
-                              </div>
-                            </div>
-                          </Link>
-                          <Link
-                            to="/products?collection=winter&category=accessories"
-                            onClick={() => setIsWinterDropdownOpen(false)}
-                            className="group relative bg-white/60 backdrop-blur-sm rounded-lg p-4 border border-[#d4c5b0]/30 hover:border-[#c9a87c] transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
-                          >
-                            <div className="absolute inset-0 bg-gradient-to-br from-[#c9a87c]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg"></div>
-                            <div className="relative">
-                              <div className="mb-3 w-10 h-10 rounded-full bg-gradient-to-br from-[#c9a87c]/20 to-[#b8956b]/20 flex items-center justify-center group-hover:from-[#c9a87c]/30 group-hover:to-[#b8956b]/30 transition-all duration-300">
-                                <Sparkles className="w-5 h-5 text-[#6b5a4d] group-hover:text-[#c9a87c] transition-colors duration-300" />
-                              </div>
-                              <div className="text-sm font-semibold text-[#3d3228] group-hover:text-[#c9a87c] transition-colors duration-300">
-                                Accessories
-                              </div>
-                              <div className="text-xs text-[#8b7355] mt-1">
-                                Complete the look
-                              </div>
-                            </div>
-                          </Link>
-                          <Link
-                            to="/products?collection=winter"
-                            onClick={() => setIsWinterDropdownOpen(false)}
-                            className="group relative bg-gradient-to-br from-[#c9a87c]/10 to-[#b8956b]/10 backdrop-blur-sm rounded-lg p-4 border border-[#c9a87c]/50 hover:border-[#c9a87c] transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
-                          >
-                            <div className="absolute inset-0 bg-gradient-to-br from-[#c9a87c]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg"></div>
-                            <div className="relative">
-                              <div className="mb-3 w-10 h-10 rounded-full bg-gradient-to-br from-[#c9a87c]/30 to-[#b8956b]/30 flex items-center justify-center grou:from-[#c9a87c]/40 group-hover:to-[#b8956b]/40 transition-all duration-300">
-                                <Grid3x3 className="w-5 h-5 text-[#6b5a4d] group-hover:text-[#c9a87c] transition-colors duration-300" />
-                              </div>
-                              <div className="text-sm font-semibold text-[#3d3228] group-hover:text-[#c9a87c] transition-colors duration-300">
-                                View All
-                              </div>
-                              <div className="text-xs text-[#8b7355] mt-1">
-                                Browse collection
-                              </div>
-                            </div>
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
+            <div className="b2c-center-section flex items-center justify-center flex-shrink-0">
+            </div>
 
-              {/* Summer Collection Dropdown */}
-              <div
-                className="relative"
-                ref={summerDropdownRef}
-                onMouseEnter={() => setIsSummerDropdownOpen(true)}
-                onMouseLeave={() => setIsSummerDropdownOpen(false)}
+            <div className="b2c-right-section flex items-center justify-end gap-1 sm:gap-3 flex-1 min-w-0">
+              <form
+                onSubmit={handleSearchSubmit}
+                className="b2c-search-wrapper hidden lg:flex items-center relative w-full max-w-[260px] xl:max-w-[320px]"
               >
-                <Link
-                  to="/products?collection=summer"
-                  className="group relative text-xs font-semibold tracking-[0.15em] transition-all duration-300 whitespace-nowrap text-[#3d3228] hover:text-[#c9a87c] flex items-center space-x-1 py-2"
+                <input
+                  type="search"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="What are you looking for?"
+                  className="b2c-search-input w-full bg-black text-white text-xs xl:text-sm pl-4 pr-16 py-2.5 rounded-full border border-neutral-800 focus:border-neutral-600 focus:outline-none transition-all placeholder:text-neutral-500"
+                />
+                <div className="b2c-search-icons absolute right-2.5 flex items-center gap-1.5 text-neutral-400">
+                  <button
+                    type="button"
+                    className="p-1 hover:text-white transition-colors"
+                    aria-label="Voice search"
+                  >
+                    <Mic className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    type="submit"
+                    className="p-1 hover:text-white transition-colors"
+                    aria-label="Submit search"
+                  >
+                    <Search className="w-4 h-4 text-neutral-400 hover:text-white" />
+                  </button>
+                </div>
+              </form>
+
+              <button
+                type="button"
+                onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
+                className="b2c-mobile-search-btn lg:hidden p-2 text-white hover:bg-neutral-900 rounded-full transition-colors"
+                aria-label="Toggle search"
+              >
+                <Search className="w-5 h-5" />
+              </button>
+
+              <div className="b2c-profile-action relative" ref={profileMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsProfileOpen(!isProfileOpen)}
+                  className="p-2 text-white hover:bg-neutral-900 rounded-full transition-colors flex items-center"
+                  aria-label="User profile"
                 >
-                  <span>SUMMER COLLECTION</span>
-                  <ChevronDown
-                    className={`w-3 h-3 transition-transform duration-300 ${
-                      isSummerDropdownOpen ? "rotate-180" : ""
-                    }`}
-                  />
-                  <span
-                    className={`absolute -bottom-1 left-0 w-0 h-0.5 transition-all duration-300 group-hover:w-full bg-[#c9a87c]`}
-                  ></span>
-                </Link>
+                  <User className="w-5 h-5" />
+                </button>
 
-                {isSummerDropdownOpen && (
-                  <div className="absolute left-1/2 -translate-x-1/2 pt-2 w-[420px] z-50">
-                    <div className="bg-gradient-to-br from-white via-[#faf8f5] to-[#f5f1eb] rounded-xl shadow-2xl border border-[#d4c5b0]/40 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
-                      {/* <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#c9a87c] via-[#b8956b] to-[#6b5a4d]"></div> */}
-                      <div className="p-4">
-                        <div className="text-xs font-bold text-[#8b7355] uppercase tracking-[0.2em] mb-3 px-2">
-                          Shop by Category
+                {isProfileOpen && (
+                  <div className="b2c-profile-dropdown absolute right-0 mt-3 w-56 bg-black text-white rounded-2xl shadow-2xl border border-neutral-800 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                    {user ? (
+                      <>
+                        <div className="px-4 py-2.5 border-b border-neutral-900">
+                          <p className="text-xs text-neutral-400 uppercase font-semibold tracking-wider">
+                            Signed in as
+                          </p>
+                          <p className="text-sm font-bold text-white truncate">
+                            {user.fullName || user.email}
+                          </p>
                         </div>
-                        <div className="grid grid-cols-2 gap-3">
-                          <Link
-                            to="/products?collection=summer&category=dresses"
-                            onClick={() => setIsSummerDropdownOpen(false)}
-                            className="group relative bg-white/60 backdrop-blur-sm rounded-lg p-4 border border-[#d4c5b0]/30 hover:border-[#c9a87c] transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
-                          >
-                            <div className="absolute inset-0 bg-gradient-to-br from-[#c9a87c]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg"></div>
-                            <div className="relative">
-                              <div className="mb-3 w-10 h-10 rounded-full bg-gradient-to-br from-[#c9a87c]/20 to-[#b8956b]/20 flex items-center justify-center group-hover:from-[#c9a87c]/30 group-hover:to-[#b8956b]/30 transition-all duration-300">
-                                <Flower2 className="w-5 h-5 text-[#6b5a4d] group-hover:text-[#c9a87c] transition-colors duration-300" />
-                              </div>
-                              <div className="text-sm font-semibold text-[#3d3228] group-hover:text-[#c9a87c] transition-colors duration-300">
-                                Dresses
-                              </div>
-                              <div className="text-xs text-[#8b7355] mt-1">
-                                Effortless elegance
-                              </div>
-                            </div>
-                          </Link>
-                          <Link
-                            to="/products?collection=summer&category=tops"
-                            onClick={() => setIsSummerDropdownOpen(false)}
-                            className="group relative bg-white/60 backdrop-blur-sm rounded-lg p-4 border border-[#d4c5b0]/30 hover:border-[#c9a87c] transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
-                          >
-                            <div className="absolute inset-0 bg-gradient-to-br from-[#c9a87c]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg"></div>
-                            <div className="relative">
-                              <div className="mb-3 w-10 h-10 rounded-full bg-gradient-to-br from-[#c9a87c]/20 to-[#b8956b]/20 flex items-center justify-center group-hover:from-[#c9a87c]/30 group-hover:to-[#b8956b]/30 transition-all duration-300">
-                                <Shirt className="w-5 h-5 text-[#6b5a4d] group-hover:text-[#c9a87c] transition-colors duration-300" />
-                              </div>
-                              <div className="text-sm font-semibold text-[#3d3228] group-hover:text-[#c9a87c] transition-colors duration-300">
-                                Tops & Shirts
-                              </div>
-                              <div className="text-xs text-[#8b7355] mt-1">
-                                Light & breezy
-                              </div>
-                            </div>
-                          </Link>
-                          <Link
-                            to="/products?collection=summer&category=shorts"
-                            onClick={() => setIsSummerDropdownOpen(false)}
-                            className="group relative bg-white/60 backdrop-blur-sm rounded-lg p-4 border border-[#d4c5b0]/30 hover:border-[#c9a87c] transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
-                          >
-                            <div className="absolute inset-0 bg-gradient-to-br from-[#c9a87c]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg"></div>
-                            <div className="relative">
-                              <div className="mb-3 w-10 h-10 rounded-full bg-gradient-to-br from-[#c9a87c]/20 to-[#b8956b]/20 flex items-center justify-center group-hover:from-[#c9a87c]/30 group-hover:to-[#b8956b]/30 transition-all duration-300">
-                                <Wind className="w-5 h-5 text-[#6b5a4d] group-hover:text-[#c9a87c] transition-colors duration-300" />
-                              </div>
-                              <div className="text-sm font-semibold text-[#3d3228] group-hover:text-[#c9a87c] transition-colors duration-300">
-                                Shorts & Skirts
-                              </div>
-                              <div className="text-xs text-[#8b7355] mt-1">
-                                Summer staples
-                              </div>
-                            </div>
-                          </Link>
-                          <Link
-                            to="/products?collection=summer"
-                            onClick={() => setIsSummerDropdownOpen(false)}
-                            className="group relative bg-gradient-to-br from-[#c9a87c]/10 to-[#b8956b]/10 backdrop-blur-sm rounded-lg p-4 border border-[#c9a87c]/50 hover:border-[#c9a87c] transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
-                          >
-                            <div className="absolute inset-0 bg-gradient-to-br from-[#c9a87c]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg"></div>
-                            <div className="relative">
-                              <div className="mb-3 w-10 h-10 rounded-full bg-gradient-to-br from-[#c9a87c]/30 to-[#b8956b]/30 flex items-center justify-center group-hover:from-[#c9a87c]/40 group-hover:to-[#b8956b]/40 transition-all duration-300">
-                                <Sun className="w-5 h-5 text-[#6b5a4d] group-hover:text-[#c9a87c] transition-colors duration-300" />
-                              </div>
-                              <div className="text-sm font-semibold text-[#3d3228] group-hover:text-[#c9a87c] transition-colors duration-300">
-                                View All
-                              </div>
-                              <div className="text-xs text-[#8b7355] mt-1">
-                                Browse collection
-                              </div>
-                            </div>
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </nav>
-
-            {/* Right Side Actions */}
-            <div className="flex items-center space-x-4 sm:space-x-6">
-              {/* User Menu */}
-              <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
-                {user ? (
-                  <div className="relative" ref={profileDropdownRef}>
-                    <button
-                      onClick={() =>
-                        setIsProfileDropdownOpen(!isProfileDropdownOpen)
-                      }
-                      className="flex items-center space-x-2 text-xs font-medium tracking-wider transition-all duration-300 text-[#3d3228] hover:text-[#c9a87c] min-w-[44px] min-h-[44px] px-3 py-2 rounded-lg"
-                    >
-                      <User className="w-4 h-4" />
-                      <span>{user.fullName}</span>
-                      <ChevronDown
-                        className={`w-4 h-4 transition-transform duration-300 ${
-                          isProfileDropdownOpen ? "rotate-180" : ""
-                        }`}
-                      />
-                    </button>
-
-                    {isProfileDropdownOpen && (
-                      <div className="absolute right-0 mt-4 w-52 bg-gradient-to-br from-white via-[#faf8f5] to-[#f5f1eb] rounded-xl shadow-2xl border border-[#d4c5b0]/40 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-300">
-                        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#c9a87c] via-[#b8956b] to-[#6b5a4d]"></div>
-                        <div className="p-2">
+                        <div className="py-1">
                           <Link
                             to="/profile"
-                            onClick={() => setIsProfileDropdownOpen(false)}
-                            className="group relative block px-4 py-3 text-sm text-[#3d3228] hover:text-[#c9a87c] rounded-lg transition-all duration-300 overflow-hidden"
+                            className="flex items-center px-4 py-2.5 text-sm text-neutral-300 hover:bg-neutral-900 hover:text-white transition-colors"
                           >
-                            <span className="absolute inset-0 bg-gradient-to-r from-[#e8dfd4] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                            <span className="relative flex items-center justify-between">
-                              <span className="flex items-center">
-                                <span className="w-1.5 h-1.5 rounded-full bg-[#c9a87c] mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                                Profile
-                              </span>
-                              <span className="text-[#c9a87c] opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                →
-                              </span>
-                            </span>
+                            <User className="w-4 h-4 mr-3 text-neutral-400" />
+                            My Profile
                           </Link>
                           <Link
                             to="/orders"
-                            onClick={() => setIsProfileDropdownOpen(false)}
-                            className="group relative block px-4 py-3 text-sm text-[#3d3228] hover:text-[#c9a87c] rounded-lg transition-all duration-300 overflow-hidden"
+                            className="flex items-center px-4 py-2.5 text-sm text-neutral-300 hover:bg-neutral-900 hover:text-white transition-colors"
                           >
-                            <span className="absolute inset-0 bg-gradient-to-r from-[#e8dfd4] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                            <span className="relative flex items-center justify-between">
-                              <span className="flex items-center">
-                                <span className="w-1.5 h-1.5 rounded-full bg-[#c9a87c] mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                                Orders
-                              </span>
-                              <span className="text-[#c9a87c] opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                →
-                              </span>
-                            </span>
+                            <Package className="w-4 h-4 mr-3 text-neutral-400" />
+                            My Orders
                           </Link>
                           {isAdmin() && (
-                            <>
-                              <div className="h-px bg-gradient-to-r from-transparent via-[#d4c5b0]/50 to-transparent my-1"></div>
-                              <Link
-                                to="/admin"
-                                onClick={() => setIsProfileDropdownOpen(false)}
-                                className="group relative block px-4 py-3 text-sm text-[#6b5a4d] hover:text-[#c9a87c] rounded-lg transition-all duration-300 overflow-hidden"
-                              >
-                                <span className="absolute inset-0 bg-gradient-to-r from-[#e8dfd4] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                                <span className="relative flex items-center justify-between">
-                                  <span className="flex items-center">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-[#c9a87c] mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                                    Admin
-                                  </span>
-                                  <span className="text-[#c9a87c] opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                    →
-                                  </span>
-                                </span>
-                              </Link>
-                            </>
+                            <Link
+                              to="/admin"
+                              className="flex items-center px-4 py-2.5 text-sm text-red-400 hover:bg-neutral-900 transition-colors font-medium"
+                            >
+                              <ShieldAlert className="w-4 h-4 mr-3 text-red-400" />
+                              Admin Panel
+                            </Link>
                           )}
-                          <div className="h-px bg-gradient-to-r from-transparent via-[#d4c5b0]/50 to-transparent my-1"></div>
+                        </div>
+                        <div className="border-t border-neutral-900 pt-1">
                           <button
-                            onClick={() => {
-                              handleLogout();
-                              setIsProfileDropdownOpen(false);
-                            }}
-                            className="group relative block w-full text-left px-4 py-3 text-sm text-[#8b7355] hover:text-[#c9a87c] rounded-lg transition-all duration-300 overflow-hidden"
+                            type="button"
+                            onClick={handleLogout}
+                            className="flex w-full items-center px-4 py-2.5 text-sm text-neutral-400 hover:bg-neutral-900 hover:text-white transition-colors"
                           >
-                            <span className="absolute inset-0 bg-gradient-to-r from-[#e8dfd4] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                            <span className="relative flex items-center justify-between">
-                              <span className="flex items-center">
-                                <span className="w-1.5 h-1.5 rounded-full bg-[#c9a87c] mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                                Logout
-                              </span>
-                              <span className="text-[#c9a87c] opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                →
-                              </span>
-                            </span>
+                            <LogOut className="w-4 h-4 mr-3 text-neutral-400" />
+                            Sign Out
                           </button>
                         </div>
+                      </>
+                    ) : (
+                      <div className="py-1">
+                        <Link
+                          to="/login"
+                          className="flex items-center px-4 py-2.5 text-sm text-neutral-200 hover:bg-neutral-900 hover:text-white font-semibold transition-colors"
+                        >
+                          Login
+                        </Link>
+                        <Link
+                          to="/register"
+                          className="flex items-center px-4 py-2.5 text-sm text-red-400 hover:bg-neutral-900 hover:text-red-300 font-semibold transition-colors"
+                        >
+                          Create Account
+                        </Link>
                       </div>
                     )}
                   </div>
-                ) : (
-                  <>
-                    <Link
-                      to="/login"
-                      className="text-xs font-medium tracking-wider transition-all duration-300 text-[#3d3228] hover:text-[#c9a87c]"
-                    >
-                      LOGIN
-                    </Link>
-                    <Link
-                      to="/register"
-                      className="text-xs font-medium tracking-wider transition-all duration-300 text-[#3d3228] hover:text-[#c9a87c]"
-                    >
-                      REGISTER
-                    </Link>
-                  </>
                 )}
               </div>
 
-              {/* Cart Icon */}
-              <button
-                onClick={() => setIsCartOpen(true)}
-                className="relative group p-2 min-w-[44px] min-h-[44px] flex items-center justify-center transition-all duration-300 rounded-full text-[#3d3228] hover:bg-[#e8dfd4] hover:text-[#c9a87c]"
-                aria-label="Shopping cart"
+              <Link
+                to="/mywishlist"
+                className="b2c-wishlist-action p-2 text-white hover:text-red-400 hover:bg-neutral-900 rounded-full transition-colors"
+                aria-label="Wishlist"
               >
-                <ShoppingCart className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" />
+                <Heart className="w-5 h-5" />
+              </Link>
+
+              <button
+                type="button"
+                onClick={() => setIsCartOpen(true)}
+                className="b2c-cart-action p-2 text-white hover:bg-neutral-900 rounded-full transition-colors relative"
+                aria-label="Shopping Cart"
+              >
+                <ShoppingCart className="w-5 h-5" />
                 {itemCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-gradient-to-br from-[#c9a87c] to-[#b8956b] text-white text-xs font-bold min-w-[20px] h-[20px] px-1.5 flex items-center justify-center rounded-full shadow-lg animate-pulse">
+                  <span className="b2c-cart-badge absolute -top-0.5 -right-0.5 bg-red-600 text-white text-[10px] font-extrabold min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center shadow-md animate-pulse">
                     {itemCount > 9 ? "9+" : itemCount}
                   </span>
                 )}
               </button>
-
-              {/* Mobile Menu Button */}
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden p-2 min-w-[44px] min-h-[44px] flex items-center justify-center transition-all duration-300 rounded-full text-[#3d3228] hover:bg-[#e8dfd4]"
-                aria-label="Toggle menu"
-              >
-                {isMobileMenuOpen ? (
-                  <X className="w-6 h-6" />
-                ) : (
-                  <Menu className="w-6 h-6" />
-                )}
-              </button>
             </div>
           </div>
+
+          <div className="md:hidden flex items-center justify-center space-x-6 py-2.5 border-t border-neutral-900 bg-black">
+            <Link
+              to="/products?gender=men"
+              className={`text-xs font-bold tracking-wider uppercase ${
+                isMenActive ? "text-white" : "text-neutral-400 hover:text-white"
+              }`}
+            >
+              <span className="relative pb-1 inline-block">
+                MEN
+                {isMenActive && (
+                  <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-white rounded-full" />
+                )}
+              </span>
+            </Link>
+            <Link
+              to="/products?gender=women"
+              className={`text-xs font-bold tracking-wider uppercase ${
+                isWomenActive ? "text-white" : "text-neutral-400 hover:text-white"
+              }`}
+            >
+              <span className="relative pb-1 inline-block">
+                WOMEN
+                {isWomenActive && (
+                  <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-white rounded-full" />
+                )}
+              </span>
+            </Link>
+            <Link
+              to="/products?category=footwear"
+              className={`text-xs font-bold tracking-wider uppercase ${
+                isSneakersActive ? "text-white" : "text-neutral-400 hover:text-white"
+              }`}
+            >
+              <span className="relative pb-1 inline-block">
+                SNEAKERS
+                {isSneakersActive && (
+                  <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-white rounded-full" />
+                )}
+              </span>
+            </Link>
+          </div>
+
+          {isMobileSearchOpen && (
+            <div className="lg:hidden pb-3 pt-1 border-t border-neutral-900 bg-black animate-in fade-in duration-200">
+              <form onSubmit={handleSearchSubmit} className="relative">
+                <input
+                  type="search"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="What are you looking for?"
+                  autoFocus
+                  className="w-full bg-black text-white text-sm pl-4 pr-12 py-2 rounded-full border border-neutral-800 focus:outline-none focus:border-neutral-600 placeholder:text-neutral-500"
+                />
+                <button
+                  type="submit"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-white p-1"
+                  aria-label="Search"
+                >
+                  <Search className="w-4 h-4" />
+                </button>
+              </form>
+            </div>
+          )}
         </div>
       </header>
 
-      {/* Mobile Menu Backdrop */}
-      {isMobileMenuOpen && (
+      {isDrawerOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden transition-opacity"
-          onClick={() => setIsMobileMenuOpen(false)}
-          aria-hidden="true"
+          className="b2c-drawer-backdrop fixed inset-0 bg-black/80 backdrop-blur-sm z-50 transition-opacity animate-in fade-in duration-200"
+          onClick={() => setIsDrawerOpen(false)}
         />
       )}
 
-      {/* Mobile Menu - Slide-in from right */}
-      <div
-        className={`fixed top-0 right-0 h-full w-80 bg-gradient-to-br from-[#f5f1eb] via-[#f8f5f0] to-[#faf8f5] shadow-2xl z-[45] md:hidden transform transition-all duration-500 ease-out ${
-          isMobileMenuOpen
-            ? "translate-x-0 opacity-100"
-            : "translate-x-full opacity-0"
+      <aside
+        className={`b2c-drawer-panel fixed top-0 left-0 bottom-0 w-[300px] sm:w-[360px] bg-black text-white border-r border-neutral-900 z-50 shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col ${
+          isDrawerOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex flex-col h-full">
-          {/* Mobile Menu Header */}
-          <div className="flex items-center justify-between p-6 border-b border-[#d4c5b0]/30 bg-white/40 backdrop-blur-sm">
-            <h2 className="text-xl font-bold text-[#6b5a4d] tracking-wider">
-              MENU
-            </h2>
-            <button
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="p-2 hover:bg-[#e8dfd4] rounded-full transition-all duration-300 min-w-[44px] min-h-[44px] flex items-center justify-center group"
-              aria-label="Close menu"
-            >
-              <X className="w-6 h-6 text-[#6b5a4d] group-hover:rotate-90 transition-transform duration-300" />
-            </button>
+        <div className="b2c-drawer-top flex items-center justify-between px-5 py-4 border-b border-neutral-900 bg-black">
+          <span className="font-extrabold text-sm tracking-widest text-white uppercase">
+            MENU
+          </span>
+          <button
+            type="button"
+            onClick={() => setIsDrawerOpen(false)}
+            className="p-1.5 rounded-full text-neutral-400 hover:text-white hover:bg-neutral-900 transition-colors"
+            aria-label="Close drawer"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="b2c-drawer-content flex-1 overflow-y-auto px-4 py-4 space-y-6 bg-black">
+          <div className="space-y-1">
+            <p className="px-3 text-[11px] font-black tracking-widest text-neutral-500 uppercase">
+              Main Categories
+            </p>
+            <div className="grid grid-cols-3 gap-2 pt-2">
+              <Link
+                to="/products?gender=men"
+                className={`flex flex-col items-center justify-center py-3 px-2 rounded-xl text-xs font-bold transition-all ${
+                  isMenActive
+                    ? "bg-neutral-900 text-white border border-neutral-700 shadow-sm"
+                    : "bg-black text-neutral-300 hover:bg-neutral-900 hover:text-white border border-neutral-800"
+                }`}
+              >
+                <Flame className="w-4 h-4 mb-1 text-red-500" />
+                MEN
+              </Link>
+              <Link
+                to="/products?gender=women"
+                className={`flex flex-col items-center justify-center py-3 px-2 rounded-xl text-xs font-bold transition-all ${
+                  isWomenActive
+                    ? "bg-neutral-900 text-white border border-neutral-700 shadow-sm"
+                    : "bg-black text-neutral-300 hover:bg-neutral-900 hover:text-white border border-neutral-800"
+                }`}
+              >
+                <Sparkles className="w-4 h-4 mb-1 text-purple-400" />
+                WOMEN
+              </Link>
+              <Link
+                to="/products?category=footwear"
+                className={`flex flex-col items-center justify-center py-3 px-2 rounded-xl text-xs font-bold transition-all ${
+                  isSneakersActive
+                    ? "bg-neutral-900 text-white border border-neutral-700 shadow-sm"
+                    : "bg-black text-neutral-300 hover:bg-neutral-900 hover:text-white border border-neutral-800"
+                }`}
+              >
+                <Layers className="w-4 h-4 mb-1 text-amber-400" />
+                SNEAKERS
+              </Link>
+            </div>
           </div>
 
-          {/* Mobile Menu Content */}
-          <nav className="flex flex-col p-6 space-y-1 overflow-y-auto">
-            <div className="pb-4 mb-4 border-b border-[#d4c5b0]/30">
-              <p className="text-xs font-bold text-[#8b7355] uppercase tracking-[0.2em] px-4 mb-3">
-                Collections
-              </p>
+          <div className="space-y-1">
+            <p className="px-3 text-[11px] font-black tracking-widest text-neutral-500 uppercase">
+              Shop by Apparel
+            </p>
+            <Link
+              to="/products?category=upper-wear"
+              className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-300 hover:bg-neutral-900 hover:text-white transition-colors"
+            >
+              <span>Upper Wear</span>
+              <ChevronRight className="w-4 h-4 text-neutral-600" />
+            </Link>
+            <Link
+              to="/products?category=bottom-wear"
+              className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-300 hover:bg-neutral-900 hover:text-white transition-colors"
+            >
+              <span>Bottom Wear</span>
+              <ChevronRight className="w-4 h-4 text-neutral-600" />
+            </Link>
+            <Link
+              to="/products?category=footwear"
+              className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-300 hover:bg-neutral-900 hover:text-white transition-colors"
+            >
+              <span>Footwear & Sneakers</span>
+              <ChevronRight className="w-4 h-4 text-neutral-600" />
+            </Link>
+          </div>
 
-              {/* Winter Collection Mobile Dropdown */}
-              <div className="mb-2">
-                <button
-                  onClick={() => setIsMobileWinterOpen(!isMobileWinterOpen)}
-                  className="group text-sm font-medium text-[#6b5a4d] py-3 px-4 hover:bg-gradient-to-r hover:from-[#e8dfd4] hover:to-transparent rounded-lg transition-all duration-300 min-h-[44px] flex items-center justify-between w-full relative overflow-hidden"
+          <div className="space-y-1">
+            <p className="px-3 text-[11px] font-black tracking-widest text-neutral-500 uppercase">
+              Collections
+            </p>
+            <Link
+              to="/products?collection=winter"
+              className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-300 hover:bg-neutral-900 hover:text-white transition-colors"
+            >
+              <span>Winter Collection</span>
+              <ChevronRight className="w-4 h-4 text-neutral-600" />
+            </Link>
+            <Link
+              to="/products?collection=summer"
+              className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-300 hover:bg-neutral-900 hover:text-white transition-colors"
+            >
+              <span>Summer Collection</span>
+              <ChevronRight className="w-4 h-4 text-neutral-600" />
+            </Link>
+          </div>
+
+          <div className="space-y-1 pt-2 border-t border-neutral-900">
+            <p className="px-3 text-[11px] font-black tracking-widest text-neutral-500 uppercase">
+              Account & Orders
+            </p>
+            {user ? (
+              <>
+                <Link
+                  to="/profile"
+                  className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-300 hover:bg-neutral-900 hover:text-white transition-colors"
                 >
-                  <span className="relative z-10">WINTER COLLECTION</span>
-                  <ChevronDown
-                    className={`w-4 h-4 transition-transform duration-300 relative z-10 ${
-                      isMobileWinterOpen ? "rotate-180" : ""
-                    }`}
-                  />
-                  <span className="absolute left-0 top-0 h-full w-1 bg-[#c9a87c] transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300"></span>
-                </button>
-
-                {isMobileWinterOpen && (
-                  <div className="mt-2 bg-white/40 rounded-lg p-3 animate-in fade-in slide-in-from-top-2 duration-300">
-                    <div className="text-xs font-bold text-[#8b7355] uppercase tracking-[0.2em] mb-2 px-2">
-                      Shop by Category
-                    </div>
-                    <div className="space-y-1">
-                      <Link
-                        to="/products?collection=winter&category=coats"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="group relative bg-white/60 backdrop-blur-sm rounded-lg p-3 border border-[#d4c5b0]/30 hover:border-[#c9a87c] transition-all duration-300 flex items-start"
-                      >
-                        <div className="mr-3 w-8 h-8 rounded-full bg-gradient-to-br from-[#c9a87c]/20 to-[#b8956b]/20 flex items-center justify-center flex-shrink-0">
-                          <Wind className="w-4 h-4 text-[#6b5a4d]" />
-                        </div>
-                        <div>
-                          <div className="text-sm font-semibold text-[#3d3228]">
-                            Coats & Jackets
-                          </div>
-                          <div className="text-xs text-[#8b7355]">
-                            Stay warm in style
-                          </div>
-                        </div>
-                      </Link>
-                      <Link
-                        to="/products?collection=winter&category=sweaters"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="group relative bg-white/60 backdrop-blur-sm rounded-lg p-3 border border-[#d4c5b0]/30 hover:border-[#c9a87c] transition-all duration-300 flex items-start"
-                      >
-                        <div className="mr-3 w-8 h-8 rounded-full bg-gradient-to-br from-[#c9a87c]/20 to-[#b8956b]/20 flex items-center justify-center flex-shrink-0">
-                          <Shirt className="w-4 h-4 text-[#6b5a4d]" />
-                        </div>
-                        <div>
-                          <div className="text-sm font-semibold text-[#3d3228]">
-                            Sweaters
-                          </div>
-                          <div className="text-xs text-[#8b7355]">
-                            Cozy essentials
-                          </div>
-                        </div>
-                      </Link>
-                      <Link
-                        to="/products?collection=winter&category=accessories"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="group relative bg-white/60 backdrop-blur-sm rounded-lg p-3 border border-[#d4c5b0]/30 hover:border-[#c9a87c] transition-all duration-300 flex items-start"
-                      >
-                        <div className="mr-3 w-8 h-8 rounded-full bg-gradient-to-br from-[#c9a87c]/20 to-[#b8956b]/20 flex items-center justify-center flex-shrink-0">
-                          <Sparkles className="w-4 h-4 text-[#6b5a4d]" />
-                        </div>
-                        <div>
-                          <div className="text-sm font-semibold text-[#3d3228]">
-                            Accessories
-                          </div>
-                          <div className="text-xs text-[#8b7355]">
-                            Complete the look
-                          </div>
-                        </div>
-                      </Link>
-                      <Link
-                        to="/products?collection=winter"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="group relative bg-gradient-to-br from-[#c9a87c]/10 to-[#b8956b]/10 backdrop-blur-sm rounded-lg p-3 border border-[#c9a87c]/50 hover:border-[#c9a87c] transition-all duration-300 flex items-start"
-                      >
-                        <div className="mr-3 w-8 h-8 rounded-full bg-gradient-to-br from-[#c9a87c]/30 to-[#b8956b]/30 flex items-center justify-center flex-shrink-0">
-                          <Grid3x3 className="w-4 h-4 text-[#6b5a4d]" />
-                        </div>
-                        <div>
-                          <div className="text-sm font-semibold text-[#3d3228]">
-                            View All
-                          </div>
-                          <div className="text-xs text-[#8b7355]">
-                            Browse collection
-                          </div>
-                        </div>
-                      </Link>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Summer Collection Mobile Dropdown */}
-              <div>
-                <button
-                  onClick={() => setIsMobileSummerOpen(!isMobileSummerOpen)}
-                  className="group text-sm font-medium text-[#6b5a4d] py-3 px-4 hover:bg-gradient-to-r hover:from-[#e8dfd4] hover:to-transparent rounded-lg transition-all duration-300 min-h-[44px] flex items-center justify-between w-full relative overflow-hidden"
+                  <span className="flex items-center gap-2">
+                    <User className="w-4 h-4 text-neutral-400" />
+                    Profile
+                  </span>
+                  <ChevronRight className="w-4 h-4 text-neutral-600" />
+                </Link>
+                <Link
+                  to="/orders"
+                  className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-300 hover:bg-neutral-900 hover:text-white transition-colors"
                 >
-                  <span className="relative z-10">SUMMER COLLECTION</span>
-                  <ChevronDown
-                    className={`w-4 h-4 transition-transform duration-300 relative z-10 ${
-                      isMobileSummerOpen ? "rotate-180" : ""
-                    }`}
-                  />
-                  <span className="absolute left-0 top-0 h-full w-1 bg-[#c9a87c] transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300"></span>
-                </button>
-
-                {isMobileSummerOpen && (
-                  <div className="mt-2 bg-white/40 rounded-lg p-3 animate-in fade-in slide-in-from-top-2 duration-300">
-                    <div className="text-xs font-bold text-[#8b7355] uppercase tracking-[0.2em] mb-2 px-2">
-                      Shop by Category
-                    </div>
-                    <div className="space-y-1">
-                      <Link
-                        to="/products?collection=summer&category=dresses"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="group relative bg-white/60 backdrop-blur-sm rounded-lg p-3 border border-[#d4c5b0]/30 hover:border-[#c9a87c] transition-all duration-300 flex items-start"
-                      >
-                        <div className="mr-3 w-8 h-8 rounded-full bg-gradient-to-br from-[#c9a87c]/20 to-[#b8956b]/20 flex items-center justify-center flex-shrink-0">
-                          <Flower2 className="w-4 h-4 text-[#6b5a4d]" />
-                        </div>
-                        <div>
-                          <div className="text-sm font-semibold text-[#3d3228]">
-                            Dresses
-                          </div>
-                          <div className="text-xs text-[#8b7355]">
-                            Effortless elegance
-                          </div>
-                        </div>
-                      </Link>
-                      <Link
-                        to="/products?collection=summer&category=tops"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="group relative bg-white/60 backdrop-blur-sm rounded-lg p-3 border border-[#d4c5b0]/30 hover:border-[#c9a87c] transition-all duration-300 flex items-start"
-                      >
-                        <div className="mr-3 w-8 h-8 rounded-full bg-gradient-to-br from-[#c9a87c]/20 to-[#b8956b]/20 flex items-center justify-center flex-shrink-0">
-                          <Shirt className="w-4 h-4 text-[#6b5a4d]" />
-                        </div>
-                        <div>
-                          <div className="text-sm font-semibold text-[#3d3228]">
-                            Tops & Shirts
-                          </div>
-                          <div className="text-xs text-[#8b7355]">
-                            Light & breezy
-                          </div>
-                        </div>
-                      </Link>
-                      <Link
-                        to="/products?collection=summer&category=shorts"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="group relative bg-white/60 backdrop-blur-sm rounded-lg p-3 border border-[#d4c5b0]/30 hover:border-[#c9a87c] transition-all duration-300 flex items-start"
-                      >
-                        <div className="mr-3 w-8 h-8 rounded-full bg-gradient-to-br from-[#c9a87c]/20 to-[#b8956b]/20 flex items-center justify-center flex-shrink-0">
-                          <Wind className="w-4 h-4 text-[#6b5a4d]" />
-                        </div>
-                        <div>
-                          <div className="text-sm font-semibold text-[#3d3228]">
-                            Shorts & Skirts
-                          </div>
-                          <div className="text-xs text-[#8b7355]">
-                            Summer staples
-                          </div>
-                        </div>
-                      </Link>
-                      <Link
-                        to="/products?collection=summer"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="group relative bg-gradient-to-br from-[#c9a87c]/10 to-[#b8956b]/10 backdrop-blur-sm rounded-lg p-3 border border-[#c9a87c]/50 hover:border-[#c9a87c] transition-all duration-300 flex items-start"
-                      >
-                        <div className="mr-3 w-8 h-8 rounded-full bg-gradient-to-br from-[#c9a87c]/30 to-[#b8956b]/30 flex items-center justify-center flex-shrink-0">
-                          <Sun className="w-4 h-4 text-[#6b5a4d]" />
-                        </div>
-                        <div>
-                          <div className="text-sm font-semibold text-[#3d3228]">
-                            View All
-                          </div>
-                          <div className="text-xs text-[#8b7355]">
-                            Browse collection
-                          </div>
-                        </div>
-                      </Link>
-                    </div>
-                  </div>
+                  <span className="flex items-center gap-2">
+                    <Package className="w-4 h-4 text-neutral-400" />
+                    My Orders
+                  </span>
+                  <ChevronRight className="w-4 h-4 text-neutral-600" />
+                </Link>
+                {isAdmin() && (
+                  <Link
+                    to="/admin"
+                    className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-semibold text-red-400 hover:bg-neutral-900 transition-colors"
+                  >
+                    <span className="flex items-center gap-2">
+                      <ShieldAlert className="w-4 h-4 text-red-400" />
+                      Admin Dashboard
+                    </span>
+                    <ChevronRight className="w-4 h-4 text-red-400" />
+                  </Link>
                 )}
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-white hover:bg-neutral-900 transition-colors"
+                >
+                  <LogOut className="w-4 h-4 text-neutral-500" />
+                  Logout
+                </button>
+              </>
+            ) : (
+              <div className="flex gap-2 pt-2 px-1">
+                <Link
+                  to="/login"
+                  className="flex-1 py-2.5 text-center text-xs font-bold uppercase tracking-wider rounded-xl bg-white text-black hover:bg-neutral-200 transition-colors"
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/register"
+                  className="flex-1 py-2.5 text-center text-xs font-bold uppercase tracking-wider rounded-xl border border-neutral-700 text-white hover:bg-neutral-900 transition-colors"
+                >
+                  Register
+                </Link>
               </div>
-            </div>
-            {user && (
-              <Link
-                to="/orders"
-                className="group text-sm font-medium text-[#6b5a4d] py-3 px-4 hover:bg-gradient-to-r hover:from-[#e8dfd4] hover:to-transparent rounded-lg transition-all duration-300 min-h-[44px] flex items-center relative overflow-hidden"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <span className="relative z-10">ORDERS</span>
-                <span className="absolute left-0 top-0 h-full w-1 bg-[#c9a87c] transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300"></span>
-              </Link>
             )}
-            {isAdmin() && (
-              <Link
-                to="/admin"
-                className="group text-sm font-medium text-[#6b5a4d] py-3 px-4 hover:bg-gradient-to-r hover:from-[#e8dfd4] hover:to-transparent rounded-lg transition-all duration-300 min-h-[44px] flex items-center relative overflow-hidden"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <span className="relative z-10">ADMIN</span>
-                <span className="absolute left-0 top-0 h-full w-1 bg-[#c9a87c] transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300"></span>
-              </Link>
-            )}
-            <div className="border-t border-[#d4c5b0]/30 pt-4 mt-4">
-              {user ? (
-                <>
-                  <Link
-                    to="/profile"
-                    className="group text-sm font-medium text-[#6b5a4d] py-3 px-4 hover:bg-gradient-to-r hover:from-[#e8dfd4] hover:to-transparent rounded-lg transition-all duration-300 min-h-[44px] flex items-center block relative overflow-hidden"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <span className="relative z-10">{user.fullName}</span>
-                    <span className="absolute left-0 top-0 h-full w-1 bg-[#c9a87c] transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300"></span>
-                  </Link>
-                  <button
-                    onClick={() => {
-                      handleLogout();
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="group text-sm font-medium text-[#8b7355] py-3 px-4 hover:bg-gradient-to-r hover:from-[#e8dfd4] hover:to-transparent rounded-lg transition-all duration-300 min-h-[44px] flex items-center w-full text-left relative overflow-hidden"
-                  >
-                    <span className="relative z-10">Logout</span>
-                    <span className="absolute left-0 top-0 h-full w-1 bg-[#c9a87c] transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300"></span>
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    to="/login"
-                    className="group text-sm font-medium text-[#6b5a4d] py-3 px-4 hover:bg-gradient-to-r hover:from-[#e8dfd4] hover:to-transparent rounded-lg transition-all duration-300 min-h-[44px] flex items-center block relative overflow-hidden"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <span className="relative z-10">LOGIN</span>
-                    <span className="absolute left-0 top-0 h-full w-1 bg-[#c9a87c] transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300"></span>
-                  </Link>
-                  <Link
-                    to="/register"
-                    className="group text-sm font-medium text-[#6b5a4d] py-3 px-4 hover:bg-gradient-to-r hover:from-[#e8dfd4] hover:to-transparent rounded-lg transition-all duration-300 min-h-[44px] flex items-center block relative overflow-hidden"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <span className="relative z-10">REGISTER</span>
-                    <span className="absolute left-0 top-0 h-full w-1 bg-[#c9a87c] transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300"></span>
-                  </Link>
-                </>
-              )}
-            </div>
-          </nav>
+          </div>
         </div>
-      </div>
 
-      {/* Cart Drawer */}
+        <div className="p-4 border-t border-neutral-900 bg-black text-xs text-neutral-400 flex items-center justify-between">
+          <Link to="/contact" className="hover:text-white transition-colors">
+            Contact Us
+          </Link>
+          <Link to="/shipping" className="hover:text-white transition-colors">
+            Shipping
+          </Link>
+          <Link to="/about" className="hover:text-white transition-colors">
+            About
+          </Link>
+        </div>
+      </aside>
+
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </>
   );

@@ -13,49 +13,55 @@ export const OrderStatus = ({ status, className = '' }: OrderStatusProps) => {
         return {
           label: 'Pending',
           icon: Clock,
-          bgColor: 'bg-yellow-100',
-          textColor: 'text-yellow-800',
-          iconColor: 'text-yellow-600',
+          bgColor: 'bg-amber-950/30',
+          textColor: 'text-amber-400',
+          borderColor: 'border-amber-800/60',
+          iconColor: 'text-amber-400',
         };
       case OrderStatusType.PROCESSING:
         return {
           label: 'Processing',
           icon: Package,
-          bgColor: 'bg-blue-100',
-          textColor: 'text-blue-800',
-          iconColor: 'text-blue-600',
+          bgColor: 'bg-blue-950/30',
+          textColor: 'text-blue-400',
+          borderColor: 'border-blue-800/60',
+          iconColor: 'text-blue-400',
         };
       case OrderStatusType.SHIPPED:
         return {
           label: 'Shipped',
           icon: Truck,
-          bgColor: 'bg-purple-100',
-          textColor: 'text-purple-800',
-          iconColor: 'text-purple-600',
+          bgColor: 'bg-purple-950/30',
+          textColor: 'text-purple-400',
+          borderColor: 'border-purple-800/60',
+          iconColor: 'text-purple-400',
         };
       case OrderStatusType.DELIVERED:
         return {
           label: 'Delivered',
           icon: CheckCircle,
-          bgColor: 'bg-green-100',
-          textColor: 'text-green-800',
-          iconColor: 'text-green-600',
+          bgColor: 'bg-emerald-950/30',
+          textColor: 'text-emerald-400',
+          borderColor: 'border-emerald-800/60',
+          iconColor: 'text-emerald-400',
         };
       case OrderStatusType.CANCELLED:
         return {
           label: 'Cancelled',
           icon: XCircle,
-          bgColor: 'bg-red-100',
-          textColor: 'text-red-800',
-          iconColor: 'text-red-600',
+          bgColor: 'bg-red-950/30',
+          textColor: 'text-red-400',
+          borderColor: 'border-red-800/60',
+          iconColor: 'text-red-400',
         };
       default:
         return {
           label: 'Unknown',
           icon: Clock,
-          bgColor: 'bg-gray-100',
-          textColor: 'text-gray-800',
-          iconColor: 'text-gray-600',
+          bgColor: 'bg-neutral-900',
+          textColor: 'text-neutral-400',
+          borderColor: 'border-neutral-800',
+          iconColor: 'text-neutral-400',
         };
     }
   };
@@ -64,13 +70,11 @@ export const OrderStatus = ({ status, className = '' }: OrderStatusProps) => {
   const Icon = config.icon;
 
   return (
-    <div
-      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full ${config.bgColor} ${className}`}
+    <span
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-mono uppercase tracking-wider font-semibold border ${config.bgColor} ${config.textColor} ${config.borderColor} ${className}`}
     >
-      <Icon className={`w-4 h-4 ${config.iconColor}`} />
-      <span className={`text-sm font-medium ${config.textColor}`}>
-        {config.label}
-      </span>
-    </div>
+      <Icon className={`w-3 h-3 ${config.iconColor}`} />
+      <span>{config.label}</span>
+    </span>
   );
 };

@@ -25,20 +25,19 @@ export const ProductSearch = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="relative">
-      <div className="relative">
+    <form onSubmit={handleSubmit} className="relative w-full select-none">
+      <div className="relative w-full">
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder={placeholder}
-          className="w-full pl-10 pr-20 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full bg-neutral-950 border border-neutral-800 text-white placeholder:text-neutral-500 text-xs sm:text-sm pl-11 pr-24 py-3 focus:outline-none focus:border-neutral-600 transition-colors"
         />
         
-        {/* Search Icon */}
-        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500 pointer-events-none">
           <svg
-            className="w-5 h-5"
+            className="w-4 h-4"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -52,14 +51,14 @@ export const ProductSearch = ({
           </svg>
         </div>
 
-        {/* Search Button */}
         <button
           type="submit"
-          className="absolute right-10 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-900"
+          className="absolute right-10 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-white transition-colors p-1"
           title="Search"
+          aria-label="Search"
         >
           <svg
-            className="w-5 h-5"
+            className="w-4 h-4"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -73,16 +72,16 @@ export const ProductSearch = ({
           </svg>
         </button>
 
-        {/* Clear Button */}
         {searchQuery && (
           <button
             type="button"
             onClick={handleClear}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-            title="Clear"
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-white transition-colors p-1"
+            title="Clear search"
+            aria-label="Clear search"
           >
             <svg
-              className="w-5 h-5"
+              className="w-4 h-4"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"

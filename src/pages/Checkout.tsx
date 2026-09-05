@@ -5,7 +5,6 @@ export const Checkout = () => {
   const navigate = useNavigate();
 
   const handleSuccess = (orderId: string) => {
-    // Redirect to order confirmation page
     navigate(`/order-confirmation/${orderId}`);
   };
 

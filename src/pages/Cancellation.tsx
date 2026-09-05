@@ -1,88 +1,85 @@
 export const Cancellation = () => {
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h1 className="text-3xl font-medium text-gray-900 mb-6">Cancellation Policy</h1>
-        
-        <div className="prose prose-gray max-w-none space-y-6">
-          <section>
-            <h2 className="text-xl font-medium text-gray-900 mb-3">Order Cancellation</h2>
-            <p className="text-gray-600 mb-4">
-              We understand that plans change. You can cancel your order before it's shipped without any charges.
+    <div className="min-h-screen bg-black text-white select-none">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+        <div className="mb-8 border-b border-neutral-800 pb-6">
+          <span className="text-[11px] font-mono tracking-[0.24em] text-neutral-400 uppercase">
+            B2C Archive Policy
+          </span>
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white uppercase mt-2">
+            Cancellation Policy
+          </h1>
+          <p className="text-xs font-mono text-neutral-400 mt-2">
+            Last Updated: January 2025 · Indore, India
+          </p>
+        </div>
+
+        <div className="space-y-8 text-sm leading-relaxed text-neutral-300 font-sans">
+          <section className="border-b border-neutral-900 pb-6">
+            <h2 className="text-base font-mono uppercase tracking-wider text-white mb-3 font-semibold">
+              01. Order Cancellation Window
+            </h2>
+            <p className="text-neutral-400">
+              Orders can be cancelled free of cost before warehouse dispatch. Once a parcel has been handed to our express courier partner, 
+              cancellation is locked and our standard exchange policy applies upon delivery.
             </p>
           </section>
-          
-          <section>
-            <h2 className="text-xl font-medium text-gray-900 mb-3">When Can I Cancel?</h2>
-            <ul className="list-disc list-inside text-gray-600 space-y-2 mb-4">
-              <li><strong>Before Processing:</strong> Cancel anytime before order is processed (usually within 2 hours of placing order)</li>
-              <li><strong>During Processing:</strong> Contact us immediately - we'll try our best to cancel if not yet shipped</li>
-              <li><strong>After Shipping:</strong> Cannot be cancelled, but you can return after delivery (see Returns Policy)</li>
+
+          <section className="border-b border-neutral-900 pb-6">
+            <h2 className="text-base font-mono uppercase tracking-wider text-white mb-3 font-semibold">
+              02. Cancellation Stages
+            </h2>
+            <ul className="space-y-3 text-xs font-mono text-neutral-400">
+              <li className="p-3.5 bg-black border border-neutral-800">
+                <span className="text-white font-bold block mb-1">Pre-Dispatch (Within 2-4 Hours):</span>
+                Instant cancellation available from your Orders dashboard or via direct WhatsApp concierge.
+              </li>
+              <li className="p-3.5 bg-black border border-neutral-800">
+                <span className="text-white font-bold block mb-1">Processing Stage:</span>
+                Contact support immediately (+91 90981 78762) to intercept packing prior to label generation.
+              </li>
+              <li className="p-3.5 bg-black border border-neutral-800">
+                <span className="text-white font-bold block mb-1">In-Transit / Dispatched:</span>
+                Cannot be recalled mid-transit. You can request a 30-day exchange once the package arrives.
+              </li>
             </ul>
           </section>
-          
-          <section>
-            <h2 className="text-xl font-medium text-gray-900 mb-3">How to Cancel</h2>
-            <ol className="list-decimal list-inside text-gray-600 space-y-2 mb-4">
-              <li>Log in to your account and go to Orders page</li>
-              <li>Find the order you want to cancel</li>
-              <li>Click "Cancel Order" button (if available)</li>
-              <li>Select cancellation reason and confirm</li>
-            </ol>
-            <p className="text-gray-600 mb-4">
-              Alternatively, you can contact our customer service at support@b2c.com or +91 731 XXX XXXX
+
+          <section className="border-b border-neutral-900 pb-6">
+            <h2 className="text-base font-mono uppercase tracking-wider text-white mb-3 font-semibold">
+              03. Refund Processing For Prepaid Cancellations
+            </h2>
+            <p className="text-neutral-400 mb-3">
+              If payment has been completed, refunds are initiated immediately to the original payment source:
             </p>
-          </section>
-          
-          <section>
-            <h2 className="text-xl font-medium text-gray-900 mb-3">Refund for Cancelled Orders</h2>
-            <p className="text-gray-600 mb-4">
-              If you've already made payment, the refund will be processed within 5-7 business days to your original payment method.
-            </p>
-            <ul className="list-disc list-inside text-gray-600 space-y-2 mb-4">
-              <li>Credit/Debit Card: 5-7 business days</li>
-              <li>UPI/Net Banking: 3-5 business days</li>
-              <li>Cash on Delivery: No refund needed</li>
+            <ul className="list-disc list-inside space-y-1.5 text-neutral-400 font-mono text-xs">
+              <li>UPI / QR Payments: 24 to 48 banking hours</li>
+              <li>Net Banking: 2 to 4 business days</li>
+              <li>Credit / Debit Cards: 3 to 7 business days depending on issuing bank</li>
+              <li>Cash on Delivery: No charge applied</li>
             </ul>
           </section>
-          
-          <section>
-            <h2 className="text-xl font-medium text-gray-900 mb-3">Partial Cancellation</h2>
-            <p className="text-gray-600 mb-4">
-              For orders with multiple items, you can cancel individual items before the order is shipped. 
-              Refund will be processed for the cancelled items only.
+
+          <section className="border-b border-neutral-900 pb-6">
+            <h2 className="text-base font-mono uppercase tracking-wider text-white mb-3 font-semibold">
+              04. Partial Cancellations
+            </h2>
+            <p className="text-neutral-400">
+              For multi-piece orders, individual items can be cancelled before packing. The proportional value and applicable taxes 
+              are credited back to your account without affecting the rest of your order.
             </p>
           </section>
-          
-          <section>
-            <h2 className="text-xl font-medium text-gray-900 mb-3">Bulk Orders</h2>
-            <p className="text-gray-600 mb-4">
-              For wholesale and bulk orders, cancellation terms may vary. 
-              Please contact us directly to discuss cancellation of bulk orders.
-            </p>
-          </section>
-          
-          <section>
-            <h2 className="text-xl font-medium text-gray-900 mb-3">Seller Cancellation</h2>
-            <p className="text-gray-600 mb-4">
-              In rare cases, we may need to cancel your order due to:
-            </p>
-            <ul className="list-disc list-inside text-gray-600 space-y-2 mb-4">
-              <li>Product unavailability</li>
-              <li>Pricing errors</li>
-              <li>Delivery area restrictions</li>
-              <li>Technical issues</li>
-            </ul>
-            <p className="text-gray-600 mb-4">
-              In such cases, you'll be notified immediately and full refund will be processed.
-            </p>
-          </section>
-          
-          <section>
-            <h2 className="text-xl font-medium text-gray-900 mb-3">Questions?</h2>
-            <p className="text-gray-600">
-              For any questions about order cancellation, please contact us at support@b2c.com
-            </p>
+
+          <section className="pt-2">
+            <h2 className="text-base font-mono uppercase tracking-wider text-white mb-3 font-semibold">
+              05. Support Concierge
+            </h2>
+            <div className="bg-black border border-neutral-800 p-5 text-xs font-mono space-y-1.5 text-neutral-400">
+              <p className="text-white font-bold">B2C Customer Assistance</p>
+              <p>WhatsApp / Call: +91 90981 78762 · +91 74897 41505</p>
+              <p>Email: support@b2cstreetwear.com</p>
+              <p>Hours: Monday to Saturday, 10:00 AM – 8:00 PM</p>
+            </div>
           </section>
         </div>
       </div>

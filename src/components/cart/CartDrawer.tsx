@@ -13,7 +13,6 @@ export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
   const navigate = useNavigate();
   const { items, total, itemCount, removeItem, updateQuantity } = useCart();
 
-  // Prevent body scroll when drawer is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -26,7 +25,6 @@ export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
     };
   }, [isOpen]);
 
-  // Close on escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
@@ -52,55 +50,53 @@ export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
 
   return (
     <>
-      {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity"
+        className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 transition-opacity"
         onClick={onClose}
         aria-hidden="true"
       />
 
-      {/* Drawer */}
       <div
-        className="fixed right-0 top-0 h-full w-full sm:max-w-md bg-[#faf8f5] shadow-xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col"
+        className="fixed right-0 top-0 h-full w-full sm:max-w-md bg-black border-l border-neutral-800 shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col text-white select-none"
         role="dialog"
         aria-modal="true"
         aria-labelledby="cart-drawer-title"
       >
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-[#d4c5b0] bg-white">
-          <h2 id="cart-drawer-title" className="text-xl font-bold text-[#3d3228] flex items-center gap-2">
-            <ShoppingCart className="w-5 h-5 text-[#c9a87c]" />
-            Shopping Cart ({itemCount})
+        <div className="flex items-center justify-between p-5 border-b border-neutral-800 bg-black">
+          <h2 id="cart-drawer-title" className="text-sm font-mono uppercase tracking-[0.2em] text-white font-bold flex items-center gap-2">
+            <ShoppingCart className="w-4 h-4 text-white" />
+            <span>Bag ({itemCount})</span>
           </h2>
           <button
+            type="button"
             onClick={onClose}
-            className="p-2 hover:bg-[#f5f1eb] rounded-md text-[#6b5a4d]"
+            className="p-1 text-neutral-400 hover:text-white transition-colors"
             aria-label="Close cart"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Cart Items */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-5 scrollbar-none">
           {items.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center">
-              <ShoppingCart className="w-16 h-16 text-[#d4c5b0] mb-4" />
-              <h3 className="text-lg font-bold text-[#3d3228] mb-2">
-                Your cart is empty
+              <ShoppingCart className="w-12 h-12 text-neutral-700 mb-4" />
+              <h3 className="text-base font-mono uppercase text-white font-bold mb-1">
+                Your Bag Is Empty
               </h3>
-              <p className="text-sm text-[#8b7355] mb-6">
-                Add items to your cart to get started
+              <p className="text-xs font-mono text-neutral-400 mb-6">
+                Explore the latest drops to fill it up
               </p>
               <button
+                type="button"
                 onClick={onClose}
-                className="px-6 py-3 text-sm font-semibold text-white bg-gradient-to-r from-[#8b7355] to-[#6b5a4d] uppercase tracking-wider"
+                className="px-6 py-3 text-xs font-mono font-bold uppercase tracking-wider text-black bg-white hover:bg-neutral-200 transition-colors"
               >
-                Continue Shopping
+                Continue Browsing
               </button>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="divide-y divide-neutral-900">
               {items.map((item) => {
                 const itemKey = item.size ? `${item.productId}-${item.size}` : item.productId;
                 return (
@@ -116,12 +112,11 @@ export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
           )}
         </div>
 
-        {/* Footer with Summary */}
         {items.length > 0 && (
-          <div className="border-t border-[#d4c5b0] p-6 space-y-4 bg-white">
-            <div className="flex justify-between items-center mb-4">
-              <span className="text-base font-semibold text-[#6b5a4d]">Subtotal</span>
-              <span className="text-xl font-bold text-[#3d3228]">
+          <div className="border-t border-neutral-800 p-5 space-y-3 bg-black">
+            <div className="flex justify-between items-baseline mb-2">
+              <span className="text-xs font-mono uppercase tracking-wider text-neutral-400">Subtotal</span>
+              <span className="text-lg font-mono font-bold text-white">
                 {new Intl.NumberFormat('en-IN', {
                   style: 'currency',
                   currency: 'INR',
@@ -131,17 +126,19 @@ export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
             </div>
 
             <button
+              type="button"
               onClick={handleCheckout}
-              className="w-full px-6 py-3 text-sm font-semibold text-white bg-gradient-to-r from-[#8b7355] to-[#6b5a4d] uppercase tracking-wider"
+              className="w-full py-3.5 px-4 text-xs font-bold uppercase tracking-[0.16em] text-white bg-red-600 hover:bg-red-700 transition-colors"
             >
-              Proceed to Checkout
+              Checkout Now
             </button>
 
             <button
+              type="button"
               onClick={handleViewCart}
-              className="w-full px-6 py-3 text-sm font-semibold text-[#6b5a4d] bg-white border-2 border-[#6b5a4d] hover:bg-[#f5f1eb] uppercase tracking-wider"
+              className="w-full py-3.5 px-4 text-xs font-bold uppercase tracking-[0.16em] text-white bg-black border border-neutral-800 hover:border-white transition-colors"
             >
-              View Full Cart
+              View Shopping Bag
             </button>
           </div>
         )}

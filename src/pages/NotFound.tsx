@@ -3,27 +3,32 @@ import { Home, ArrowLeft } from 'lucide-react';
 
 export const NotFound = () => {
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-4">
-      <div className="max-w-md w-full text-center">
-        <div className="mb-8">
-          <h1 className="text-9xl font-light text-gray-900">404</h1>
-          <h2 className="text-2xl font-medium text-gray-900 mt-4">Page Not Found</h2>
-          <p className="text-sm text-gray-600 mt-3">
-            Sorry, the page you're looking for doesn't exist or has been moved.
+    <div className="min-h-screen bg-black text-white flex items-center justify-center px-4 select-none">
+      <div className="max-w-md w-full text-center border border-neutral-800 p-8 sm:p-12 bg-black">
+        <div className="mb-6">
+          <span className="text-8xl sm:text-9xl font-mono font-bold tracking-tighter text-white block">
+            404
+          </span>
+          <h1 className="text-xl sm:text-2xl font-bold uppercase tracking-tight text-white mt-2">
+            Archive Not Found
+          </h1>
+          <p className="text-xs font-mono text-neutral-400 mt-2">
+            The piece or page you are requesting has moved, sold out, or does not exist.
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link
             to="/"
-            className="inline-flex items-center justify-center px-6 py-2.5 bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors"
+            className="inline-flex items-center justify-center px-6 py-3 bg-white text-black text-xs font-mono font-bold uppercase tracking-wider hover:bg-neutral-200 transition-colors"
           >
             <Home className="w-4 h-4 mr-2" />
-            Go Home
+            Home
           </Link>
           <button
+            type="button"
             onClick={() => window.history.back()}
-            className="inline-flex items-center justify-center px-6 py-2.5 border border-gray-900 text-gray-900 text-sm font-medium hover:bg-gray-900 hover:text-white transition-colors"
+            className="inline-flex items-center justify-center px-6 py-3 border border-neutral-800 text-white text-xs font-mono font-bold uppercase tracking-wider hover:border-white transition-colors"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Go Back

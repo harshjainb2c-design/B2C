@@ -8,6 +8,16 @@ interface ShippingFormProps {
   defaultValues?: Partial<ShippingAddressInput>;
 }
 
+const inputBase = 'w-full px-3 py-2.5 md:py-3 text-sm md:text-base bg-black border text-white focus:outline-none focus:border-white transition-colors';
+const inputOk = `${inputBase} border-neutral-700`;
+const inputErr = `${inputBase} border-red-500`;
+
+const ErrorIcon = () => (
+  <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+  </svg>
+);
+
 export const ShippingForm = ({ onSubmit, isLoading, defaultValues }: ShippingFormProps) => {
   const {
     register,
@@ -21,84 +31,66 @@ export const ShippingForm = ({ onSubmit, isLoading, defaultValues }: ShippingFor
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 md:space-y-5">
       <div>
-        <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1.5">
+        <label htmlFor="fullName" className="block text-xs font-mono uppercase tracking-wider text-neutral-400 mb-1.5">
           Full Name *
         </label>
         <input
           id="fullName"
           type="text"
           {...register('fullName')}
-          className={`w-full px-3 py-2.5 md:py-3 text-sm md:text-base border rounded-md focus:outline-none focus:ring-2 transition-colors ${
-            errors.fullName 
-              ? 'border-red-500 focus:ring-red-500 focus:border-red-500' 
-              : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
-          }`}
+          className={errors.fullName ? inputErr : inputOk}
           placeholder="Rahul Sharma"
           disabled={isLoading}
           aria-invalid={errors.fullName ? 'true' : 'false'}
           aria-describedby={errors.fullName ? 'fullName-error' : undefined}
         />
         {errors.fullName && (
-          <p id="fullName-error" className="mt-1.5 text-sm text-red-600 flex items-start gap-1">
-            <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-            </svg>
+          <p id="fullName-error" className="mt-1.5 text-sm text-red-400 flex items-start gap-1">
+            <ErrorIcon />
             {errors.fullName.message}
           </p>
         )}
       </div>
 
       <div>
-        <label htmlFor="addressLine1" className="block text-sm font-medium text-gray-700 mb-1.5">
+        <label htmlFor="addressLine1" className="block text-xs font-mono uppercase tracking-wider text-neutral-400 mb-1.5">
           Address Line 1 *
         </label>
         <input
           id="addressLine1"
           type="text"
           {...register('addressLine1')}
-          className={`w-full px-3 py-2.5 md:py-3 text-sm md:text-base border rounded-md focus:outline-none focus:ring-2 transition-colors ${
-            errors.addressLine1 
-              ? 'border-red-500 focus:ring-red-500 focus:border-red-500' 
-              : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
-          }`}
+          className={errors.addressLine1 ? inputErr : inputOk}
           placeholder="House No., Street Name"
           disabled={isLoading}
           aria-invalid={errors.addressLine1 ? 'true' : 'false'}
           aria-describedby={errors.addressLine1 ? 'addressLine1-error' : undefined}
         />
         {errors.addressLine1 && (
-          <p id="addressLine1-error" className="mt-1.5 text-sm text-red-600 flex items-start gap-1">
-            <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-            </svg>
+          <p id="addressLine1-error" className="mt-1.5 text-sm text-red-400 flex items-start gap-1">
+            <ErrorIcon />
             {errors.addressLine1.message}
           </p>
         )}
       </div>
 
       <div>
-        <label htmlFor="addressLine2" className="block text-sm font-medium text-gray-700 mb-1.5">
+        <label htmlFor="addressLine2" className="block text-xs font-mono uppercase tracking-wider text-neutral-400 mb-1.5">
           Address Line 2
         </label>
         <input
           id="addressLine2"
           type="text"
           {...register('addressLine2')}
-          className={`w-full px-3 py-2.5 md:py-3 text-sm md:text-base border rounded-md focus:outline-none focus:ring-2 transition-colors ${
-            errors.addressLine2 
-              ? 'border-red-500 focus:ring-red-500 focus:border-red-500' 
-              : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
-          }`}
+          className={errors.addressLine2 ? inputErr : inputOk}
           placeholder="Landmark, Area"
           disabled={isLoading}
           aria-invalid={errors.addressLine2 ? 'true' : 'false'}
           aria-describedby={errors.addressLine2 ? 'addressLine2-error' : undefined}
         />
         {errors.addressLine2 && (
-          <p id="addressLine2-error" className="mt-1.5 text-sm text-red-600 flex items-start gap-1">
-            <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-            </svg>
+          <p id="addressLine2-error" className="mt-1.5 text-sm text-red-400 flex items-start gap-1">
+            <ErrorIcon />
             {errors.addressLine2.message}
           </p>
         )}
@@ -106,45 +98,35 @@ export const ShippingForm = ({ onSubmit, isLoading, defaultValues }: ShippingFor
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
         <div>
-          <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1.5">
+          <label htmlFor="city" className="block text-xs font-mono uppercase tracking-wider text-neutral-400 mb-1.5">
             City *
           </label>
           <input
             id="city"
             type="text"
             {...register('city')}
-            className={`w-full px-3 py-2.5 md:py-3 text-sm md:text-base border rounded-md focus:outline-none focus:ring-2 transition-colors ${
-              errors.city 
-                ? 'border-red-500 focus:ring-red-500 focus:border-red-500' 
-                : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
-            }`}
+            className={errors.city ? inputErr : inputOk}
             placeholder="Indore"
             disabled={isLoading}
             aria-invalid={errors.city ? 'true' : 'false'}
             aria-describedby={errors.city ? 'city-error' : undefined}
           />
           {errors.city && (
-            <p id="city-error" className="mt-1.5 text-sm text-red-600 flex items-start gap-1">
-              <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
+            <p id="city-error" className="mt-1.5 text-sm text-red-400 flex items-start gap-1">
+              <ErrorIcon />
               {errors.city.message}
             </p>
           )}
         </div>
 
         <div>
-          <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-1.5">
+          <label htmlFor="state" className="block text-xs font-mono uppercase tracking-wider text-neutral-400 mb-1.5">
             State *
           </label>
           <select
             id="state"
             {...register('state')}
-            className={`w-full px-3 py-2.5 md:py-3 text-sm md:text-base border rounded-md focus:outline-none focus:ring-2 transition-colors ${
-              errors.state 
-                ? 'border-red-500 focus:ring-red-500 focus:border-red-500' 
-                : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
-            }`}
+            className={errors.state ? inputErr : inputOk}
             disabled={isLoading}
             aria-invalid={errors.state ? 'true' : 'false'}
             aria-describedby={errors.state ? 'state-error' : undefined}
@@ -168,10 +150,8 @@ export const ShippingForm = ({ onSubmit, isLoading, defaultValues }: ShippingFor
             <option value="Other">Other</option>
           </select>
           {errors.state && (
-            <p id="state-error" className="mt-1.5 text-sm text-red-600 flex items-start gap-1">
-              <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
+            <p id="state-error" className="mt-1.5 text-sm text-red-400 flex items-start gap-1">
+              <ErrorIcon />
               {errors.state.message}
             </p>
           )}
@@ -180,18 +160,14 @@ export const ShippingForm = ({ onSubmit, isLoading, defaultValues }: ShippingFor
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
         <div>
-          <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700 mb-1.5">
+          <label htmlFor="postalCode" className="block text-xs font-mono uppercase tracking-wider text-neutral-400 mb-1.5">
             PIN Code *
           </label>
           <input
             id="postalCode"
             type="text"
             {...register('postalCode')}
-            className={`w-full px-3 py-2.5 md:py-3 text-sm md:text-base border rounded-md focus:outline-none focus:ring-2 transition-colors ${
-              errors.postalCode 
-                ? 'border-red-500 focus:ring-red-500 focus:border-red-500' 
-                : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
-            }`}
+            className={errors.postalCode ? inputErr : inputOk}
             placeholder="400001"
             maxLength={6}
             disabled={isLoading}
@@ -199,17 +175,15 @@ export const ShippingForm = ({ onSubmit, isLoading, defaultValues }: ShippingFor
             aria-describedby={errors.postalCode ? 'postalCode-error' : undefined}
           />
           {errors.postalCode && (
-            <p id="postalCode-error" className="mt-1.5 text-sm text-red-600 flex items-start gap-1">
-              <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
+            <p id="postalCode-error" className="mt-1.5 text-sm text-red-400 flex items-start gap-1">
+              <ErrorIcon />
               {errors.postalCode.message}
             </p>
           )}
         </div>
 
         <div>
-          <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-1.5">
+          <label htmlFor="country" className="block text-xs font-mono uppercase tracking-wider text-neutral-400 mb-1.5">
             Country *
           </label>
           <input
@@ -217,35 +191,29 @@ export const ShippingForm = ({ onSubmit, isLoading, defaultValues }: ShippingFor
             type="text"
             {...register('country')}
             value="India"
-            className="w-full px-3 py-2.5 md:py-3 text-sm md:text-base border border-gray-300 rounded-md bg-gray-50"
+            className="w-full px-3 py-2.5 md:py-3 text-sm md:text-base bg-neutral-950 border border-neutral-800 text-neutral-500"
             disabled
           />
         </div>
       </div>
 
       <div>
-        <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1.5">
+        <label htmlFor="phone" className="block text-xs font-mono uppercase tracking-wider text-neutral-400 mb-1.5">
           Phone Number *
         </label>
         <input
           id="phone"
           type="tel"
           {...register('phone')}
-          className={`w-full px-3 py-2.5 md:py-3 text-sm md:text-base border rounded-md focus:outline-none focus:ring-2 transition-colors ${
-            errors.phone 
-              ? 'border-red-500 focus:ring-red-500 focus:border-red-500' 
-              : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
-          }`}
+          className={errors.phone ? inputErr : inputOk}
           placeholder="+91 98765 43210"
           disabled={isLoading}
           aria-invalid={errors.phone ? 'true' : 'false'}
           aria-describedby={errors.phone ? 'phone-error' : undefined}
         />
         {errors.phone && (
-          <p id="phone-error" className="mt-1.5 text-sm text-red-600 flex items-start gap-1">
-            <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-            </svg>
+          <p id="phone-error" className="mt-1.5 text-sm text-red-400 flex items-start gap-1">
+            <ErrorIcon />
             {errors.phone.message}
           </p>
         )}
@@ -254,7 +222,7 @@ export const ShippingForm = ({ onSubmit, isLoading, defaultValues }: ShippingFor
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full px-6 py-4 text-sm font-semibold text-white bg-gradient-to-r from-[#8b7355] to-[#6b5a4d] disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider"
+        className="w-full px-6 py-4 text-xs font-bold uppercase tracking-widest text-black bg-white hover:bg-neutral-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         {isLoading ? 'Processing...' : 'Continue to Payment'}
       </button>
