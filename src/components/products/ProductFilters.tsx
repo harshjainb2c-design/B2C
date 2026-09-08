@@ -90,27 +90,27 @@ export const ProductFilters = ({
       <button
         type="button"
         onClick={() => toggleSection(sectionKey)}
-        className="flex items-center justify-between w-full py-2 text-left group"
+        className="flex items-center justify-between w-full py-2 text-left"
       >
-        <h4 className="text-xs font-bold text-neutral-300 uppercase tracking-wide group-hover:text-white transition-colors">{title}</h4>
+        <h4 className="text-xs font-inter font-bold text-neutral-300 uppercase tracking-wide">{title}</h4>
         {expandedSections[sectionKey] ? (
-          <ChevronUp className="w-3.5 h-3.5 text-neutral-500 group-hover:text-white transition-colors" />
+          <ChevronUp className="w-3.5 h-3.5 text-neutral-400" />
         ) : (
-          <ChevronDown className="w-3.5 h-3.5 text-neutral-500 group-hover:text-white transition-colors" />
+          <ChevronDown className="w-3.5 h-3.5 text-neutral-400" />
         )}
       </button>
       
       {expandedSections[sectionKey] && (
         <div className="mt-2 space-y-1.5">
           {options.map((option) => (
-            <label key={option.value} className="flex items-center cursor-pointer py-1 group">
+            <label key={option.value} className="flex items-center cursor-pointer py-1">
               <input
                 type="checkbox"
                 checked={selectedValue === option.value}
                 onChange={(e) => onChange(e.target.checked ? option.value : undefined)}
                 className="w-3.5 h-3.5 accent-white bg-neutral-900 border-neutral-700 cursor-pointer rounded-none"
               />
-              <span className={`ml-2 text-xs transition-colors ${selectedValue === option.value ? 'font-bold text-white' : 'text-neutral-400 group-hover:text-neutral-200'}`}>
+              <span className={`ml-2 text-xs font-inter ${selectedValue === option.value ? 'font-bold text-white' : 'text-neutral-400'}`}>
                 {option.label}
               </span>
             </label>
@@ -121,14 +121,14 @@ export const ProductFilters = ({
   );
 
   return (
-    <div className="lg:border lg:border-neutral-900 bg-neutral-950 lg:p-4 text-white select-none">
+    <div className="lg:border lg:border-neutral-900 bg-neutral-950 lg:p-4 text-white select-none font-inter">
       <div className="flex items-center justify-between mb-3 pb-2 border-b border-neutral-900">
-        <h3 className="text-xs font-extrabold text-white uppercase tracking-wider">Filters</h3>
+        <h3 className="text-xs font-inter font-extrabold text-white uppercase tracking-wider">Filters</h3>
         {hasActiveFilters && (
           <button
             type="button"
             onClick={clearAllFilters}
-            className="text-xs text-neutral-400 hover:text-white underline cursor-pointer"
+            className="text-xs font-inter text-neutral-400 underline cursor-pointer"
           >
             Clear
           </button>
@@ -173,7 +173,7 @@ export const ProductFilters = ({
         <button
           type="button"
           onClick={clearAllFilters}
-          className="mt-4 w-full px-3 py-2 text-xs font-bold uppercase tracking-wider text-neutral-300 border border-neutral-800 hover:bg-white hover:text-black transition-colors"
+          className="mt-4 w-full px-3 py-2 text-xs font-inter font-bold uppercase tracking-wider text-neutral-300 border border-neutral-800 bg-neutral-900"
         >
           Clear All Filters
         </button>

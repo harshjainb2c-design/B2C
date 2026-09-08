@@ -25,14 +25,14 @@ export const ProductSearch = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="relative w-full select-none">
+    <form onSubmit={handleSubmit} className="relative w-full select-none font-inter">
       <div className="relative w-full">
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder={placeholder}
-          className="w-full bg-neutral-950 border border-neutral-800 text-white placeholder:text-neutral-500 text-xs sm:text-sm pl-11 pr-24 py-3 focus:outline-none focus:border-neutral-600 transition-colors"
+          className="w-full bg-neutral-950 border border-neutral-800 text-white placeholder:text-neutral-500 text-xs sm:text-sm pl-11 pr-24 py-3 focus:outline-none focus:border-neutral-600 font-inter"
         />
         
         <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500 pointer-events-none">
@@ -53,7 +53,7 @@ export const ProductSearch = ({
 
         <button
           type="submit"
-          className="absolute right-10 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-white transition-colors p-1"
+          className="absolute right-10 top-1/2 -translate-y-1/2 text-neutral-400 p-1"
           title="Search"
           aria-label="Search"
         >
@@ -76,23 +76,11 @@ export const ProductSearch = ({
           <button
             type="button"
             onClick={handleClear}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-white transition-colors p-1"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 p-1 text-xs font-inter font-bold"
             title="Clear search"
             aria-label="Clear search"
           >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
+            ✕
           </button>
         )}
       </div>

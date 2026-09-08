@@ -25,32 +25,32 @@ export const ProductCard = ({ product }: ProductCardProps) => {
       role="button"
       tabIndex={0}
       aria-label={`View details for ${product.name}`}
-      className="group cursor-pointer flex flex-col bg-transparent select-none focus:outline-none"
+      className="cursor-pointer flex flex-col bg-transparent select-none focus:outline-none font-inter"
     >
-      <div className="relative aspect-[3/4] overflow-hidden bg-neutral-900 border border-neutral-800 hover:border-neutral-700 transition-colors duration-200">
+      <div className="relative aspect-[3/4] overflow-hidden bg-neutral-900 border border-neutral-800">
         {product.images && product.images.length > 0 ? (
           <img
             src={product.images[0]}
             alt={product.name}
-            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300 select-none"
+            className="w-full h-full object-cover object-center select-none"
             loading="lazy"
             decoding="async"
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-neutral-500 font-mono text-xs">
+          <div className="absolute inset-0 flex items-center justify-center text-neutral-500 font-inter text-xs">
             NO IMAGE
           </div>
         )}
         
         <div className="absolute top-2.5 left-2.5 z-10 pointer-events-none">
-          <span className="text-[9px] sm:text-[10px] font-mono font-bold tracking-[0.14em] text-white uppercase leading-none border-l-2 border-white pl-1.5 drop-shadow">
+          <span className="text-[9px] sm:text-[10px] font-inter font-bold tracking-[0.14em] text-white uppercase leading-none border-l-2 border-white pl-1.5">
             {product.category || 'OVERSIZED'}
           </span>
         </div>
 
         {isOutOfStock && (
           <div className="absolute inset-0 bg-black/80 flex items-center justify-center z-20">
-            <span className="text-white font-mono font-bold text-xs uppercase tracking-wider border border-white/40 px-3 py-1 bg-black/60">
+            <span className="text-white font-inter font-bold text-xs uppercase tracking-wider border border-white/40 px-3 py-1 bg-black/60">
               OUT OF STOCK
             </span>
           </div>
@@ -58,18 +58,18 @@ export const ProductCard = ({ product }: ProductCardProps) => {
 
         {product.stock > 0 && product.stock <= 10 && (
           <div className="absolute top-2.5 right-2.5 z-10 pointer-events-none">
-            <span className="px-2 py-0.5 bg-red-600/90 text-[9px] font-mono font-bold text-white uppercase tracking-wider">
+            <span className="px-2 py-0.5 bg-red-600 text-[9px] font-inter font-bold text-white uppercase tracking-wider">
               LOW STOCK
             </span>
           </div>
         )}
       </div>
 
-      <div className="pt-3 pb-2 px-1 text-left">
+      <div className="pt-2.5 pb-1 px-0.5 text-left font-inter">
         <h3 className="text-xs sm:text-sm font-bold text-white tracking-tight line-clamp-1 mb-0.5">
           {product.name}
         </h3>
-        <p className="text-[11px] sm:text-xs text-white/90 font-normal mb-1.5 capitalize">
+        <p className="text-[11px] sm:text-xs text-neutral-400 font-normal mb-1 capitalize">
           {product.category || 'Streetwear'}
         </p>
         <span className="text-xs sm:text-sm font-extrabold text-white">

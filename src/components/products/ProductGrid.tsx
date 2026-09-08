@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { Product } from '../../types/product';
 import { ProductCard } from './ProductCard';
 import { ProductCardSkeleton } from '../common/LoadingSkeleton';
@@ -8,6 +9,8 @@ interface ProductGridProps {
 }
 
 export const ProductGrid = ({ products, isLoading }: ProductGridProps) => {
+  const navigate = useNavigate();
+
   if (isLoading) {
     return (
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
@@ -20,8 +23,8 @@ export const ProductGrid = ({ products, isLoading }: ProductGridProps) => {
 
   if (products.length === 0) {
     return (
-      <div className="text-center py-12 sm:py-20 border border-neutral-900 bg-neutral-950 p-8">
-        <div className="text-neutral-600 mb-3">
+      <div className="text-center py-12 sm:py-20 border border-neutral-900 bg-neutral-950 p-6 sm:p-10 font-inter">
+        <div className="text-neutral-500 mb-4">
           <svg
             className="mx-auto h-12 w-12 stroke-[1.5]"
             fill="none"
@@ -35,12 +38,19 @@ export const ProductGrid = ({ products, isLoading }: ProductGridProps) => {
             />
           </svg>
         </div>
-        <h3 className="font-headline text-xl sm:text-2xl font-normal text-white uppercase tracking-wide mb-1">
+        <h3 className="font-inter text-lg sm:text-xl font-bold text-white uppercase tracking-wider mb-2">
           No Products Found
         </h3>
-        <p className="text-xs sm:text-sm text-neutral-400">
-          Try adjusting your search terms or filter selections
+        <p className="text-xs sm:text-sm text-neutral-400 max-w-sm mx-auto mb-6">
+          We couldn't find any products matching your active filters or search terms.
         </p>
+        <button
+          type="button"
+          onClick={() => navigate('/products')}
+          className="inline-flex items-center justify-center px-5 py-2.5 bg-white text-black text-xs font-inter font-bold uppercase tracking-wider border border-white"
+        >
+          Reset All Filters
+        </button>
       </div>
     );
   }

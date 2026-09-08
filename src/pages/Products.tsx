@@ -46,6 +46,24 @@ export const Products = () => {
     return Object.values(filters).filter(v => v !== undefined).length;
   }, [filters]);
 
+  const pageTitle = useMemo(() => {
+    if (searchQuery) return `Search: "${searchQuery}"`;
+    if (collection) return `${collection.toUpperCase()} DROP`;
+    if (filters.category === 'upper' || filters.clothingType === 'upper') return 'T-SHIRTS & TOPS';
+    if (filters.category === 'bottom' || filters.clothingType === 'bottom') return 'BOTTOMS & PANTS';
+    if (filters.category === 'shoes' || filters.clothingType === 'shoes') return 'SNEAKERS & FOOTWEAR';
+    if (filters.category === 'accessories' || filters.clothingType === 'accessories') return 'ACCESSORIES';
+    if (categoryFilter) return `${categoryFilter.toUpperCase()}`;
+    return 'ALL PRODUCTS';
+  }, [searchQuery, collection, filters, categoryFilter]);
+
+  const pageSubtitle = useMemo(() => {
+    if (searchQuery) return `Showing catalog matches for search query "${searchQuery}"`;
+    if (collection) return `Exclusive pieces from the ${collection} curated drop`;
+    if (categoryFilter) return 'Heavyweight cuts, relaxed drops, and tailored urban silhouettes';
+    return 'Explore heavyweight boxy cuts, custom streetwear tailored denim, and limited archive releases';
+  }, [searchQuery, collection, categoryFilter]);
+
   const quickCategories = [
     { id: 'all', label: 'All Products' },
     { id: 'upper', label: 'T-Shirts & Tops' },
@@ -116,25 +134,25 @@ export const Products = () => {
   }, [searchParams, setSearchParams]);
 
   return (
-    <div className="min-h-screen bg-black text-white relative overflow-x-clip select-none">
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 relative z-10">
-        <div className="mb-6 sm:mb-8 pb-6 border-b border-neutral-900">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <div className="min-h-screen bg-black text-white relative overflow-x-clip select-none font-inter">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 relative z-10">
+        <div className="mb-6 sm:mb-8 pb-5 border-b border-neutral-900">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-3">
             <div>
-              <span className="text-[10px] sm:text-xs font-mono font-bold tracking-[0.22em] text-neutral-400 uppercase block mb-1">
-                ARCHIVE // B2C 2026 DROPS
+              <span className="text-[10px] sm:text-xs font-inter font-bold tracking-[0.22em] text-neutral-400 uppercase block mb-1">
+                {collection ? `COLLECTION · ${collection.toUpperCase()}` : 'ARCHIVE · B2C 2026'}
               </span>
-              <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-white uppercase tracking-tight leading-none">
-                SHOP COLLECTION
+              <h1 className="font-inter text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-white uppercase tracking-tight leading-none">
+                {pageTitle}
               </h1>
             </div>
             <p className="text-xs sm:text-sm text-neutral-400 max-w-md font-normal leading-relaxed">
-              Explore heavyweight boxy cuts, custom streetwear tailored denim, and limited archive releases.
+              {pageSubtitle}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-4 mb-4 sm:mb-6">
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-3 mb-4 sm:mb-6">
           {quickCategories.map((cat) => {
             const isActive = (!categoryFilter && cat.id === 'all') || categoryFilter === cat.id;
             return (
@@ -142,10 +160,10 @@ export const Products = () => {
                 key={cat.id}
                 type="button"
                 onClick={() => handleQuickCategory(cat.id === 'all' ? undefined : cat.id)}
-                className={`shrink-0 px-4 sm:px-5 py-2 rounded-full text-xs font-bold transition-all duration-200 ${
+                className={`shrink-0 px-4 py-2 rounded-full text-xs font-inter font-bold ${
                   isActive
-                    ? "bg-white text-black shadow-md border border-white"
-                    : "bg-transparent text-neutral-400 border border-neutral-800 hover:text-white hover:border-neutral-700"
+                    ? 'bg-white text-black border border-white'
+                    : 'bg-transparent text-neutral-400 border border-neutral-800'
                 }`}
               >
                 {cat.label}
@@ -154,7 +172,7 @@ export const Products = () => {
           })}
         </div>
 
-        <div className="mb-6">
+        <div className="mb-5">
           <ProductSearch 
             onSearch={handleSearch}
             initialValue={searchQuery}
@@ -179,7 +197,7 @@ export const Products = () => {
             )}
 
             {!isLoading && !error && data && (
-              <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-neutral-950 p-4 border border-neutral-900">
+              <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-neutral-950 p-3.5 sm:p-4 border border-neutral-900">
                 <p className="text-xs sm:text-sm text-neutral-400">
                   Showing <span className="font-bold text-white">{data.products?.length || 0}</span> of <span className="font-bold text-white">{data.total}</span> products
                   {collection && (
@@ -210,12 +228,12 @@ export const Products = () => {
             )}
 
             {!isLoading && data && data.totalPages > 1 && (
-              <div className="mt-10 flex items-center justify-center gap-2">
+              <div className="mt-8 sm:mt-10 flex items-center justify-center gap-2">
                 <button
                   type="button"
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className="px-4 py-2 text-xs font-bold uppercase tracking-wider text-neutral-300 bg-neutral-950 border border-neutral-800 hover:bg-white hover:text-black disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
+                  className="px-4 py-2 text-xs font-inter font-bold uppercase tracking-wider text-neutral-300 bg-neutral-950 border border-neutral-800 disabled:opacity-25 disabled:cursor-not-allowed"
                 >
                   Previous
                 </button>
@@ -232,7 +250,7 @@ export const Products = () => {
                         return (
                           <span
                             key={page}
-                            className="px-3 py-2 text-xs text-neutral-600"
+                            className="px-3 py-2 text-xs text-neutral-600 font-inter"
                           >
                             ...
                           </span>
@@ -246,10 +264,10 @@ export const Products = () => {
                         key={page}
                         type="button"
                         onClick={() => handlePageChange(page)}
-                        className={`px-3.5 py-2 text-xs font-bold transition-all ${
+                        className={`px-3.5 py-2 text-xs font-inter font-bold ${
                           currentPage === page
-                            ? 'text-black bg-white border border-white shadow-md'
-                            : 'text-neutral-400 bg-neutral-950 border border-neutral-800 hover:border-neutral-700 hover:text-white'
+                            ? 'text-black bg-white border border-white'
+                            : 'text-neutral-400 bg-neutral-950 border border-neutral-800'
                         }`}
                       >
                         {page}
@@ -262,7 +280,7 @@ export const Products = () => {
                   type="button"
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === data.totalPages}
-                  className="px-4 py-2 text-xs font-bold uppercase tracking-wider text-neutral-300 bg-neutral-950 border border-neutral-800 hover:bg-white hover:text-black disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
+                  className="px-4 py-2 text-xs font-inter font-bold uppercase tracking-wider text-neutral-300 bg-neutral-950 border border-neutral-800 disabled:opacity-25 disabled:cursor-not-allowed"
                 >
                   Next
                 </button>

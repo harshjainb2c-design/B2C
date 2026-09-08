@@ -17,18 +17,18 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
 
 export const ProductSort = memo(({ value, onChange }: ProductSortProps) => {
   return (
-    <div className="flex items-center gap-2 select-none">
-      <label htmlFor="sort" className="text-xs font-bold uppercase tracking-wider text-neutral-400 hidden sm:block">
+    <div className="flex items-center gap-2 select-none font-inter">
+      <label htmlFor="sort" className="text-xs font-inter font-bold uppercase tracking-wider text-neutral-400 hidden sm:block">
         Sort:
       </label>
       <select
         id="sort"
         value={value}
         onChange={(e) => onChange(e.target.value as SortOption)}
-        className="w-full sm:w-auto px-3 py-2 text-xs sm:text-sm border border-neutral-800 bg-neutral-950 text-white focus:outline-none focus:border-neutral-600 cursor-pointer"
+        className="w-full sm:w-auto px-3 py-2 text-xs sm:text-sm border border-neutral-800 bg-neutral-950 text-white focus:outline-none focus:border-neutral-600 cursor-pointer font-inter"
       >
         {SORT_OPTIONS.map((option) => (
-          <option key={option.value} value={option.value} className="bg-neutral-950 text-white">
+          <option key={option.value} value={option.value} className="bg-neutral-950 text-white font-inter">
             {option.label}
           </option>
         ))}
