@@ -6,10 +6,6 @@ interface ProtectedRouteProps {
   children: ReactNode;
 }
 
-/**
- * ProtectedRoute wrapper component that protects authenticated routes
- * Redirects to login if not authenticated
- */
 export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { user, isInitialized, initialize } = useAuthStore();
   const location = useLocation();
@@ -20,23 +16,20 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     }
   }, [isInitialized, initialize]);
 
-  // Wait for auth initialization
   if (!isInitialized) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-black text-white flex items-center justify-center select-none">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-2 border-white/20 border-t-white"></div>
+          <p className="mt-3 text-xs tracking-wider text-neutral-400 uppercase font-medium">Verifying Session...</p>
         </div>
       </div>
     );
   }
 
-  // Redirect to login if not authenticated
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // User is authenticated
   return <>{children}</>;
 };

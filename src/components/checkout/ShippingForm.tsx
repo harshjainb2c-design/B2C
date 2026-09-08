@@ -8,12 +8,12 @@ interface ShippingFormProps {
   defaultValues?: Partial<ShippingAddressInput>;
 }
 
-const inputBase = 'w-full px-3 py-2.5 md:py-3 text-sm md:text-base bg-black border text-white focus:outline-none focus:border-white transition-colors';
-const inputOk = `${inputBase} border-neutral-700`;
+const inputBase = 'w-full px-3.5 py-2.5 text-xs sm:text-sm bg-black border rounded-sm text-white placeholder:text-neutral-500 focus:outline-none';
+const inputOk = `${inputBase} border-neutral-800 focus:border-neutral-600`;
 const inputErr = `${inputBase} border-red-500`;
 
 const ErrorIcon = () => (
-  <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+  <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
   </svg>
 );
@@ -29,9 +29,9 @@ export const ShippingForm = ({ onSubmit, isLoading, defaultValues }: ShippingFor
   });
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 md:space-y-5">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-3.5 sm:space-y-4">
       <div>
-        <label htmlFor="fullName" className="block text-xs font-mono uppercase tracking-wider text-neutral-400 mb-1.5">
+        <label htmlFor="fullName" className="block text-xs uppercase tracking-wider text-neutral-400 mb-1.5 font-medium">
           Full Name *
         </label>
         <input
@@ -45,7 +45,7 @@ export const ShippingForm = ({ onSubmit, isLoading, defaultValues }: ShippingFor
           aria-describedby={errors.fullName ? 'fullName-error' : undefined}
         />
         {errors.fullName && (
-          <p id="fullName-error" className="mt-1.5 text-sm text-red-400 flex items-start gap-1">
+          <p id="fullName-error" className="mt-1 text-xs text-red-400 flex items-center gap-1">
             <ErrorIcon />
             {errors.fullName.message}
           </p>
@@ -53,7 +53,7 @@ export const ShippingForm = ({ onSubmit, isLoading, defaultValues }: ShippingFor
       </div>
 
       <div>
-        <label htmlFor="addressLine1" className="block text-xs font-mono uppercase tracking-wider text-neutral-400 mb-1.5">
+        <label htmlFor="addressLine1" className="block text-xs uppercase tracking-wider text-neutral-400 mb-1.5 font-medium">
           Address Line 1 *
         </label>
         <input
@@ -67,7 +67,7 @@ export const ShippingForm = ({ onSubmit, isLoading, defaultValues }: ShippingFor
           aria-describedby={errors.addressLine1 ? 'addressLine1-error' : undefined}
         />
         {errors.addressLine1 && (
-          <p id="addressLine1-error" className="mt-1.5 text-sm text-red-400 flex items-start gap-1">
+          <p id="addressLine1-error" className="mt-1 text-xs text-red-400 flex items-center gap-1">
             <ErrorIcon />
             {errors.addressLine1.message}
           </p>
@@ -75,7 +75,7 @@ export const ShippingForm = ({ onSubmit, isLoading, defaultValues }: ShippingFor
       </div>
 
       <div>
-        <label htmlFor="addressLine2" className="block text-xs font-mono uppercase tracking-wider text-neutral-400 mb-1.5">
+        <label htmlFor="addressLine2" className="block text-xs uppercase tracking-wider text-neutral-400 mb-1.5 font-medium">
           Address Line 2
         </label>
         <input
@@ -89,16 +89,16 @@ export const ShippingForm = ({ onSubmit, isLoading, defaultValues }: ShippingFor
           aria-describedby={errors.addressLine2 ? 'addressLine2-error' : undefined}
         />
         {errors.addressLine2 && (
-          <p id="addressLine2-error" className="mt-1.5 text-sm text-red-400 flex items-start gap-1">
+          <p id="addressLine2-error" className="mt-1 text-xs text-red-400 flex items-center gap-1">
             <ErrorIcon />
             {errors.addressLine2.message}
           </p>
         )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
         <div>
-          <label htmlFor="city" className="block text-xs font-mono uppercase tracking-wider text-neutral-400 mb-1.5">
+          <label htmlFor="city" className="block text-xs uppercase tracking-wider text-neutral-400 mb-1.5 font-medium">
             City *
           </label>
           <input
@@ -112,7 +112,7 @@ export const ShippingForm = ({ onSubmit, isLoading, defaultValues }: ShippingFor
             aria-describedby={errors.city ? 'city-error' : undefined}
           />
           {errors.city && (
-            <p id="city-error" className="mt-1.5 text-sm text-red-400 flex items-start gap-1">
+            <p id="city-error" className="mt-1 text-xs text-red-400 flex items-center gap-1">
               <ErrorIcon />
               {errors.city.message}
             </p>
@@ -120,7 +120,7 @@ export const ShippingForm = ({ onSubmit, isLoading, defaultValues }: ShippingFor
         </div>
 
         <div>
-          <label htmlFor="state" className="block text-xs font-mono uppercase tracking-wider text-neutral-400 mb-1.5">
+          <label htmlFor="state" className="block text-xs uppercase tracking-wider text-neutral-400 mb-1.5 font-medium">
             State *
           </label>
           <select
@@ -150,7 +150,7 @@ export const ShippingForm = ({ onSubmit, isLoading, defaultValues }: ShippingFor
             <option value="Other">Other</option>
           </select>
           {errors.state && (
-            <p id="state-error" className="mt-1.5 text-sm text-red-400 flex items-start gap-1">
+            <p id="state-error" className="mt-1 text-xs text-red-400 flex items-center gap-1">
               <ErrorIcon />
               {errors.state.message}
             </p>
@@ -158,9 +158,9 @@ export const ShippingForm = ({ onSubmit, isLoading, defaultValues }: ShippingFor
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
         <div>
-          <label htmlFor="postalCode" className="block text-xs font-mono uppercase tracking-wider text-neutral-400 mb-1.5">
+          <label htmlFor="postalCode" className="block text-xs uppercase tracking-wider text-neutral-400 mb-1.5 font-medium">
             PIN Code *
           </label>
           <input
@@ -175,7 +175,7 @@ export const ShippingForm = ({ onSubmit, isLoading, defaultValues }: ShippingFor
             aria-describedby={errors.postalCode ? 'postalCode-error' : undefined}
           />
           {errors.postalCode && (
-            <p id="postalCode-error" className="mt-1.5 text-sm text-red-400 flex items-start gap-1">
+            <p id="postalCode-error" className="mt-1 text-xs text-red-400 flex items-center gap-1">
               <ErrorIcon />
               {errors.postalCode.message}
             </p>
@@ -183,7 +183,7 @@ export const ShippingForm = ({ onSubmit, isLoading, defaultValues }: ShippingFor
         </div>
 
         <div>
-          <label htmlFor="country" className="block text-xs font-mono uppercase tracking-wider text-neutral-400 mb-1.5">
+          <label htmlFor="country" className="block text-xs uppercase tracking-wider text-neutral-400 mb-1.5 font-medium">
             Country *
           </label>
           <input
@@ -191,14 +191,14 @@ export const ShippingForm = ({ onSubmit, isLoading, defaultValues }: ShippingFor
             type="text"
             {...register('country')}
             value="India"
-            className="w-full px-3 py-2.5 md:py-3 text-sm md:text-base bg-neutral-950 border border-neutral-800 text-neutral-500"
+            className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-neutral-950 border border-neutral-900 rounded-sm text-neutral-500"
             disabled
           />
         </div>
       </div>
 
       <div>
-        <label htmlFor="phone" className="block text-xs font-mono uppercase tracking-wider text-neutral-400 mb-1.5">
+        <label htmlFor="phone" className="block text-xs uppercase tracking-wider text-neutral-400 mb-1.5 font-medium">
           Phone Number *
         </label>
         <input
@@ -212,7 +212,7 @@ export const ShippingForm = ({ onSubmit, isLoading, defaultValues }: ShippingFor
           aria-describedby={errors.phone ? 'phone-error' : undefined}
         />
         {errors.phone && (
-          <p id="phone-error" className="mt-1.5 text-sm text-red-400 flex items-start gap-1">
+          <p id="phone-error" className="mt-1 text-xs text-red-400 flex items-center gap-1">
             <ErrorIcon />
             {errors.phone.message}
           </p>
@@ -222,7 +222,7 @@ export const ShippingForm = ({ onSubmit, isLoading, defaultValues }: ShippingFor
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full px-6 py-4 text-xs font-bold uppercase tracking-widest text-black bg-white hover:bg-neutral-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="w-full px-5 py-3.5 text-xs font-bold uppercase tracking-wider text-black bg-white disabled:opacity-50 disabled:cursor-not-allowed rounded-sm"
       >
         {isLoading ? 'Processing...' : 'Continue to Payment'}
       </button>

@@ -17,86 +17,69 @@ export const OrderList = ({ orders, onOrderClick }: OrderListProps) => {
     }).format(price);
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
-
   if (orders.length === 0) {
     return (
-      <div className="bg-black border border-neutral-800 p-8 sm:p-12 text-center text-white select-none">
-        <p className="text-base font-mono uppercase text-white font-bold mb-2">No Orders Found</p>
-        <p className="text-xs font-mono text-neutral-400">
-          Your orders will appear here once you place a purchase.
-        </p>
+      <div className="border border-white/10 rounded-lg p-8 text-center font-inter">
+        <p className="text-sm font-medium text-white mb-1">No Orders Found</p>
+        <p className="text-xs text-neutral-500">Your orders will appear here once you place a purchase.</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-3 sm:space-y-4 select-none">
+    <div className="space-y-2.5 font-inter">
       {orders.map((order) => (
         <div
           key={order.id}
           onClick={() => onOrderClick?.(order.id)}
-          className="border border-neutral-800 bg-black p-4 sm:p-6 hover:border-neutral-600 transition-all cursor-pointer touch-manipulation text-white"
+          className="border border-white/10 rounded-lg p-4 cursor-pointer active:bg-white/5 transition-colors"
         >
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 mb-4">
-            <div className="flex-1">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
-                <h3 className="text-sm sm:text-base font-mono font-bold uppercase text-white">
-                  Order #{order.id.slice(0, 8).toUpperCase()}
+          <div className="flex items-start justify-between gap-3 mb-3">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="text-sm font-medium text-white">
+                  #{order.id.slice(0, 8).toUpperCase()}
                 </h3>
                 <OrderStatus status={order.status} />
               </div>
-              <p className="text-xs font-mono text-neutral-400">
-                Placed {formatDistanceToNow(new Date(order.createdAt), { addSuffix: true })}
-              </p>
-              <p className="text-[11px] font-mono text-neutral-500 mt-0.5">
-                {formatDate(order.createdAt)}
+              <p className="text-[11px] text-neutral-500">
+                {formatDistanceToNow(new Date(order.createdAt), { addSuffix: true })}
               </p>
             </div>
 
-            <div className="flex items-center justify-between sm:justify-end gap-3 sm:text-right">
-              <div>
-                <p className="text-base sm:text-lg font-mono font-bold text-white">
-                  {formatPrice(order.total)}
-                </p>
-                <p className="text-[11px] font-mono text-neutral-400">
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <div className="text-right">
+                <p className="text-sm font-semibold text-white">{formatPrice(order.total)}</p>
+                <p className="text-[11px] text-neutral-500">
                   {order.items.length} {order.items.length === 1 ? 'item' : 'items'}
                 </p>
               </div>
-              <ChevronRight className="w-4 h-4 text-neutral-400" />
+              <ChevronRight className="w-4 h-4 text-neutral-600" />
             </div>
           </div>
 
-          <div className="border-t border-neutral-900 pt-3">
-            <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1">
-              {order.items.map((item, index) => {
-                const itemKey = item.size ? `${item.productId}-${item.size}-${index}` : `${item.productId}-${index}`;
-                return (
-                  <div
-                    key={itemKey}
-                    className="flex-shrink-0 w-12 h-14 bg-neutral-950 border border-neutral-800 overflow-hidden"
-                  >
-                    {item.product?.images && item.product.images.length > 0 ? (
-                      <img
-                        src={item.product.images[0]}
-                        alt={item.product.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-neutral-600 text-[8px] font-mono">
-                        N/A
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
+            {order.items.map((item, index) => {
+              const itemKey = item.size ? `${item.productId}-${item.size}-${index}` : `${item.productId}-${index}`;
+              return (
+                <div
+                  key={itemKey}
+                  className="flex-shrink-0 w-10 h-12 bg-white/5 rounded overflow-hidden"
+                >
+                  {item.product?.images && item.product.images.length > 0 ? (
+                    <img
+                      src={item.product.images[0]}
+                      alt={item.product.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-neutral-600 text-[7px]">
+                      N/A
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       ))}

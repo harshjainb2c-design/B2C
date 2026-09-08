@@ -11,6 +11,7 @@ import {
   ChevronUp
 } from 'lucide-react';
 import { useToast } from '../../hooks/use-toast';
+import { useWishlistStore } from '../../stores/wishlistStore';
 
 interface ProductDetailProps {
   product: Product;
@@ -25,7 +26,8 @@ export const ProductDetail = ({ product, onAddToCart }: ProductDetailProps) => {
     product.sizes && product.sizes.length > 0 ? product.sizes[0] : null
   );
   const [isAddingToCart, setIsAddingToCart] = useState(false);
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const isWishlisted = useWishlistStore((state) => state.items.some((item) => item.id === product.id));
+  const toggleWishlistItem = useWishlistStore((state) => state.toggleItem);
   const [pincode, setPincode] = useState('');
   const [pincodeStatus, setPincodeStatus] = useState<string | null>(null);
   const [isCheckingPincode, setIsCheckingPincode] = useState(false);
@@ -68,11 +70,16 @@ export const ProductDetail = ({ product, onAddToCart }: ProductDetailProps) => {
   };
 
   const toggleWishlist = () => {
-    const next = !isWishlisted;
-    setIsWishlisted(next);
+    const added = toggleWishlistItem({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.images && product.images.length > 0 ? product.images[0] : '',
+      category: product.category,
+    });
     toast({
-      title: next ? 'Saved to Wishlist' : 'Removed from Wishlist',
-      description: `${product.name} ${next ? 'added to' : 'removed from'} your wishlist.`,
+      title: added ? 'Saved to Wishlist' : 'Removed from Wishlist',
+      description: `${product.name} ${added ? 'added to' : 'removed from'} your wishlist.`,
     });
   };
 

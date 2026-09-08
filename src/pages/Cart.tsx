@@ -24,19 +24,19 @@ export const Cart = () => {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-black text-white py-16 px-4 select-none flex items-center justify-center">
-        <div className="max-w-md w-full border border-neutral-800 p-8 sm:p-12 text-center bg-black">
-          <ShoppingCart className="w-12 h-12 text-neutral-600 mx-auto mb-4" />
-          <h1 className="text-xl sm:text-2xl font-bold uppercase tracking-tight text-white mb-2">
-            Your Bag Is Empty
+      <div className="min-h-screen bg-black text-white pt-10 sm:pt-16 pb-16 px-4 select-none flex items-center justify-center">
+        <div className="max-w-md w-full p-6 text-center">
+          <ShoppingCart className="w-10 h-10 text-neutral-700 mx-auto mb-3" />
+          <h1 className="font-headline text-2xl sm:text-3xl font-bold uppercase tracking-tight text-white mb-2">
+            YOUR BAG IS EMPTY
           </h1>
-          <p className="text-xs font-mono text-neutral-400 mb-6 leading-relaxed">
-            No archive pieces added yet. Explore the fresh drop to build your look.
+          <p className="text-xs text-neutral-400 mb-6 leading-relaxed">
+            No items added yet. Explore the collection to build your look.
           </p>
           <button
             type="button"
             onClick={handleContinueShopping}
-            className="inline-flex items-center justify-center gap-2 px-6 py-3.5 text-xs font-mono font-bold uppercase tracking-wider text-black bg-white hover:bg-neutral-200 transition-colors"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 text-xs font-bold uppercase tracking-wider text-black bg-white rounded-sm"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Discover Collection</span>
@@ -47,37 +47,36 @@ export const Cart = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white py-8 sm:py-12 select-none">
+    <div className="min-h-screen bg-black text-white pt-6 sm:pt-10 pb-16 sm:pb-24 select-none">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8 pb-6 border-b border-neutral-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-end justify-between border-b border-neutral-900 pb-5 sm:pb-8 mb-8 sm:mb-12">
           <div>
-            <span className="text-[11px] font-mono tracking-[0.2em] text-neutral-400 uppercase">
-              B2C Bag
-            </span>
-            <h1 className="text-2xl sm:text-3xl font-bold uppercase text-white mt-1">
-              Shopping Bag ({itemCount})
+            <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl text-white uppercase tracking-tight">
+              Shopping Bag
             </h1>
+            <p className="text-xs sm:text-sm text-neutral-500 mt-1.5 tracking-wide">
+              {itemCount} {itemCount === 1 ? 'item' : 'items'}
+            </p>
           </div>
 
           <button
             type="button"
             onClick={handleContinueShopping}
-            className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-neutral-400 hover:text-white transition-colors"
+            className="text-xs uppercase tracking-wider text-neutral-500"
           >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Continue Browsing</span>
+            Continue Browsing
           </button>
         </div>
 
         {hasStockIssues && (
-          <div className="mb-6 bg-red-950/20 border border-red-900/60 p-4 flex items-start gap-3">
+          <div className="mb-6 bg-red-950/20 border border-red-900/40 rounded-sm p-4 flex items-start gap-3">
             <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
             <div>
-              <h3 className="text-xs font-mono font-bold uppercase text-red-400 mb-1">
+              <h3 className="text-xs font-bold uppercase text-red-400 mb-1">
                 Stock Adjustment Required
               </h3>
-              <p className="text-xs text-neutral-300 font-mono">
-                Some items exceed current physical warehouse stock. Please adjust quantities before checkout.
+              <p className="text-xs text-neutral-300">
+                Some items exceed current stock. Please adjust quantities before checkout.
               </p>
             </div>
           </div>
@@ -85,7 +84,7 @@ export const Cart = () => {
 
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
           <div className="w-full lg:w-2/3">
-            <div className="border border-neutral-800 bg-black p-4 sm:p-6 divide-y divide-neutral-800">
+            <div className="divide-y divide-neutral-900">
               {items.map((item) => {
                 const hasStockIssue = item.product.stock < item.quantity;
                 const itemKey = item.size ? `${item.productId}-${item.size}` : item.productId;
@@ -97,9 +96,9 @@ export const Cart = () => {
                       onRemove={removeItem}
                     />
                     {hasStockIssue && (
-                      <div className="py-2 text-xs font-mono text-red-400 flex items-center gap-1.5">
+                      <div className="py-2 text-xs text-red-400 flex items-center gap-1.5">
                         <AlertTriangle className="w-3.5 h-3.5" />
-                        <span>Only {item.product.stock} available in warehouse</span>
+                        <span>Only {item.product.stock} available</span>
                       </div>
                     )}
                   </div>

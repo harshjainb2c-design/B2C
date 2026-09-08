@@ -116,7 +116,7 @@ export const Products = () => {
   }, [searchParams, setSearchParams]);
 
   return (
-    <div className="min-h-screen bg-black text-white relative overflow-hidden select-none">
+    <div className="min-h-screen bg-black text-white relative overflow-x-clip select-none">
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 relative z-10">
         <div className="mb-6 sm:mb-8 pb-6 border-b border-neutral-900">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">

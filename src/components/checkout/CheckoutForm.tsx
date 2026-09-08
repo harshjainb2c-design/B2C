@@ -51,71 +51,82 @@ export const CheckoutForm = ({ onSuccess }: CheckoutFormProps) => {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-black py-16 text-center">
-        <p className="text-neutral-400 text-sm">Your cart is empty.</p>
+      <div className="min-h-screen bg-black py-16 text-center text-white select-none">
+        <p className="text-neutral-400 text-xs">Your cart is empty.</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black py-6 sm:py-8 text-white">
+    <div className="min-h-screen bg-black pt-6 sm:pt-10 pb-16 sm:pb-24 text-white select-none">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <h1 className="mb-8 text-2xl font-bold uppercase tracking-wider text-white">Checkout</h1>
+        <div className="flex items-end justify-between border-b border-neutral-900 pb-5 sm:pb-8 mb-8 sm:mb-12">
+          <div>
+            <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl text-white uppercase tracking-tight">
+              Checkout
+            </h1>
+            <p className="text-xs sm:text-sm text-neutral-500 mt-1.5 tracking-wide">
+              Secure Delivery & Order Verification
+            </p>
+          </div>
+        </div>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-8">
-          <div className="lg:col-span-2">
-            <div className="border border-neutral-800 p-4 sm:p-6 lg:p-8">
-              <div className="mb-8 flex items-center">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8 items-start">
+          <div className="lg:col-span-8">
+            <div className="bg-neutral-950 border border-neutral-900 rounded-md p-5 sm:p-6">
+              <div className="mb-6 flex items-center">
                 <div className={`flex items-center ${step === 'shipping' ? 'text-white' : 'text-neutral-500'}`}>
-                  <div className={`flex h-10 w-10 items-center justify-center border-2 font-bold ${step === 'shipping' ? 'border-white bg-white text-black' : 'border-neutral-700'}`}>
+                  <div className={`flex h-8 w-8 items-center justify-center rounded-sm text-xs font-bold ${step === 'shipping' ? 'bg-white text-black' : 'border border-neutral-800 text-neutral-400'}`}>
                     1
                   </div>
-                  <span className="ml-2 text-xs font-bold uppercase tracking-wider sm:text-sm">Shipping</span>
+                  <span className="ml-2 text-xs font-bold uppercase tracking-wider">Shipping</span>
                 </div>
-                <div className="mx-3 h-0.5 flex-1 bg-neutral-800 sm:mx-4" />
+                <div className="mx-3 h-[1px] flex-1 bg-neutral-900 sm:mx-4" />
                 <div className={`flex items-center ${step === 'review' ? 'text-white' : 'text-neutral-500'}`}>
-                  <div className={`flex h-10 w-10 items-center justify-center border-2 font-bold ${step === 'review' ? 'border-white bg-white text-black' : 'border-neutral-700'}`}>
+                  <div className={`flex h-8 w-8 items-center justify-center rounded-sm text-xs font-bold ${step === 'review' ? 'bg-white text-black' : 'border border-neutral-800 text-neutral-400'}`}>
                     2
                   </div>
-                  <span className="ml-2 text-xs font-bold uppercase tracking-wider sm:text-sm">Review</span>
+                  <span className="ml-2 text-xs font-bold uppercase tracking-wider">Review</span>
                 </div>
               </div>
 
               {error && (
-                <div className="mb-6 border border-red-900 bg-red-950/50 p-4 text-sm text-red-400">
+                <div className="mb-5 rounded-md bg-red-600 p-3 text-xs font-medium text-white">
                   {error}
                 </div>
               )}
 
               {step === 'shipping' ? (
                 <>
-                  <h2 className="mb-6 text-base font-bold uppercase tracking-wider text-white">Shipping information</h2>
+                  <h2 className="mb-4 text-xs uppercase tracking-[0.2em] font-bold text-neutral-400">
+                    Shipping Details
+                  </h2>
                   <ShippingForm onSubmit={handleShippingSubmit} isLoading={isSubmitting} defaultValues={shippingAddress || undefined} />
                 </>
               ) : (
                 <div>
-                  <div className="mb-6 flex items-start justify-between gap-4 border border-neutral-800 p-4">
+                  <div className="mb-4 flex items-start justify-between gap-4 bg-black border border-neutral-900 rounded-sm p-4">
                     <div>
-                      <h2 className="mb-2 text-base font-bold uppercase tracking-wider text-white">Delivery address</h2>
-                      <p className="text-sm text-neutral-400">
-                        {shippingAddress?.fullName}<br />
+                      <h2 className="mb-2 text-xs uppercase tracking-wider font-bold text-white">Delivery Address</h2>
+                      <p className="text-xs text-neutral-400 leading-relaxed">
+                        <span className="text-white font-medium">{shippingAddress?.fullName}</span><br />
                         {shippingAddress?.addressLine1}<br />
                         {shippingAddress?.addressLine2 && <>{shippingAddress.addressLine2}<br /></>}
                         {shippingAddress?.city}, {shippingAddress?.state} {shippingAddress?.postalCode}<br />
                         {shippingAddress?.phone}
                       </p>
                     </div>
-                    <button type="button" onClick={() => setStep('shipping')} className="text-xs font-bold uppercase tracking-wider text-neutral-400 hover:text-white underline transition-colors">
+                    <button type="button" onClick={() => setStep('shipping')} className="text-xs font-bold uppercase tracking-wider text-neutral-400 underline">
                       Edit
                     </button>
                   </div>
 
-                  <div className="mb-6 border border-neutral-800 p-4">
-                    <div className="flex gap-3">
-                      <Truck className="mt-0.5 h-5 w-5 flex-shrink-0 text-neutral-400" />
+                  <div className="mb-5 bg-black border border-neutral-900 rounded-sm p-4">
+                    <div className="flex gap-3 items-center">
+                      <Truck className="h-4 w-4 shrink-0 text-neutral-400" />
                       <div>
-                        <h2 className="font-bold text-white">Cash on Delivery</h2>
-                        <p className="mt-1 text-sm text-neutral-400">Pay when your Shiprocket delivery arrives.</p>
+                        <h2 className="text-xs font-bold uppercase tracking-wider text-white">Cash on Delivery</h2>
+                        <p className="text-xs text-neutral-400 mt-0.5">Pay when your delivery arrives.</p>
                       </div>
                     </div>
                   </div>
@@ -124,18 +135,18 @@ export const CheckoutForm = ({ onSuccess }: CheckoutFormProps) => {
                     type="button"
                     onClick={placeOrder}
                     disabled={isSubmitting}
-                    className="flex min-h-12 w-full items-center justify-center gap-2 bg-white px-6 py-4 text-xs font-bold uppercase tracking-widest text-black hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                    className="flex min-h-11 w-full items-center justify-center gap-2 bg-white px-5 py-3.5 text-xs font-bold uppercase tracking-wider text-black disabled:opacity-50 disabled:cursor-not-allowed rounded-sm"
                   >
-                    <PackageCheck className="h-5 w-5" />
-                    {isSubmitting ? 'Creating shipment...' : `Place COD order · ₹${total.toFixed(0)}`}
+                    <PackageCheck className="h-4 w-4" />
+                    <span>{isSubmitting ? 'Creating shipment...' : `Place COD order · ₹${total.toFixed(0)}`}</span>
                   </button>
                 </div>
               )}
             </div>
           </div>
 
-          <div className="lg:col-span-1">
-            <div className="lg:sticky lg:top-8">
+          <div className="lg:col-span-4">
+            <div className="lg:sticky lg:top-24">
               <OrderSummary items={items} total={total} />
             </div>
           </div>

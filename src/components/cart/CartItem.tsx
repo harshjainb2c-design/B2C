@@ -33,9 +33,9 @@ export const CartItem = ({ item, onUpdateQuantity, onRemove }: CartItemProps) =>
   const itemTotal = item.price * item.quantity;
 
   return (
-    <div className="flex flex-col sm:flex-row gap-4 py-4 border-b border-neutral-800 bg-black text-white">
+    <div className="flex flex-col sm:flex-row gap-4 py-4 bg-black text-white">
       <div className="flex gap-4 sm:contents">
-        <div className="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 bg-neutral-950 border border-neutral-800 overflow-hidden">
+        <div className="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 bg-neutral-950 rounded-sm overflow-hidden">
           {item.product.images && item.product.images.length > 0 ? (
             <img
               src={item.product.images[0]}
@@ -43,7 +43,7 @@ export const CartItem = ({ item, onUpdateQuantity, onRemove }: CartItemProps) =>
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-neutral-500 text-xs font-mono">
+            <div className="w-full h-full flex items-center justify-center text-neutral-500 text-xs">
               NO IMAGE
             </div>
           )}
@@ -55,34 +55,34 @@ export const CartItem = ({ item, onUpdateQuantity, onRemove }: CartItemProps) =>
               {item.product.name}
             </h3>
             {item.size && (
-              <p className="text-xs font-mono text-neutral-400 mb-1">
+              <p className="text-xs text-neutral-400 mb-1">
                 Size: <span className="text-white font-bold">{item.size}</span>
               </p>
             )}
-            <p className="text-xs font-mono text-neutral-400">
+            <p className="text-xs text-neutral-400">
               {formatPrice(item.price)} each
             </p>
           </div>
 
           <div className="flex sm:flex-col items-end justify-between sm:justify-start gap-4 mt-3 sm:mt-0">
-            <div className="flex items-center border border-neutral-800 bg-black">
+            <div className="flex items-center border border-neutral-900 rounded-sm bg-black">
               <button
                 type="button"
                 onClick={handleDecrement}
                 disabled={item.quantity <= 1}
-                className="p-1.5 text-neutral-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+                className="p-1.5 text-neutral-400 disabled:opacity-30 disabled:cursor-not-allowed"
                 aria-label="Decrease quantity"
               >
                 <Minus className="w-3.5 h-3.5" />
               </button>
-              <span className="px-3 py-1 text-xs font-mono font-bold text-white min-w-[28px] text-center">
+              <span className="px-3 py-1 text-xs font-bold text-white min-w-[28px] text-center">
                 {item.quantity}
               </span>
               <button
                 type="button"
                 onClick={handleIncrement}
                 disabled={isMaxQuantity}
-                className="p-1.5 text-neutral-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+                className="p-1.5 text-neutral-400 disabled:opacity-30 disabled:cursor-not-allowed"
                 aria-label="Increase quantity"
               >
                 <Plus className="w-3.5 h-3.5" />
@@ -90,13 +90,13 @@ export const CartItem = ({ item, onUpdateQuantity, onRemove }: CartItemProps) =>
             </div>
 
             <div className="flex items-center gap-3">
-              <span className="text-sm sm:text-base font-bold text-white font-mono">
+              <span className="text-sm sm:text-base font-bold text-white">
                 {formatPrice(itemTotal)}
               </span>
               <button
                 type="button"
                 onClick={() => onRemove(item.productId, item.size)}
-                className="p-1.5 text-neutral-500 hover:text-red-400 transition-colors"
+                className="p-1.5 text-neutral-500 text-neutral-400"
                 aria-label="Remove item"
               >
                 <Trash2 className="w-4 h-4" />

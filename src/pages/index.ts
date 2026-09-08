@@ -12,6 +12,7 @@ export { Profile } from './Profile';
 export { Unauthorized } from './Unauthorized';
 export { NotFound } from './NotFound';
 export { HealthCheck } from './HealthCheck';
+export { Wishlist } from './Wishlist';
 
 // Info pages
 export { About } from './About';

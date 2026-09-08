@@ -48,7 +48,7 @@ export const useAuthStore = create<AuthStore>()(
         try {
           set({ isLoading: true });
           await supabase.auth.signOut();
-          set({ user: null, session: null, isLoading: false });
+          set({ user: null, session: null, isLoading: false, isInitialized: true });
         } catch (error) {
           set({ isLoading: false });
           throw error;
@@ -62,44 +62,58 @@ export const useAuthStore = create<AuthStore>()(
 
       initialize: async () => {
         const state = get();
-        
-        // Prevent multiple simultaneous initializations
-        if (state.isInitialized || state.isLoading) {
-          return;
-        }
-        
-        const { data: sessionData, error } = await supabase.auth.getSession();
-        if (error || !sessionData.session) {
-          set({ user: null, session: null, isInitialized: true });
+        if (state.isInitialized) {
           return;
         }
 
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', sessionData.session.user.id)
-          .single();
+        try {
+          const { data: sessionData } = await supabase.auth.getSession();
 
-        if (!profile) {
-          set({ user: null, session: null, isInitialized: true });
-          return;
-        }
+          if (!sessionData?.session?.user) {
+            set({ user: null, session: null, isInitialized: true, isLoading: false });
+            return;
+          }
 
-        set({
-          user: {
-            id: profile.id,
+          let mappedUser: User = {
+            id: sessionData.session.user.id,
             email: sessionData.session.user.email || '',
-            fullName: profile.full_name,
-            role: profile.role,
-            createdAt: profile.created_at,
-          },
-          session: {
-            accessToken: sessionData.session.access_token,
-            refreshToken: sessionData.session.refresh_token || '',
-            expiresAt: sessionData.session.expires_at || 0,
-          },
-          isInitialized: true,
-        });
+            fullName: sessionData.session.user.user_metadata?.full_name || sessionData.session.user.email?.split('@')[0] || 'User',
+            role: (sessionData.session.user.user_metadata?.role as 'customer' | 'admin') || 'customer',
+            createdAt: sessionData.session.user.created_at || new Date().toISOString(),
+          };
+
+          try {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', sessionData.session.user.id)
+              .maybeSingle();
+
+            if (profile) {
+              mappedUser = {
+                id: profile.id,
+                email: sessionData.session.user.email || '',
+                fullName: profile.full_name || mappedUser.fullName,
+                role: profile.role || mappedUser.role,
+                createdAt: profile.created_at || mappedUser.createdAt,
+              };
+            }
+          } catch {
+          }
+
+          set({
+            user: mappedUser,
+            session: {
+              accessToken: sessionData.session.access_token,
+              refreshToken: sessionData.session.refresh_token || '',
+              expiresAt: sessionData.session.expires_at || 0,
+            },
+            isInitialized: true,
+            isLoading: false,
+          });
+        } catch {
+          set({ user: null, session: null, isInitialized: true, isLoading: false });
+        }
       },
 
       reset: () => set(initialState),
@@ -114,40 +128,51 @@ export const useAuthStore = create<AuthStore>()(
   )
 );
 
-// Set up auth state change listener
 supabase.auth.onAuthStateChange(async (event, session) => {
   const store = useAuthStore.getState();
 
   if (event === 'SIGNED_OUT') {
     store.setUser(null);
     store.setSession(null);
-  } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-    if (session) {
-      // Fetch user profile
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .single();
+    useAuthStore.setState({ isInitialized: true, isLoading: false });
+  } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
+    if (session?.user) {
+      let mappedUser: User = {
+        id: session.user.id,
+        email: session.user.email || '',
+        fullName: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'User',
+        role: (session.user.user_metadata?.role as 'customer' | 'admin') || 'customer',
+        createdAt: session.user.created_at || new Date().toISOString(),
+      };
 
-      if (profile) {
-        const mappedSession: Session = {
-          accessToken: session.access_token,
-          refreshToken: session.refresh_token || '',
-          expiresAt: session.expires_at || 0,
-        };
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
 
-        const mappedUser: User = {
-          id: profile.id,
-          email: session.user.email || '',
-          fullName: profile.full_name,
-          role: profile.role,
-          createdAt: profile.created_at,
-        };
-
-        store.setUser(mappedUser);
-        store.setSession(mappedSession);
+        if (profile) {
+          mappedUser = {
+            id: profile.id,
+            email: session.user.email || '',
+            fullName: profile.full_name || mappedUser.fullName,
+            role: profile.role || mappedUser.role,
+            createdAt: profile.created_at || mappedUser.createdAt,
+          };
+        }
+      } catch {
       }
+
+      store.setUser(mappedUser);
+      store.setSession({
+        accessToken: session.access_token,
+        refreshToken: session.refresh_token || '',
+        expiresAt: session.expires_at || 0,
+      });
+      useAuthStore.setState({ isInitialized: true, isLoading: false });
+    } else {
+      useAuthStore.setState({ isInitialized: true, isLoading: false });
     }
   }
 });

@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useRef } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
@@ -32,6 +32,7 @@ const PasswordReset = lazy(() => import('./pages').then(m => ({ default: m.Passw
 const Unauthorized = lazy(() => import('./pages').then(m => ({ default: m.Unauthorized })));
 const NotFound = lazy(() => import('./pages').then(m => ({ default: m.NotFound })));
 const HealthCheck = lazy(() => import('./pages').then(m => ({ default: m.HealthCheck })));
+const Wishlist = lazy(() => import('./pages').then(m => ({ default: m.Wishlist })));
 
 // Info pages
 const About = lazy(() => import('./pages').then(m => ({ default: m.About })));
@@ -63,7 +64,11 @@ const queryClient = new QueryClient({
 });
 
 const AppContent = () => {
+  const location = useLocation();
   const initStartedRef = useRef(false);
+  const isAuthPage = ['/login', '/register', '/password-reset', '/reset-password'].includes(
+    location.pathname.toLowerCase()
+  );
 
   // Initialize auth on mount - only once, even in StrictMode
   // But don't block the UI if it fails
@@ -76,13 +81,20 @@ const AppContent = () => {
         // Auth initialization failed - user will need to login manually
       });
     }
-  }, []); // Empty dependency array - only run once on mount
+  }, []);
+
+  useEffect(() => {
+    if (!isAuthPage) {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    }
+  }, [location.pathname, isAuthPage]);
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col">
+    <div className={`bg-black text-white ${isAuthPage ? 'fixed inset-0 w-full h-full overflow-hidden' : 'min-h-screen flex flex-col'}`}>
       <ScrollToTop />
-      <Header />
-      <main className="flex-1">
+      {!isAuthPage && <Header />}
+      <main className={`flex-1 ${isAuthPage ? 'w-full h-full overflow-hidden' : ''}`}>
         <Suspense fallback={<PageLoader />}>
           <Routes>
           {/* Public routes */}
@@ -92,11 +104,13 @@ const AppContent = () => {
           <Route path="/men" element={<Navigate to="/products?gender=men" replace />} />
           <Route path="/women" element={<Navigate to="/products?gender=women" replace />} />
           <Route path="/sneakers" element={<Navigate to="/products?category=footwear" replace />} />
-          <Route path="/mywishlist" element={<Navigate to="/products" replace />} />
+          <Route path="/mywishlist" element={<Wishlist />} />
+          <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/password-reset" element={<PasswordReset />} />
+          <Route path="/reset-password" element={<PasswordReset />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
           <Route path="/health" element={<HealthCheck />} />
           
@@ -177,7 +191,7 @@ const AppContent = () => {
         </Routes>
       </Suspense>
       </main>
-      <Footer />
+      {location.pathname === '/' && <Footer />}
     </div>
   );
 };

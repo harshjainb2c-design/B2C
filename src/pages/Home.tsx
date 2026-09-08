@@ -2,11 +2,11 @@ import { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ShoppingBag,
+  ArrowRight,
   TrendingUp,
   Shield,
   Truck,
   ChevronRight,
-  ChevronLeft,
   AlertCircle,
   Heart,
   Instagram,
@@ -17,22 +17,38 @@ import {
 } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
 import { useCartStore } from "../stores/cartStore";
+import { useWishlistStore } from "../stores/wishlistStore";
 
 export const Home = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const addItem = useCartStore((state) => state.addItem);
-  const [wishlist, setWishlist] = useState<Record<string, boolean>>({ "drop-3": true });
+  const wishlistItems = useWishlistStore((state) => state.items);
+  const toggleWishlistItem = useWishlistStore((state) => state.toggleItem);
   const [activeReelId, setActiveReelId] = useState<string | null>(null);
+  const [selectedGenderCategory, setSelectedGenderCategory] = useState<"men" | "women" | "footwear">("men");
 
-  const toggleWishlist = (id: string, name: string) => {
-    setWishlist((prev) => {
-      const next = !prev[id];
-      toast({
-        title: next ? "Added to Wishlist" : "Removed from Wishlist",
-        description: `${name} ${next ? "added to" : "removed from"} your wishlist.`,
-      });
-      return { ...prev, [id]: next };
+  const isItemWishlisted = (id: string) => wishlistItems.some((i) => i.id === id);
+
+  const toggleWishlist = (
+    id: string,
+    name: string,
+    price = 1299,
+    image = "",
+    category = "Apparel",
+    fabric?: string
+  ) => {
+    const added = toggleWishlistItem({
+      id,
+      name,
+      price,
+      image,
+      category,
+      fabric,
+    });
+    toast({
+      title: added ? "Added to Wishlist" : "Removed from Wishlist",
+      description: `${name} ${added ? "added to" : "removed from"} your wishlist.`,
     });
   };
 
@@ -127,14 +143,6 @@ export const Home = () => {
   ];
 
   const reelsScrollRef = useRef<HTMLDivElement>(null);
-
-  const scrollReels = (direction: "left" | "right") => {
-    if (reelsScrollRef.current) {
-      const scrollAmount = direction === "left" ? -320 : 320;
-      reelsScrollRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
-    }
-  };
-  
   const isDraggingReels = useRef(false);
   const startXReels = useRef(0);
   const scrollLeftReels = useRef(0);
@@ -180,6 +188,148 @@ export const Home = () => {
     { id: "joggers", label: "Men Joggers" },
     { id: "collectibles", label: "Collectibles" },
   ];
+
+  const trustFeatures = [
+    { icon: TrendingUp, title: "Wholesale Prices", subtitle: "Best rates in Indore" },
+    { icon: Truck, title: "Local Delivery", subtitle: "Fast delivery in Indore" },
+    { icon: Shield, title: "Secure Payment", subtitle: "100% secure" },
+    { icon: ShoppingBag, title: "Easy Returns", subtitle: "30-day policy" },
+  ];
+
+  const genderCategoryTabs = [
+    { id: "men", label: "MEN" },
+    { id: "women", label: "WOMEN" },
+    { id: "footwear", label: "FOOTWEAR" },
+  ];
+
+  const genderCategoryData: Record<
+    "men" | "women" | "footwear",
+    Array<{ id: string; name: string; image: string; path: string; position?: string }>
+  > = {
+    men: [
+      {
+        id: "m-tshirts",
+        name: "T-SHIRTS",
+        image: "/tshirt-men.png",
+        path: "/products?category=t-shirts",
+      },
+      {
+        id: "m-shirts",
+        name: "SHIRTS",
+        image: "/shirt-men.png",
+        path: "/products?category=shirts",
+      },
+      {
+        id: "m-polos",
+        name: "POLOS",
+        image: "/polo-men.png",
+        path: "/products?category=polos",
+      },
+      {
+        id: "m-jeans",
+        name: "JEANS",
+        image: "/jeans-men.png?v=3",
+        path: "/products?category=jeans",
+        position: "object-bottom",
+      },
+      {
+        id: "m-pants",
+        name: "PANTS",
+        image: "/pants-men.png?v=1",
+        path: "/products?category=pants",
+        position: "object-bottom",
+      },
+      {
+        id: "m-joggers",
+        name: "JOGGERS",
+        image: "/joggers-men.png?v=1",
+        path: "/products?category=joggers",
+        position: "object-bottom",
+      },
+    ],
+    women: [
+      {
+        id: "w-tshirts",
+        name: "T-SHIRTS",
+        image: "/tshirt-women.png?v=1",
+        path: "/products?category=t-shirts",
+        position: "object-top",
+      },
+      {
+        id: "w-crop-tops",
+        name: "CROP TOPS",
+        image: "/croptop-women.png?v=1",
+        path: "/products?category=crop-tops",
+        position: "object-top",
+      },
+      {
+        id: "w-shirts",
+        name: "SHIRTS",
+        image: "/shirt-women.png?v=1",
+        path: "/products?category=shirts",
+        position: "object-top",
+      },
+      {
+        id: "w-jeans",
+        name: "JEANS",
+        image: "/jeans-women.png?v=1",
+        path: "/products?category=jeans",
+        position: "object-bottom",
+      },
+      {
+        id: "w-pants",
+        name: "PANTS",
+        image: "/pants-women.png?v=1",
+        path: "/products?category=pants",
+        position: "object-bottom",
+      },
+      {
+        id: "w-hoodies",
+        name: "HOODIES",
+        image: "/hoodie-women.jpg?v=1",
+        path: "/products?category=hoodies",
+      },
+    ],
+    footwear: [
+      {
+        id: "f-sneakers",
+        name: "SNEAKERS",
+        image: "/sneakers.png?v=1",
+        path: "/products?category=footwear",
+      },
+      {
+        id: "f-high-tops",
+        name: "HIGH TOPS",
+        image: "/hightops.jpg?v=1",
+        path: "/products?category=footwear",
+      },
+      {
+        id: "f-chunky",
+        name: "CHUNKY SNEAKERS",
+        image: "/chunky-sneakers.jpg?v=1",
+        path: "/products?category=footwear",
+      },
+      {
+        id: "f-clogs",
+        name: "CLOGS",
+        image: "/clogs.jpg?v=1",
+        path: "/products?category=footwear",
+      },
+      {
+        id: "f-loafers",
+        name: "LOAFERS",
+        image: "/loafers.jpg?v=1",
+        path: "/products?category=footwear",
+      },
+      {
+        id: "f-boots",
+        name: "BOOTS",
+        image: "/boots.png?v=1",
+        path: "/products?category=footwear",
+        position: "object-bottom",
+      },
+    ],
+  };
 
   const catalogProducts: Record<
     string,
@@ -518,11 +668,11 @@ export const Home = () => {
                   className="inline-flex items-center gap-2 bg-white text-black text-xs sm:text-sm font-extrabold uppercase tracking-[0.18em] px-6 sm:px-7 py-3 sm:py-3.5 hover:bg-neutral-200 transition-all duration-300 shadow-xl group"
                 >
                   SHOP COLLECTION
-                  <span className="text-base leading-none transition-transform duration-300 group-hover:translate-x-1">→</span>
+                  <ArrowRight className="w-4 h-4" />
                 </Link>
                 <Link
                   to="/products"
-                  className="inline-flex items-center bg-transparent text-white border border-neutral-700 hover:border-white text-xs sm:text-sm font-bold uppercase tracking-[0.18em] px-6 sm:px-7 py-3 sm:py-3.5 hover:bg-white/5 transition-all duration-300"
+                  className="inline-flex items-center bg-transparent text-white border border-neutral-700 text-xs sm:text-sm font-bold uppercase tracking-[0.18em] px-6 sm:px-7 py-3 sm:py-3.5 transition-all duration-300"
                 >
                   VIEW ARCHIVE
                 </Link>
@@ -605,20 +755,20 @@ export const Home = () => {
               </div>
               <Link
                 to="/products"
-                className="inline-flex items-center gap-2 border border-neutral-700 hover:border-white text-white text-xs font-bold uppercase tracking-[0.18em] px-5 py-3 hover:bg-white/5 transition-all w-fit group"
+                className="inline-flex items-center gap-2 border border-neutral-700 text-white text-xs font-bold uppercase tracking-[0.18em] px-5 py-3 w-fit"
               >
                 EXPLORE DROP 01
-                <span className="text-sm font-light transition-transform duration-300 group-hover:translate-x-1">→</span>
+                <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
 
             <div className="flex-1 min-w-0 w-full">
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-1.5 sm:gap-2">
+              <div className="flex overflow-x-auto scrollbar-hide pb-3 sm:pb-0 sm:grid sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-2 snap-x snap-mandatory">
                 {dropItems.map((item) => (
                   <div
                     key={item.id}
                     onClick={() => navigate(`/products`)}
-                    className="group relative aspect-[3/4] overflow-hidden bg-neutral-900 border border-neutral-800 hover:border-neutral-700 transition-colors duration-200 cursor-pointer"
+                    className="shrink-0 w-[185px] xs:w-[210px] sm:w-auto snap-start group relative aspect-[3/4] overflow-hidden bg-neutral-900 border border-neutral-800 hover:border-neutral-700 transition-colors duration-200 cursor-pointer"
                   >
                     <img
                       src={item.image}
@@ -630,20 +780,20 @@ export const Home = () => {
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        toggleWishlist(item.id, item.name);
+                        toggleWishlist(item.id, item.name, item.price, item.image, "Drop Item");
                       }}
-                      className="absolute top-3 right-3 p-2 rounded-full text-white/90 hover:text-red-500 transition-all z-10"
+                      className="absolute top-2 sm:top-3 right-2 sm:right-3 p-1.5 sm:p-2 rounded-full text-white/90 hover:text-red-500 transition-all z-10 outline-none focus:outline-none focus:ring-0 active:outline-none"
                       aria-label="Wishlist"
                     >
                       <Heart
-                        className={`w-4 h-4 transition-colors ${
-                          wishlist[item.id]
+                        className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition-colors ${
+                          isItemWishlisted(item.id)
                             ? "fill-red-500 text-red-500"
                             : "text-white hover:text-red-400"
                         }`}
                       />
                     </button>
-                    <div className="absolute inset-x-0 bottom-0 p-3 sm:p-4 pt-16 bg-gradient-to-t from-black via-black/70 to-transparent flex items-end justify-between gap-2">
+                    <div className="absolute inset-x-0 bottom-0 p-3 sm:p-4 pt-12 sm:pt-16 bg-gradient-to-t from-black via-black/70 to-transparent flex items-end justify-between gap-2">
                       <div className="min-w-0 flex-1">
                         <h3 className="font-headline text-xs sm:text-sm tracking-wide text-white uppercase line-clamp-2 leading-snug mb-1">
                           {item.name}
@@ -658,14 +808,15 @@ export const Home = () => {
                           e.stopPropagation();
                           handleAddToCart(item);
                         }}
-                        className="p-1.5 text-white/80 hover:text-white hover:scale-110 transition-transform shrink-0"
+                        className="p-1 sm:p-1.5 text-white/80 hover:text-white hover:scale-110 transition-transform shrink-0"
                         aria-label="Add to cart"
                       >
-                        <ShoppingBag className="w-5 h-5 stroke-[1.8]" />
+                        <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5 stroke-[1.8]" />
                       </button>
                     </div>
                   </div>
                 ))}
+                <div className="shrink-0 w-2 sm:hidden" aria-hidden="true" />
               </div>
             </div>
           </div>
@@ -685,10 +836,10 @@ export const Home = () => {
               </p>
               <Link
                 to="/products"
-                className="inline-flex items-center gap-2 border border-neutral-700 hover:border-white text-white text-xs sm:text-sm font-bold uppercase tracking-[0.18em] px-6 sm:px-8 py-3.5 hover:bg-white/5 transition-all w-fit group"
+                className="inline-flex items-center gap-2 border border-neutral-700 text-white text-xs sm:text-sm font-bold uppercase tracking-[0.18em] px-6 sm:px-8 py-3.5 transition-all w-fit"
               >
                 SHOP COLLECTION
-                <span className="text-sm font-light transition-transform duration-300 group-hover:translate-x-1">→</span>
+                <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
 
@@ -722,39 +873,21 @@ export const Home = () => {
               href="https://www.instagram.com/b2cexports_since_2018/"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-xs font-bold tracking-[0.16em] uppercase text-neutral-300 hover:text-white border border-neutral-800 hover:border-neutral-600 px-4 py-2.5 bg-neutral-950 transition-colors"
+              className="hidden sm:inline-flex items-center gap-2 text-xs font-bold tracking-[0.16em] uppercase text-neutral-300 hover:text-white border border-neutral-800 hover:border-neutral-600 px-4 py-2.5 bg-neutral-950 transition-colors"
             >
               <Instagram className="w-3.5 h-3.5" />
               <span>@b2cexports_since_2018</span>
             </a>
           </div>
 
-          <div className="relative group/carousel">
-            <button
-              type="button"
-              onClick={() => scrollReels("left")}
-              className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/90 hover:bg-white text-black shadow-2xl flex items-center justify-center transition-all duration-200 hover:scale-105"
-              aria-label="Scroll left"
-            >
-              <ChevronLeft className="w-5 h-5 stroke-[2.5]" />
-            </button>
-
-            <button
-              type="button"
-              onClick={() => scrollReels("right")}
-              className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/90 hover:bg-white text-black shadow-2xl flex items-center justify-center transition-all duration-200 hover:scale-105"
-              aria-label="Scroll right"
-            >
-              <ChevronRight className="w-5 h-5 stroke-[2.5]" />
-            </button>
-
+          <div className="relative">
             <div
               ref={reelsScrollRef}
               onMouseDown={onReelsMouseDown}
               onMouseLeave={onReelsMouseLeaveOrUp}
               onMouseUp={onReelsMouseLeaveOrUp}
               onMouseMove={onReelsMouseMove}
-              className="flex gap-2.5 sm:gap-3.5 md:gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-2 cursor-grab active:cursor-grabbing"
+              className="flex gap-2.5 sm:gap-3.5 md:gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-2 cursor-grab active:cursor-grabbing -mr-4 sm:-mr-6 lg:-mr-8 pr-4 sm:pr-6 lg:pr-8"
             >
               {reelsData.map((reel) => (
                 <div
@@ -844,58 +977,83 @@ export const Home = () => {
               ))}
             </div>
           </div>
+
+          <div className="mt-5 sm:hidden flex justify-center">
+            <a
+              href="https://www.instagram.com/b2cexports_since_2018/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 text-xs font-bold tracking-[0.14em] uppercase text-neutral-300 hover:text-white border border-neutral-800 hover:border-neutral-600 px-5 py-2.5 bg-neutral-950 transition-colors w-full"
+            >
+              <Instagram className="w-3.5 h-3.5" />
+              <span>@b2cexports_since_2018</span>
+            </a>
+          </div>
         </div>
       </section>
 
-      <section className="py-8 sm:py-10 md:py-12 bg-black text-white border-b border-neutral-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
-            <div className="text-center">
-              <TrendingUp className="w-6 h-6 sm:w-7 sm:h-7 text-neutral-400 mx-auto mb-2 sm:mb-3" />
+      <section className="py-4 sm:py-10 md:py-12 bg-black text-white border-b border-neutral-900 overflow-hidden">
+        <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8 max-w-7xl mx-auto px-4 sm:px-6">
+          {trustFeatures.map((item, idx) => (
+            <div key={idx} className="text-center">
+              <item.icon className="w-6 h-6 sm:w-7 sm:h-7 text-neutral-400 mx-auto mb-2 sm:mb-3" />
               <h3 className="text-xs sm:text-sm font-semibold text-white mb-0.5 sm:mb-1">
-                Wholesale Prices
+                {item.title}
               </h3>
               <p className="text-[10px] sm:text-xs text-neutral-400">
-                Best rates in Indore
+                {item.subtitle}
               </p>
             </div>
+          ))}
+        </div>
 
-            <div className="text-center">
-              <Truck className="w-6 h-6 sm:w-7 sm:h-7 text-neutral-400 mx-auto mb-2 sm:mb-3" />
-              <h3 className="text-xs sm:text-sm font-semibold text-white mb-0.5 sm:mb-1">
-                Local Delivery
-              </h3>
-              <p className="text-[10px] sm:text-xs text-neutral-400">
-                Fast delivery in Indore
-              </p>
+        <div className="sm:hidden relative w-full overflow-hidden select-none py-1">
+          <div className="animate-marquee flex items-center">
+            <div className="flex items-center shrink-0">
+              {[...trustFeatures, ...trustFeatures].map((item, idx) => (
+                <div
+                  key={`trust-a-${idx}`}
+                  className="inline-flex items-center gap-2.5 px-4 shrink-0"
+                >
+                  <item.icon className="w-4 h-4 text-neutral-400 shrink-0" />
+                  <div className="text-left whitespace-nowrap">
+                    <h3 className="text-xs font-semibold text-white leading-tight">
+                      {item.title}
+                    </h3>
+                    <p className="text-[10px] text-neutral-400 leading-tight">
+                      {item.subtitle}
+                    </p>
+                  </div>
+                  <span className="text-neutral-700 text-xs ml-3 select-none">/</span>
+                </div>
+              ))}
             </div>
-
-            <div className="text-center">
-              <Shield className="w-6 h-6 sm:w-7 sm:h-7 text-neutral-400 mx-auto mb-2 sm:mb-3" />
-              <h3 className="text-xs sm:text-sm font-semibold text-white mb-0.5 sm:mb-1">
-                Secure Payment
-              </h3>
-              <p className="text-[10px] sm:text-xs text-neutral-400">
-                100% secure
-              </p>
-            </div>
-
-            <div className="text-center">
-              <ShoppingBag className="w-6 h-6 sm:w-7 sm:h-7 text-neutral-400 mx-auto mb-2 sm:mb-3" />
-              <h3 className="text-xs sm:text-sm font-semibold text-white mb-0.5 sm:mb-1">
-                Easy Returns
-              </h3>
-              <p className="text-[10px] sm:text-xs text-neutral-400">
-                30-day policy
-              </p>
+            <div className="flex items-center shrink-0">
+              {[...trustFeatures, ...trustFeatures].map((item, idx) => (
+                <div
+                  key={`trust-b-${idx}`}
+                  className="inline-flex items-center gap-2.5 px-4 shrink-0"
+                >
+                  <item.icon className="w-4 h-4 text-neutral-400 shrink-0" />
+                  <div className="text-left whitespace-nowrap">
+                    <h3 className="text-xs font-semibold text-white leading-tight">
+                      {item.title}
+                    </h3>
+                    <p className="text-[10px] text-neutral-400 leading-tight">
+                      {item.subtitle}
+                    </p>
+                  </div>
+                  <span className="text-neutral-700 text-xs ml-3 select-none">/</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      <section className="bg-black text-white pt-6 sm:pt-8 md:pt-10 pb-12 sm:pb-16 border-b border-neutral-900 select-none">
+      <section className="bg-black text-white pt-6 sm:pt-8 md:pt-10 pb-12 sm:pb-16 border-b border-neutral-900 select-none overflow-hidden">
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-center gap-2 sm:gap-2.5 overflow-x-auto scrollbar-hide pb-6 sm:pb-8">
+          <div className="flex items-center justify-start lg:justify-center gap-2 sm:gap-2.5 overflow-x-auto scrollbar-hide pb-6 sm:pb-8 -mr-4 sm:-mr-6 lg:mr-0 pr-4 sm:pr-6 lg:pr-0">
             {catalogTabs.map((tab) => (
               <button
                 key={tab.id}
@@ -917,9 +1075,8 @@ export const Home = () => {
               ? Array.from({ length: 8 }).map((_, idx) => (
                   <div key={idx} className="flex flex-col bg-transparent animate-pulse">
                     <div className="relative aspect-[3/4] overflow-hidden bg-neutral-900 rounded-sm">
-                      <div className="absolute top-2.5 left-2.5 w-16 h-3 bg-neutral-800 rounded-sm" />
                       <div className="absolute top-2.5 right-2.5 w-6 h-6 bg-neutral-800 rounded-full" />
-                      <div className="absolute bottom-2.5 left-2.5 w-24 h-3.5 bg-neutral-800 rounded-sm" />
+                      <div className="absolute bottom-2.5 left-0 w-24 h-3.5 bg-neutral-800" />
                     </div>
                     <div className="pt-3 pb-2 px-1 text-left space-y-1.5">
                       <div className="h-3.5 bg-neutral-800 rounded w-4/5" />
@@ -941,28 +1098,23 @@ export const Home = () => {
                         className="w-full h-full object-cover object-center select-none"
                         loading="lazy"
                       />
-                      <div className="absolute top-2.5 left-2.5 z-10">
-                        <span className="text-[9px] sm:text-[10px] font-mono font-bold tracking-[0.14em] text-white uppercase leading-none border-l-2 border-white pl-1.5 drop-shadow">
-                          {item.fit}
-                        </span>
-                      </div>
                       <button
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          toggleWishlist(item.id, item.name);
+                          toggleWishlist(item.id, item.name, item.price, item.image, item.category, item.fabric);
                         }}
                         className="absolute top-2.5 right-2.5 z-10 p-1.5 rounded-full bg-black/40 backdrop-blur-sm text-white/90 hover:text-red-500 transition-colors"
                         aria-label="Wishlist"
                       >
                         <Heart
                           className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition-colors ${
-                            wishlist[item.id] ? "fill-red-500 text-red-500" : "text-white"
+                            isItemWishlisted(item.id) ? "fill-red-500 text-red-500" : "text-white"
                           }`}
                         />
                       </button>
-                      <div className="absolute bottom-2.5 left-2.5 z-10">
-                        <span className="px-2 py-0.5 bg-black/85 backdrop-blur-sm text-[8px] sm:text-[9px] font-mono font-bold tracking-wider text-white uppercase">
+                      <div className="absolute bottom-2.5 left-0 z-10">
+                        <span className="px-2.5 py-0.5 bg-black/85 backdrop-blur-sm text-[8px] sm:text-[9px] font-mono font-bold tracking-wider text-white uppercase">
                           {item.fabric}
                         </span>
                       </div>
@@ -981,6 +1133,57 @@ export const Home = () => {
                     </div>
                   </div>
                 ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-8 sm:py-12 md:py-16 bg-black text-white border-t border-neutral-900 select-none overflow-hidden">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-5 sm:mb-8">
+            <p className="text-[11px] sm:text-xs font-extrabold tracking-[0.22em] text-neutral-400 uppercase mb-1.5 sm:mb-2">
+              CURATED WARDROBE
+            </p>
+            <h2 className="font-headline text-3xl sm:text-4xl md:text-5xl text-white uppercase tracking-tight leading-none mb-3 sm:mb-5">
+              SHOP BY CATEGORY
+            </h2>
+            <div className="flex items-center justify-center gap-1.5 sm:gap-2.5 w-full max-w-sm sm:max-w-md mx-auto">
+              {genderCategoryTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setSelectedGenderCategory(tab.id as "men" | "women" | "footwear")}
+                  className={`flex-1 sm:flex-initial text-center px-3.5 sm:px-6 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-sm font-bold tracking-wider uppercase transition-all duration-200 ${
+                    selectedGenderCategory === tab.id
+                      ? "bg-white text-black shadow-md border border-white"
+                      : "bg-transparent text-neutral-400 border border-neutral-800 hover:text-white hover:border-neutral-700"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-2 sm:gap-3 md:gap-3.5 lg:gap-4">
+            {genderCategoryData[selectedGenderCategory].map((cat) => (
+              <div
+                key={cat.id}
+                onClick={() => navigate(cat.path)}
+                className="cursor-pointer flex flex-col items-center"
+              >
+                <div className="w-full aspect-[3/4] overflow-hidden bg-neutral-900 border border-neutral-800">
+                  <img
+                    src={cat.image}
+                    alt={cat.name}
+                    className={`w-full h-full object-cover select-none ${cat.position || "object-center"}`}
+                    loading="lazy"
+                  />
+                </div>
+                <h3 className="font-bold text-[10px] sm:text-xs tracking-[0.12em] uppercase text-neutral-200 text-center mt-1.5 sm:mt-2 line-clamp-1">
+                  {cat.name}
+                </h3>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -1006,11 +1209,11 @@ export const Home = () => {
             href="https://www.instagram.com/b2cexports_since_2018/"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-3 px-8 sm:px-10 py-3.5 sm:py-4 text-xs sm:text-sm font-bold text-black bg-white hover:bg-neutral-200 transition-all rounded-sm uppercase tracking-wider group"
+            className="inline-flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-10 py-2.5 sm:py-4 text-[11px] sm:text-sm font-bold text-black bg-white hover:bg-neutral-200 transition-all rounded-sm uppercase tracking-wide sm:tracking-wider whitespace-nowrap max-w-full"
           >
-            <Instagram className="w-4 h-4 sm:w-5 sm:h-5 text-black" />
+            <Instagram className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-black shrink-0" />
             <span>FOLLOW @B2CEXPORTS_SINCE_2018</span>
-            <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+            <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
           </a>
         </div>
       </section>

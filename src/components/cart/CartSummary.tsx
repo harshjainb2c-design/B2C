@@ -23,35 +23,35 @@ export const CartSummary = ({
   const estimatedTotal = total + estimatedTax;
 
   return (
-    <div className="bg-black border border-neutral-800 p-6 text-white select-none">
-      <h2 className="text-sm font-mono uppercase tracking-[0.2em] text-white font-bold mb-4 pb-3 border-b border-neutral-900">
+    <div className="bg-neutral-950 border border-neutral-900 rounded-md p-5 sm:p-6 text-white select-none">
+      <h2 className="text-xs uppercase tracking-[0.2em] text-neutral-400 font-bold pb-3.5 mb-4 border-b border-neutral-900">
         Order Summary
       </h2>
 
-      <div className="space-y-3 mb-6 font-mono text-xs">
-        <div className="flex justify-between">
+      <div className="space-y-3.5 mb-5 text-xs">
+        <div className="flex justify-between items-center">
           <span className="text-neutral-400">
             Subtotal ({itemCount} {itemCount === 1 ? 'item' : 'items'})
           </span>
-          <span className="font-bold text-white">{formatPrice(total)}</span>
+          <span className="font-semibold text-white">{formatPrice(total)}</span>
         </div>
 
-        <div className="flex justify-between">
+        <div className="flex justify-between items-center">
           <span className="text-neutral-400">Estimated GST (5%)</span>
-          <span className="font-bold text-white">{formatPrice(estimatedTax)}</span>
+          <span className="font-semibold text-white">{formatPrice(estimatedTax)}</span>
         </div>
 
-        <div className="flex justify-between">
-          <span className="text-neutral-400">Express Delivery</span>
-          <span className="font-bold text-emerald-400">FREE</span>
+        <div className="flex justify-between items-center">
+          <span className="text-neutral-400">Shipping</span>
+          <span className="font-semibold text-emerald-400 uppercase tracking-wider text-[11px]">Free</span>
         </div>
 
-        <div className="border-t border-neutral-800 pt-3 mt-3">
+        <div className="border-t border-neutral-900 pt-3.5 mt-3.5">
           <div className="flex justify-between items-baseline">
-            <span className="text-xs uppercase tracking-wider text-neutral-300 font-bold">
-              Total Due
+            <span className="text-xs uppercase tracking-wider text-neutral-200 font-bold">
+              Total
             </span>
-            <span className="text-xl font-bold text-white">
+            <span className="text-xl font-bold text-white tracking-tight">
               {formatPrice(estimatedTotal)}
             </span>
           </div>
@@ -63,14 +63,14 @@ export const CartSummary = ({
           type="button"
           onClick={onCheckout}
           disabled={itemCount === 0}
-          className="w-full py-4 px-6 text-xs sm:text-sm font-bold uppercase tracking-[0.16em] text-black bg-white hover:bg-neutral-200 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:cursor-not-allowed transition-all"
+          className="w-full py-3.5 px-4 text-xs font-bold uppercase tracking-wider text-black bg-white disabled:opacity-40 disabled:cursor-not-allowed rounded-sm"
         >
           Proceed To Checkout
         </button>
       )}
 
-      <p className="text-[11px] font-mono text-neutral-500 text-center mt-4">
-        Applicable taxes and delivery calculated at checkout
+      <p className="text-[11px] text-neutral-500 text-center mt-3.5 tracking-wide">
+        Taxes and delivery calculated at checkout
       </p>
     </div>
   );

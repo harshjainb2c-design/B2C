@@ -6,11 +6,14 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+        inter: ['Inter', 'sans-serif'],
+      },
       zIndex: {
         '35': '35',
       },
       colors: {
-        // Beige/Warm Palette
         beige: {
           50: '#faf8f5',
           100: '#f5f1e8',
@@ -28,7 +31,6 @@ export default {
         taupe: '#9d8670',
         warmBrown: '#6b5a4d',
         terracotta: '#c87d5c',
-        // Design system tokens
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

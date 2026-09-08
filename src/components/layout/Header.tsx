@@ -12,30 +12,34 @@ import {
   LogOut,
   Package,
   ShieldAlert,
-  Flame,
-  Layers,
-  Sparkles,
 } from "lucide-react";
 import { useCart } from "../../hooks/useCart";
 import { useAuthStore } from "../../stores/authStore";
+import { useWishlistStore } from "../../stores/wishlistStore";
 import { CartDrawer } from "../cart/CartDrawer";
+import { useToast } from "../../hooks/use-toast";
 
 export const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const { itemCount } = useCart();
+  const wishlistCount = useWishlistStore((state) => state.items.length);
   const { user, isAdmin, logout } = useAuthStore();
+  const { toast } = useToast();
 
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
   const announcements = [
-    "LIMITED RELEASES. EXCLUSIVE DROPS. ELEGANCE IS NOW LIVE.",
-    "FREE EXPRESS DELIVERY ON ORDERS OVER ₹2,000",
-    "SPECIAL INTRODUCTORY OFFER • 10% OFF CODE: B2CFIRST",
+    "FREE SHIPPING ON ORDERS ABOVE ₹999",
+    "EXTRA 10% OFF • CODE: B2CFIRST",
+    "EASY 7-DAY RETURNS & EXCHANGES",
+    "CASH ON DELIVERY AVAILABLE",
   ];
   const [announcementIndex, setAnnouncementIndex] = useState(0);
 
@@ -51,6 +55,7 @@ export const Header = () => {
   const currentGender = searchParams.get("gender")?.toLowerCase();
   const currentCategory = searchParams.get("category")?.toLowerCase();
   const currentPath = location.pathname.toLowerCase();
+  const isHomePage = currentPath === "/";
 
   const isMenActive =
     currentPath === "/men" ||
@@ -77,6 +82,30 @@ export const Header = () => {
   }, []);
 
   useEffect(() => {
+    if (isDrawerOpen) {
+      document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    };
+  }, [isDrawerOpen]);
+
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isDrawerOpen) {
+        setIsDrawerOpen(false);
+      }
+    };
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [isDrawerOpen]);
+
+  useEffect(() => {
     setIsDrawerOpen(false);
     setIsProfileOpen(false);
     setIsMobileSearchOpen(false);
@@ -86,6 +115,79 @@ export const Header = () => {
     e.preventDefault();
     if (!searchTerm.trim()) return;
     navigate(`/products?search=${encodeURIComponent(searchTerm.trim())}`);
+  };
+
+  const handleVoiceSearch = () => {
+    const SpeechRecognition =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      toast({
+        title: "Voice Search Unavailable",
+        description: "Your browser does not support voice search.",
+      });
+      return;
+    }
+
+    if (isListening && recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+      return;
+    }
+
+    try {
+      const recognition = new SpeechRecognition();
+      recognitionRef.current = recognition;
+      recognition.lang = "en-IN";
+      recognition.continuous = false;
+      recognition.interimResults = true;
+
+      recognition.onstart = () => {
+        setIsListening(true);
+      };
+
+      recognition.onresult = (event: any) => {
+        const transcript = Array.from(event.results)
+          .map((res: any) => res[0].transcript)
+          .join("");
+        setSearchTerm(transcript);
+      };
+
+      recognition.onerror = (event: any) => {
+        setIsListening(false);
+        if (event.error === "not-allowed") {
+          toast({
+            title: "Microphone Access Denied",
+            description: "Please allow microphone access in your browser settings.",
+          });
+        }
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognition.start();
+    } catch {
+      setIsListening(false);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
+
+  const handleProfileClick = () => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    setIsProfileOpen((prev) => !prev);
   };
 
   const handleLogout = async () => {
@@ -98,13 +200,18 @@ export const Header = () => {
 
   return (
     <>
-      <div className="b2c-top-announcement-strip bg-[#262626] text-white text-[10px] sm:text-xs font-bold tracking-[0.22em] uppercase py-2 px-4 border-b border-neutral-800 select-none">
-        <div className="max-w-7xl mx-auto flex items-center justify-center text-center">
-          <span className="inline-block transition-all duration-300 truncate">
-            {announcements[announcementIndex]}
-          </span>
+      {isHomePage && (
+        <div className="b2c-top-announcement-strip bg-[#141414] text-neutral-300 text-[8.5px] sm:text-[11px] font-medium tracking-[0.08em] sm:tracking-[0.14em] uppercase py-1 sm:py-1.5 px-3 border-b border-neutral-900 select-none">
+          <div className="max-w-7xl mx-auto flex items-center justify-center text-center">
+            <span
+              key={announcementIndex}
+              className="inline-block animate-in fade-in duration-300 truncate"
+            >
+              {announcements[announcementIndex]}
+            </span>
+          </div>
         </div>
-      </div>
+      )}
 
       <header className="b2c-header-wrapper sticky top-0 z-40 bg-black text-white border-b border-neutral-900">
         <div className="b2c-nav-shell max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-black">
@@ -171,17 +278,34 @@ export const Header = () => {
                 className="b2c-search-wrapper hidden lg:flex items-center relative w-full max-w-[260px] xl:max-w-[320px]"
               >
                 <input
-                  type="search"
+                  type="text"
+                  autoComplete="off"
+                  spellCheck="false"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="What are you looking for?"
-                  className="b2c-search-input w-full bg-black text-white text-xs xl:text-sm pl-4 pr-16 py-2.5 rounded-full border border-neutral-800 focus:border-neutral-600 focus:outline-none transition-all placeholder:text-neutral-500"
+                  placeholder={isListening ? "Listening... Speak now" : "What are you looking for?"}
+                  className="b2c-search-input w-full bg-black text-white text-xs xl:text-sm pl-4 pr-20 py-2.5 rounded-full border border-neutral-800 focus:border-neutral-500 outline-none ring-0 placeholder:text-neutral-500"
+                  style={{ outline: "none", WebkitTapHighlightColor: "transparent" }}
                 />
-                <div className="b2c-search-icons absolute right-2.5 flex items-center gap-1.5 text-neutral-400">
+                <div className="b2c-search-icons absolute right-2.5 flex items-center gap-1 text-neutral-400">
+                  {searchTerm && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchTerm("")}
+                      className="p-1 hover:text-white transition-colors"
+                      aria-label="Clear search"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
                   <button
                     type="button"
-                    className="p-1 hover:text-white transition-colors"
-                    aria-label="Voice search"
+                    onClick={handleVoiceSearch}
+                    className={`p-1 transition-colors ${
+                      isListening ? "text-red-500 animate-pulse" : "hover:text-white"
+                    }`}
+                    aria-label={isListening ? "Listening... click to stop" : "Voice search"}
+                    title={isListening ? "Listening... click to stop" : "Voice search"}
                   >
                     <Mic className="w-3.5 h-3.5" />
                   </button>
@@ -207,87 +331,73 @@ export const Header = () => {
               <div className="b2c-profile-action relative" ref={profileMenuRef}>
                 <button
                   type="button"
-                  onClick={() => setIsProfileOpen(!isProfileOpen)}
+                  onClick={handleProfileClick}
                   className="p-2 text-white hover:bg-neutral-900 rounded-full transition-colors flex items-center"
                   aria-label="User profile"
                 >
                   <User className="w-5 h-5" />
                 </button>
 
-                {isProfileOpen && (
+                {user && isProfileOpen && (
                   <div className="b2c-profile-dropdown absolute right-0 mt-3 w-56 bg-black text-white rounded-2xl shadow-2xl border border-neutral-800 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                    {user ? (
-                      <>
-                        <div className="px-4 py-2.5 border-b border-neutral-900">
-                          <p className="text-xs text-neutral-400 uppercase font-semibold tracking-wider">
-                            Signed in as
-                          </p>
-                          <p className="text-sm font-bold text-white truncate">
-                            {user.fullName || user.email}
-                          </p>
-                        </div>
-                        <div className="py-1">
-                          <Link
-                            to="/profile"
-                            className="flex items-center px-4 py-2.5 text-sm text-neutral-300 hover:bg-neutral-900 hover:text-white transition-colors"
-                          >
-                            <User className="w-4 h-4 mr-3 text-neutral-400" />
-                            My Profile
-                          </Link>
-                          <Link
-                            to="/orders"
-                            className="flex items-center px-4 py-2.5 text-sm text-neutral-300 hover:bg-neutral-900 hover:text-white transition-colors"
-                          >
-                            <Package className="w-4 h-4 mr-3 text-neutral-400" />
-                            My Orders
-                          </Link>
-                          {isAdmin() && (
-                            <Link
-                              to="/admin"
-                              className="flex items-center px-4 py-2.5 text-sm text-red-400 hover:bg-neutral-900 transition-colors font-medium"
-                            >
-                              <ShieldAlert className="w-4 h-4 mr-3 text-red-400" />
-                              Admin Panel
-                            </Link>
-                          )}
-                        </div>
-                        <div className="border-t border-neutral-900 pt-1">
-                          <button
-                            type="button"
-                            onClick={handleLogout}
-                            className="flex w-full items-center px-4 py-2.5 text-sm text-neutral-400 hover:bg-neutral-900 hover:text-white transition-colors"
-                          >
-                            <LogOut className="w-4 h-4 mr-3 text-neutral-400" />
-                            Sign Out
-                          </button>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="py-1">
+                    <div className="px-4 py-2.5 border-b border-neutral-900">
+                      <p className="text-xs text-neutral-400 uppercase font-semibold tracking-wider">
+                        Signed in as
+                      </p>
+                      <p className="text-sm font-bold text-white truncate">
+                        {user.fullName || user.email}
+                      </p>
+                    </div>
+                    <div className="py-1">
+                      <Link
+                        to="/profile"
+                        className="flex items-center px-4 py-2.5 text-sm text-neutral-300 hover:bg-neutral-900 hover:text-white transition-colors"
+                      >
+                        <User className="w-4 h-4 mr-3 text-neutral-400" />
+                        My Profile
+                      </Link>
+                      <Link
+                        to="/orders"
+                        className="flex items-center px-4 py-2.5 text-sm text-neutral-300 hover:bg-neutral-900 hover:text-white transition-colors"
+                      >
+                        <Package className="w-4 h-4 mr-3 text-neutral-400" />
+                        My Orders
+                      </Link>
+                      {isAdmin() && (
                         <Link
-                          to="/login"
-                          className="flex items-center px-4 py-2.5 text-sm text-neutral-200 hover:bg-neutral-900 hover:text-white font-semibold transition-colors"
+                          to="/admin"
+                          className="flex items-center px-4 py-2.5 text-sm text-red-400 hover:bg-neutral-900 transition-colors font-medium"
                         >
-                          Login
+                          <ShieldAlert className="w-4 h-4 mr-3 text-red-400" />
+                          Admin Panel
                         </Link>
-                        <Link
-                          to="/register"
-                          className="flex items-center px-4 py-2.5 text-sm text-red-400 hover:bg-neutral-900 hover:text-red-300 font-semibold transition-colors"
-                        >
-                          Create Account
-                        </Link>
-                      </div>
-                    )}
+                      )}
+                    </div>
+                    <div className="border-t border-neutral-900 pt-1">
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="flex w-full items-center px-4 py-2.5 text-sm text-neutral-400 hover:bg-neutral-900 hover:text-white transition-colors"
+                      >
+                        <LogOut className="w-4 h-4 mr-3 text-neutral-400" />
+                        Sign Out
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
 
               <Link
                 to="/mywishlist"
-                className="b2c-wishlist-action p-2 text-white hover:text-red-400 hover:bg-neutral-900 rounded-full transition-colors"
+                className="b2c-wishlist-action p-2 text-white rounded-full relative"
                 aria-label="Wishlist"
               >
                 <Heart className="w-5 h-5" />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 bg-red-600 text-white text-[10px] font-extrabold min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center shadow-md">
+                    {wishlistCount > 9 ? "9+" : wishlistCount}
+                  </span>
+                )}
               </Link>
 
               <button
@@ -306,66 +416,50 @@ export const Header = () => {
             </div>
           </div>
 
-          <div className="md:hidden flex items-center justify-center space-x-6 py-2.5 border-t border-neutral-900 bg-black">
-            <Link
-              to="/products?gender=men"
-              className={`text-xs font-bold tracking-wider uppercase ${
-                isMenActive ? "text-white" : "text-neutral-400 hover:text-white"
-              }`}
-            >
-              <span className="relative pb-1 inline-block">
-                MEN
-                {isMenActive && (
-                  <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-white rounded-full" />
-                )}
-              </span>
-            </Link>
-            <Link
-              to="/products?gender=women"
-              className={`text-xs font-bold tracking-wider uppercase ${
-                isWomenActive ? "text-white" : "text-neutral-400 hover:text-white"
-              }`}
-            >
-              <span className="relative pb-1 inline-block">
-                WOMEN
-                {isWomenActive && (
-                  <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-white rounded-full" />
-                )}
-              </span>
-            </Link>
-            <Link
-              to="/products?category=footwear"
-              className={`text-xs font-bold tracking-wider uppercase ${
-                isSneakersActive ? "text-white" : "text-neutral-400 hover:text-white"
-              }`}
-            >
-              <span className="relative pb-1 inline-block">
-                SNEAKERS
-                {isSneakersActive && (
-                  <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-white rounded-full" />
-                )}
-              </span>
-            </Link>
-          </div>
-
           {isMobileSearchOpen && (
             <div className="lg:hidden pb-3 pt-1 border-t border-neutral-900 bg-black animate-in fade-in duration-200">
               <form onSubmit={handleSearchSubmit} className="relative">
                 <input
-                  type="search"
+                  type="text"
+                  autoComplete="off"
+                  spellCheck="false"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="What are you looking for?"
+                  placeholder={isListening ? "Listening... Speak now" : "What are you looking for?"}
                   autoFocus
-                  className="w-full bg-black text-white text-sm pl-4 pr-12 py-2 rounded-full border border-neutral-800 focus:outline-none focus:border-neutral-600 placeholder:text-neutral-500"
+                  className="w-full bg-black text-white text-sm pl-4 pr-20 py-2 rounded-full border border-neutral-800 focus:border-neutral-500 outline-none ring-0 placeholder:text-neutral-500"
+                  style={{ outline: "none", WebkitTapHighlightColor: "transparent" }}
                 />
-                <button
-                  type="submit"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-white p-1"
-                  aria-label="Search"
-                >
-                  <Search className="w-4 h-4" />
-                </button>
+                <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1 text-neutral-400">
+                  {searchTerm && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchTerm("")}
+                      className="p-1 hover:text-white transition-colors"
+                      aria-label="Clear search"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleVoiceSearch}
+                    className={`p-1 transition-colors ${
+                      isListening ? "text-red-500 animate-pulse" : "hover:text-white"
+                    }`}
+                    aria-label={isListening ? "Listening... click to stop" : "Voice search"}
+                    title={isListening ? "Listening... click to stop" : "Voice search"}
+                  >
+                    <Mic className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    type="submit"
+                    className="p-1 hover:text-white transition-colors"
+                    aria-label="Search"
+                  >
+                    <Search className="w-4 h-4" />
+                  </button>
+                </div>
               </form>
             </div>
           )}
@@ -380,87 +474,46 @@ export const Header = () => {
       )}
 
       <aside
-        className={`b2c-drawer-panel fixed top-0 left-0 bottom-0 w-[300px] sm:w-[360px] bg-black text-white border-r border-neutral-900 z-50 shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col ${
+        className={`b2c-drawer-panel fixed top-0 left-0 h-screen h-[100dvh] max-h-[100dvh] w-[300px] sm:w-[360px] bg-black text-white border-r border-neutral-900 z-50 transform transition-transform duration-300 ease-in-out flex flex-col overflow-hidden select-none ${
           isDrawerOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="b2c-drawer-top flex items-center justify-between px-5 py-4 border-b border-neutral-900 bg-black">
+        <div className="b2c-drawer-top flex-shrink-0 flex items-center justify-between px-5 py-4 border-b border-neutral-900 bg-black z-10">
           <span className="font-extrabold text-sm tracking-widest text-white uppercase">
             MENU
           </span>
           <button
             type="button"
             onClick={() => setIsDrawerOpen(false)}
-            className="p-1.5 rounded-full text-neutral-400 hover:text-white hover:bg-neutral-900 transition-colors"
+            className="p-1.5 rounded-full text-neutral-400 hover:text-white transition-colors"
             aria-label="Close drawer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="b2c-drawer-content flex-1 overflow-y-auto px-4 py-4 space-y-6 bg-black">
-          <div className="space-y-1">
-            <p className="px-3 text-[11px] font-black tracking-widest text-neutral-500 uppercase">
-              Main Categories
-            </p>
-            <div className="grid grid-cols-3 gap-2 pt-2">
-              <Link
-                to="/products?gender=men"
-                className={`flex flex-col items-center justify-center py-3 px-2 rounded-xl text-xs font-bold transition-all ${
-                  isMenActive
-                    ? "bg-neutral-900 text-white border border-neutral-700 shadow-sm"
-                    : "bg-black text-neutral-300 hover:bg-neutral-900 hover:text-white border border-neutral-800"
-                }`}
-              >
-                <Flame className="w-4 h-4 mb-1 text-red-500" />
-                MEN
-              </Link>
-              <Link
-                to="/products?gender=women"
-                className={`flex flex-col items-center justify-center py-3 px-2 rounded-xl text-xs font-bold transition-all ${
-                  isWomenActive
-                    ? "bg-neutral-900 text-white border border-neutral-700 shadow-sm"
-                    : "bg-black text-neutral-300 hover:bg-neutral-900 hover:text-white border border-neutral-800"
-                }`}
-              >
-                <Sparkles className="w-4 h-4 mb-1 text-purple-400" />
-                WOMEN
-              </Link>
-              <Link
-                to="/products?category=footwear"
-                className={`flex flex-col items-center justify-center py-3 px-2 rounded-xl text-xs font-bold transition-all ${
-                  isSneakersActive
-                    ? "bg-neutral-900 text-white border border-neutral-700 shadow-sm"
-                    : "bg-black text-neutral-300 hover:bg-neutral-900 hover:text-white border border-neutral-800"
-                }`}
-              >
-                <Layers className="w-4 h-4 mb-1 text-amber-400" />
-                SNEAKERS
-              </Link>
-            </div>
-          </div>
-
+        <div className="b2c-drawer-content flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 py-4 space-y-6 bg-black">
           <div className="space-y-1">
             <p className="px-3 text-[11px] font-black tracking-widest text-neutral-500 uppercase">
               Shop by Apparel
             </p>
             <Link
               to="/products?category=upper-wear"
-              className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-300 hover:bg-neutral-900 hover:text-white transition-colors"
+              className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-300 hover:text-white transition-colors"
             >
               <span>Upper Wear</span>
               <ChevronRight className="w-4 h-4 text-neutral-600" />
             </Link>
             <Link
               to="/products?category=bottom-wear"
-              className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-300 hover:bg-neutral-900 hover:text-white transition-colors"
+              className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-300 hover:text-white transition-colors"
             >
               <span>Bottom Wear</span>
               <ChevronRight className="w-4 h-4 text-neutral-600" />
             </Link>
             <Link
               to="/products?category=footwear"
-              className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-300 hover:bg-neutral-900 hover:text-white transition-colors"
+              className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-300 hover:text-white transition-colors"
             >
               <span>Footwear & Sneakers</span>
               <ChevronRight className="w-4 h-4 text-neutral-600" />
@@ -473,87 +526,70 @@ export const Header = () => {
             </p>
             <Link
               to="/products?collection=winter"
-              className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-300 hover:bg-neutral-900 hover:text-white transition-colors"
+              className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-300 hover:text-white transition-colors"
             >
               <span>Winter Collection</span>
               <ChevronRight className="w-4 h-4 text-neutral-600" />
             </Link>
             <Link
               to="/products?collection=summer"
-              className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-300 hover:bg-neutral-900 hover:text-white transition-colors"
+              className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-300 hover:text-white transition-colors"
             >
               <span>Summer Collection</span>
               <ChevronRight className="w-4 h-4 text-neutral-600" />
             </Link>
           </div>
 
-          <div className="space-y-1 pt-2 border-t border-neutral-900">
-            <p className="px-3 text-[11px] font-black tracking-widest text-neutral-500 uppercase">
-              Account & Orders
-            </p>
-            {user ? (
-              <>
+          {user && (
+            <div className="space-y-1 pt-2 border-t border-neutral-900">
+              <p className="px-3 text-[11px] font-black tracking-widest text-neutral-500 uppercase">
+                Account & Orders
+              </p>
+              <Link
+                to="/profile"
+                className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-300 hover:text-white transition-colors"
+              >
+                <span className="flex items-center gap-2">
+                  <User className="w-4 h-4 text-neutral-400" />
+                  Profile
+                </span>
+                <ChevronRight className="w-4 h-4 text-neutral-600" />
+              </Link>
+              <Link
+                to="/orders"
+                className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-300 hover:text-white transition-colors"
+              >
+                <span className="flex items-center gap-2">
+                  <Package className="w-4 h-4 text-neutral-400" />
+                  My Orders
+                </span>
+                <ChevronRight className="w-4 h-4 text-neutral-600" />
+              </Link>
+              {isAdmin() && (
                 <Link
-                  to="/profile"
-                  className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-300 hover:bg-neutral-900 hover:text-white transition-colors"
+                  to="/admin"
+                  className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-semibold text-red-400 transition-colors"
                 >
                   <span className="flex items-center gap-2">
-                    <User className="w-4 h-4 text-neutral-400" />
-                    Profile
+                    <ShieldAlert className="w-4 h-4 text-red-400" />
+                    Admin Dashboard
                   </span>
-                  <ChevronRight className="w-4 h-4 text-neutral-600" />
+                  <ChevronRight className="w-4 h-4 text-red-400" />
                 </Link>
-                <Link
-                  to="/orders"
-                  className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-300 hover:bg-neutral-900 hover:text-white transition-colors"
-                >
-                  <span className="flex items-center gap-2">
-                    <Package className="w-4 h-4 text-neutral-400" />
-                    My Orders
-                  </span>
-                  <ChevronRight className="w-4 h-4 text-neutral-600" />
-                </Link>
-                {isAdmin() && (
-                  <Link
-                    to="/admin"
-                    className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-semibold text-red-400 hover:bg-neutral-900 transition-colors"
-                  >
-                    <span className="flex items-center gap-2">
-                      <ShieldAlert className="w-4 h-4 text-red-400" />
-                      Admin Dashboard
-                    </span>
-                    <ChevronRight className="w-4 h-4 text-red-400" />
-                  </Link>
-                )}
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="flex items-center gap-2 w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-white hover:bg-neutral-900 transition-colors"
-                >
-                  <LogOut className="w-4 h-4 text-neutral-500" />
-                  Logout
-                </button>
-              </>
-            ) : (
-              <div className="flex gap-2 pt-2 px-1">
-                <Link
-                  to="/login"
-                  className="flex-1 py-2.5 text-center text-xs font-bold uppercase tracking-wider rounded-xl bg-white text-black hover:bg-neutral-200 transition-colors"
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/register"
-                  className="flex-1 py-2.5 text-center text-xs font-bold uppercase tracking-wider rounded-xl border border-neutral-700 text-white hover:bg-neutral-900 transition-colors"
-                >
-                  Register
-                </Link>
-              </div>
-            )}
-          </div>
+              )}
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex items-center gap-2 w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-white transition-colors"
+              >
+                <LogOut className="w-4 h-4 text-neutral-500" />
+                Logout
+              </button>
+            </div>
+          )}
         </div>
 
-        <div className="p-4 border-t border-neutral-900 bg-black text-xs text-neutral-400 flex items-center justify-between">
+        <div className="flex-shrink-0 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] border-t border-neutral-900 bg-black text-xs text-neutral-400 flex items-center justify-between z-10">
           <Link to="/contact" className="hover:text-white transition-colors">
             Contact Us
           </Link>

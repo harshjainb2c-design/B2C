@@ -1,19 +1,20 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-// Supabase configuration
-const supabaseUrl = __SUPABASE_URL__;
-const supabaseAnonKey = __SUPABASE_ANON_KEY__;
+declare const __SUPABASE_URL__: string;
+declare const __SUPABASE_ANON_KEY__: string;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error(
-    'Missing Supabase environment variables. Please check your .env file.'
-  );
-}
+const supabaseUrl =
+  (typeof __SUPABASE_URL__ !== 'undefined' && __SUPABASE_URL__) ||
+  (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_SUPABASE_URL) ||
+  'https://mujkpyeennxjkdvezpaz.supabase.co';
 
-// Singleton instance
+const supabaseAnonKey =
+  (typeof __SUPABASE_ANON_KEY__ !== 'undefined' && __SUPABASE_ANON_KEY__) ||
+  (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_SUPABASE_ANON_KEY) ||
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im11amtweWVlbm54amtkdmV6cGF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1ODUxMjIsImV4cCI6MjA3ODE2MTEyMn0.r67KrcqS-VU7-JFI-78m2iTxeLUJixQhp8Rm_ViNBDI';
+
 let supabaseInstance: SupabaseClient | null = null;
 
-// Get or create Supabase client (singleton pattern)
 function getSupabaseClient() {
   if (!supabaseInstance) {
     supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
@@ -32,10 +33,8 @@ function getSupabaseClient() {
   return supabaseInstance;
 }
 
-// Export singleton instance
 export const supabase = getSupabaseClient();
 
-// Helper function to get the current user
 export const getCurrentUser = async () => {
   const {
     data: { user },
@@ -49,7 +48,6 @@ export const getCurrentUser = async () => {
   return user;
 };
 
-// Helper function to get the current session
 export const getCurrentSession = async () => {
   const {
     data: { session },
@@ -63,7 +61,6 @@ export const getCurrentSession = async () => {
   return session;
 };
 
-// Helper function to sign out
 export const signOut = async () => {
   const { error } = await supabase.auth.signOut();
 

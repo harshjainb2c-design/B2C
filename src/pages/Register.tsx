@@ -1,66 +1,50 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { AuthLayout } from '../components/auth/AuthLayout';
 import { RegisterForm } from '../components/auth/RegisterForm';
 import { useAuth } from '../hooks/useAuth';
 import { RegisterRequest } from '../types/user';
 
 export const Register = () => {
   const navigate = useNavigate();
-  const { register: registerUser, isLoading } = useAuth();
+  const location = useLocation();
+  const { user, register: registerUser, isLoading } = useAuth();
   const [error, setError] = useState<string | null>(null);
+
+  const rawFrom = (location.state as any)?.from;
+  const destination = typeof rawFrom === 'string' ? rawFrom : rawFrom?.pathname || '/';
+
+  useEffect(() => {
+    if (user) {
+      navigate(destination, { replace: true });
+    }
+  }, [user, navigate, destination]);
 
   const handleRegister = async (data: RegisterRequest) => {
     try {
       setError(null);
       await registerUser(data);
-      navigate('/');
+      navigate(destination, { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create account');
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black text-white py-12 px-4 sm:px-6 lg:px-8 select-none">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
-          <span className="text-[11px] font-mono tracking-[0.24em] text-neutral-400 uppercase">
-            B2C Archive
-          </span>
-          <h1 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight text-white uppercase">
-            Create Account
-          </h1>
-          <p className="mt-2 text-xs font-mono text-neutral-400">
-            Already have an account?{' '}
-            <Link
-              to="/login"
-              className="text-white hover:text-neutral-300 underline underline-offset-4"
-            >
-              Sign In
-            </Link>
-          </p>
-        </div>
-
-        <div className="bg-black border border-neutral-800 p-6 sm:p-10 shadow-2xl">
-          <RegisterForm
-            onSubmit={handleRegister}
-            isLoading={isLoading}
-            error={error}
-          />
-
-          <div className="mt-6 pt-6 border-t border-neutral-900 text-center">
-            <p className="text-[11px] font-mono text-neutral-500">
-              By joining, you agree to our{' '}
-              <Link to="/terms" className="text-neutral-400 hover:text-white underline">
-                Terms
-              </Link>{' '}
-              and{' '}
-              <Link to="/privacy" className="text-neutral-400 hover:text-white underline">
-                Privacy
-              </Link>
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
+    <AuthLayout
+      headline="Get Started with Us"
+      subtitle="Complete these easy steps to register your account."
+      steps={[
+        { label: "Sign up your account", active: true },
+        { label: "Set up your profile" },
+        { label: "Explore curated drops" },
+      ]}
+    >
+      <RegisterForm
+        onSubmit={handleRegister}
+        isLoading={isLoading}
+        error={error}
+      />
+    </AuthLayout>
   );
 };

@@ -10,24 +10,14 @@ import {
   AuthResponse,
 } from '../types/user';
 
-/**
- * Authentication hook that provides login, register, and logout functionality
- * Uses TanStack Query for mutations and Zustand for state management
- */
 export const useAuth = () => {
   const queryClient = useQueryClient();
   const { user, session, isLoading, setUser, setSession, setLoading, logout: storeLogout, isAdmin } = useAuthStore();
 
-  /**
-   * Login mutation
-   */
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginRequest): Promise<AuthResponse> => {
-      setLoading(true);
-
-      // Sign in with Supabase
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email: credentials.email,
+        email: credentials.email.trim(),
         password: credentials.password,
       });
 
@@ -35,60 +25,49 @@ export const useAuth = () => {
         throw new Error(authError.message || 'Invalid email or password');
       }
 
-      if (!authData.user || !authData.session) {
+      if (!authData?.user || !authData?.session) {
         throw new Error('Invalid email or password');
       }
 
-      // Fetch user profile
-      let { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', authData.user.id)
-        .single();
+      let userRole: 'customer' | 'admin' = (authData.user.user_metadata?.role as 'customer' | 'admin') || 'customer';
+      let userFullName = authData.user.user_metadata?.full_name || authData.user.email?.split('@')[0] || 'User';
+      let userCreatedAt = authData.user.created_at || new Date().toISOString();
 
-      // If profile doesn't exist, create it
-      if (profileError && profileError.code === 'PGRST116') {
-        // Extract full name from user metadata or use email
-        const fullName = authData.user.user_metadata?.full_name || 
-                        authData.user.email?.split('@')[0] || 
-                        'User';
-
-        // Create profile - RLS policy allows users to insert their own profile
-        const { data: insertedProfile, error: createError } = await supabase
+      try {
+        const { data: profile } = await supabase
           .from('profiles')
-          .insert({
-            id: authData.user.id,
-            full_name: fullName,
-            role: 'customer',
-          })
-          .select()
-          .single();
+          .select('*')
+          .eq('id', authData.user.id)
+          .maybeSingle();
 
-        if (createError) {
-          throw new Error(`Failed to create user profile: ${createError.message}`);
+        if (profile) {
+          userFullName = profile.full_name || userFullName;
+          userRole = profile.role || userRole;
+          userCreatedAt = profile.created_at || userCreatedAt;
+        } else {
+          try {
+            await supabase.from('profiles').insert({
+              id: authData.user.id,
+              full_name: userFullName,
+              role: userRole,
+            });
+          } catch {
+          }
         }
-
-        profile = insertedProfile;
-      } else if (profileError) {
-        throw new Error(`Failed to fetch user profile: ${profileError.message}`);
+      } catch {
       }
 
-      if (!profile) {
-        throw new Error('User profile not found');
-      }
-
-      // Map to our types
       const mappedUser: User = {
         id: authData.user.id,
-        email: authData.user.email!,
-        fullName: profile.full_name,
-        role: profile.role,
-        createdAt: profile.created_at,
+        email: authData.user.email || '',
+        fullName: userFullName,
+        role: userRole,
+        createdAt: userCreatedAt,
       };
 
       const mappedSession: Session = {
         accessToken: authData.session.access_token,
-        refreshToken: authData.session.refresh_token,
+        refreshToken: authData.session.refresh_token || '',
         expiresAt: authData.session.expires_at || 0,
       };
 
@@ -97,25 +76,15 @@ export const useAuth = () => {
     onSuccess: (data) => {
       setUser(data.user);
       setSession(data.session);
-      setLoading(false);
-      // Invalidate any cached queries that depend on auth state
+      useAuthStore.setState({ isInitialized: true, isLoading: false });
       queryClient.invalidateQueries({ queryKey: ['user'] });
-    },
-    onError: () => {
-      setLoading(false);
     },
   });
 
-  /**
-   * Register mutation
-   */
   const registerMutation = useMutation({
     mutationFn: async (data: RegisterRequest): Promise<AuthResponse> => {
-      setLoading(true);
-
-      // Sign up with Supabase
       const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: data.email,
+        email: data.email.trim(),
         password: data.password,
         options: {
           data: {
@@ -125,7 +94,7 @@ export const useAuth = () => {
       });
 
       if (authError) {
-        if (authError.message.includes('already registered')) {
+        if (authError.message.toLowerCase().includes('already registered') || authError.message.toLowerCase().includes('already exists')) {
           throw new Error('User with this email already exists');
         }
         throw new Error(authError.message || 'Failed to create account');
@@ -139,29 +108,45 @@ export const useAuth = () => {
         throw new Error('Account created. Please confirm your email before signing in.');
       }
 
-      // The database trigger creates the profile independently of client authentication.
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', authData.user.id)
-        .single();
+      let userRole: 'customer' | 'admin' = (authData.user.user_metadata?.role as 'customer' | 'admin') || 'customer';
+      let userFullName = data.fullName || authData.user.user_metadata?.full_name || 'User';
+      let userCreatedAt = authData.user.created_at || new Date().toISOString();
 
-      if (profileError || !profile) {
-        throw new Error('Account was created, but its profile could not be loaded. Please try signing in again.');
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', authData.user.id)
+          .maybeSingle();
+
+        if (profile) {
+          userFullName = profile.full_name || userFullName;
+          userRole = profile.role || userRole;
+          userCreatedAt = profile.created_at || userCreatedAt;
+        } else {
+          try {
+            await supabase.from('profiles').insert({
+              id: authData.user.id,
+              full_name: userFullName,
+              role: userRole,
+            });
+          } catch {
+          }
+        }
+      } catch {
       }
 
-      // Map to our types
       const mappedUser: User = {
         id: authData.user.id,
-        email: authData.user.email!,
-        fullName: profile?.full_name || data.fullName,
-        role: profile?.role || 'customer',
-        createdAt: authData.user.created_at,
+        email: authData.user.email || '',
+        fullName: userFullName,
+        role: userRole,
+        createdAt: userCreatedAt,
       };
 
       const mappedSession: Session = {
         accessToken: authData.session.access_token,
-        refreshToken: authData.session.refresh_token,
+        refreshToken: authData.session.refresh_token || '',
         expiresAt: authData.session.expires_at || 0,
       };
 
@@ -170,33 +155,23 @@ export const useAuth = () => {
     onSuccess: (data) => {
       setUser(data.user);
       setSession(data.session);
-      setLoading(false);
+      useAuthStore.setState({ isInitialized: true, isLoading: false });
       queryClient.invalidateQueries({ queryKey: ['user'] });
-    },
-    onError: () => {
-      setLoading(false);
     },
   });
 
-  /**
-   * Logout mutation
-   */
   const logoutMutation = useMutation({
     mutationFn: async () => {
       await storeLogout();
     },
     onSuccess: () => {
-      // Clear all cached queries on logout
       queryClient.clear();
     },
   });
 
-  /**
-   * Reset password mutation
-   */
   const resetPasswordMutation = useMutation({
     mutationFn: async (data: ResetPasswordRequest) => {
-      const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
+      const { error } = await supabase.auth.resetPasswordForEmail(data.email.trim(), {
         redirectTo: `${window.location.origin}/reset-password`,
       });
 
@@ -209,20 +184,17 @@ export const useAuth = () => {
   });
 
   return {
-    // State
     user,
     session,
     isLoading: isLoading || loginMutation.isPending || registerMutation.isPending || logoutMutation.isPending,
     isAuthenticated: !!user,
     isAdmin: isAdmin(),
 
-    // Actions
     login: loginMutation.mutateAsync,
     register: registerMutation.mutateAsync,
     logout: logoutMutation.mutateAsync,
     resetPassword: resetPasswordMutation.mutateAsync,
 
-    // Mutation states
     loginError: loginMutation.error,
     registerError: registerMutation.error,
     resetPasswordError: resetPasswordMutation.error,
