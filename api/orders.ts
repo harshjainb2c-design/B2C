@@ -184,12 +184,18 @@ async function createOrder(req: VercelRequest, res: VercelResponse, userId: stri
   }
 
   for (const item of requestedItems) {
-    const product = productsById.get(item.productId)!;
-    const newStock = Math.max(0, product.stock - item.quantity);
-    await supabase.from('products').update({
-      stock: newStock,
-      updated_at: new Date().toISOString(),
-    }).eq('id', product.id);
+    const { data: rpcSuccess, error: rpcError } = await supabase.rpc('decrement_product_stock', {
+      p_product_id: item.productId,
+      p_quantity: item.quantity,
+    });
+    if (rpcError || !rpcSuccess) {
+      const product = productsById.get(item.productId)!;
+      const newStock = Math.max(0, product.stock - item.quantity);
+      await supabase.from('products').update({
+        stock: newStock,
+        updated_at: new Date().toISOString(),
+      }).eq('id', product.id);
+    }
   }
 
   try {

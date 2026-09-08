@@ -161,6 +161,16 @@ async function handleVerifyRazorpayPayment(req: AuthenticatedRequest, res: Verce
     return res.status(400).json({ error: { code: 'SIGNATURE_VERIFICATION_FAILED', message: 'Invalid payment signature' } });
   }
 
+  const { data: existingOrder } = await supabase
+    .from('orders')
+    .select('id')
+    .eq('payment_intent_id', razorpayPaymentId)
+    .maybeSingle();
+
+  if (existingOrder) {
+    return res.status(200).json({ success: true, orderId: existingOrder.id });
+  }
+
   const productIds = items.map((i: any) => i.productId);
   const { data: products } = await supabase
     .from('products')
@@ -206,13 +216,19 @@ async function handleVerifyRazorpayPayment(req: AuthenticatedRequest, res: Verce
   }
 
   for (const item of canonicalItems) {
-    const currentProduct = productMap.get(item.productId);
-    if (currentProduct) {
-      const nextStock = Math.max(0, currentProduct.stock - item.quantity);
-      await supabase
-        .from('products')
-        .update({ stock: nextStock })
-        .eq('id', item.productId);
+    const { data: rpcSuccess, error: rpcError } = await supabase.rpc('decrement_product_stock', {
+      p_product_id: item.productId,
+      p_quantity: item.quantity,
+    });
+    if (rpcError || !rpcSuccess) {
+      const currentProduct = productMap.get(item.productId);
+      if (currentProduct) {
+        const nextStock = Math.max(0, currentProduct.stock - item.quantity);
+        await supabase
+          .from('products')
+          .update({ stock: nextStock })
+          .eq('id', item.productId);
+      }
     }
   }
 
