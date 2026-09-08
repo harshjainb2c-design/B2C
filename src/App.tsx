@@ -10,10 +10,7 @@ import { useAuthStore } from './stores/authStore';
 
 const PageLoader = () => (
   <div className="min-h-screen bg-black text-white flex items-center justify-center font-inter">
-    <div className="text-center">
-      <div className="inline-block animate-spin rounded-full h-10 w-10 border-2 border-white/20 border-t-white"></div>
-      <p className="mt-4 text-xs font-inter font-bold tracking-widest text-neutral-400 uppercase">Loading Archive...</p>
-    </div>
+    <div className="inline-block animate-spin rounded-full h-8 w-8 border-2 border-white/20 border-t-white" />
   </div>
 );
 
@@ -185,7 +182,7 @@ const AppContent = () => {
           </Routes>
         </Suspense>
       </main>
-      {!isAuthPage && <Footer />}
+      {location.pathname === '/' && <Footer />}
     </div>
   );
 };

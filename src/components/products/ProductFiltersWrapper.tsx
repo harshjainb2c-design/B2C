@@ -44,7 +44,7 @@ export const ProductFiltersWrapper = ({
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="lg:hidden inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full text-xs font-inter font-bold uppercase tracking-wider text-white bg-neutral-900/80 border border-white/15 select-none"
+        className="lg:hidden inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-inter font-bold uppercase tracking-wider text-white bg-black border border-neutral-800 hover:border-neutral-700 select-none"
         aria-label="Open filters"
       >
         <SlidersHorizontal className="w-3.5 h-3.5 text-neutral-400" />

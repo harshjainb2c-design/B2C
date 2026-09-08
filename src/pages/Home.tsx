@@ -18,6 +18,7 @@ import {
 import { useToast } from "../hooks/use-toast";
 import { useCartStore } from "../stores/cartStore";
 import { useWishlistStore } from "../stores/wishlistStore";
+import { ProductCardSkeleton } from "../components/common/LoadingSkeleton";
 
 export const Home = () => {
   const navigate = useNavigate();
@@ -674,7 +675,7 @@ export const Home = () => {
                   to="/products"
                   className="inline-flex items-center bg-transparent text-white border border-neutral-700 text-xs sm:text-sm font-bold uppercase tracking-[0.18em] px-6 sm:px-7 py-3 sm:py-3.5 transition-all duration-300"
                 >
-                  VIEW ARCHIVE
+                  VIEW ALL
                 </Link>
               </div>
             </div>
@@ -752,7 +753,7 @@ export const Home = () => {
                   DROP 01
                 </h2>
                 <p className="text-xs sm:text-sm text-neutral-400 font-normal leading-relaxed max-w-xs mb-6">
-                  Curated streetwear archive. Heavyweight custom cuts and export silhouettes. Finite inventory, no restocks.
+                  Curated streetwear collection. Heavyweight custom cuts and quality fits.
                 </p>
               </div>
               <Link
@@ -1077,17 +1078,7 @@ export const Home = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
             {isCatalogLoading
               ? Array.from({ length: 8 }).map((_, idx) => (
-                  <div key={idx} className="flex flex-col bg-transparent animate-pulse">
-                    <div className="relative aspect-[3/4] overflow-hidden bg-neutral-900 rounded-sm">
-                      <div className="absolute top-2.5 right-2.5 w-6 h-6 bg-neutral-800 rounded-full" />
-                      <div className="absolute bottom-2.5 left-0 w-24 h-3.5 bg-neutral-800" />
-                    </div>
-                    <div className="pt-3 pb-2 px-1 text-left space-y-1.5">
-                      <div className="h-3.5 bg-neutral-800 rounded w-4/5" />
-                      <div className="h-2.5 bg-neutral-800/70 rounded w-1/2" />
-                      <div className="h-3.5 bg-neutral-800 rounded w-1/3 pt-0.5" />
-                    </div>
-                  </div>
+                  <ProductCardSkeleton key={idx} />
                 ))
               : currentProducts.map((item) => (
                   <div

@@ -15,10 +15,22 @@ export const OrderConfirmation = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-black py-12">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-2 border-white border-t-transparent mx-auto" />
-          <p className="mt-4 text-xs font-mono uppercase tracking-wider text-neutral-400">Loading order details...</p>
+      <div className="min-h-screen bg-black py-12 text-white font-inter select-none">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="max-w-md mx-auto space-y-3 text-center mb-8">
+            <div className="w-12 h-12 bg-neutral-900 rounded-full mx-auto animate-pulse" />
+            <div className="h-6 bg-neutral-900 rounded-lg w-48 mx-auto animate-pulse" />
+            <div className="h-3.5 bg-neutral-900 rounded w-64 mx-auto animate-pulse" />
+          </div>
+          <div className="bg-neutral-950 rounded-lg p-6 mb-6 space-y-4 animate-pulse">
+            <div className="h-4 bg-neutral-900 rounded w-32" />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="h-10 bg-neutral-900 rounded" />
+              <div className="h-10 bg-neutral-900 rounded" />
+              <div className="h-10 bg-neutral-900 rounded" />
+              <div className="h-10 bg-neutral-900 rounded" />
+            </div>
+          </div>
         </div>
       </div>
     );

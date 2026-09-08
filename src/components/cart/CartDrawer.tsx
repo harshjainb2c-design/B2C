@@ -107,7 +107,7 @@ export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
                 }}
                 className="px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider text-black bg-white border border-white"
               >
-                Shop Archive
+                Shop Products
               </button>
             </div>
           ) : (

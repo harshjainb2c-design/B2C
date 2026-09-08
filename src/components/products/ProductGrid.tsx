@@ -23,10 +23,10 @@ export const ProductGrid = ({ products, isLoading }: ProductGridProps) => {
 
   if (products.length === 0) {
     return (
-      <div className="text-center py-12 sm:py-20 rounded-2xl border border-white/10 bg-neutral-950/40 p-6 sm:p-10 font-inter">
-        <div className="w-12 h-12 rounded-full bg-neutral-900 border border-white/10 flex items-center justify-center mx-auto mb-4 text-neutral-400">
+      <div className="py-16 sm:py-24 text-center max-w-md mx-auto flex flex-col items-center select-none font-inter">
+        <div className="w-16 h-16 rounded-full bg-neutral-900 border border-white/10 flex items-center justify-center mb-5 text-neutral-400">
           <svg
-            className="h-6 w-6 stroke-[1.5]"
+            className="h-7 w-7 stroke-[1.5]"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -38,16 +38,16 @@ export const ProductGrid = ({ products, isLoading }: ProductGridProps) => {
             />
           </svg>
         </div>
-        <h3 className="font-inter text-lg sm:text-xl font-bold text-white uppercase tracking-wider mb-2">
+        <h2 className="font-headline text-2xl sm:text-3xl md:text-4xl text-white uppercase tracking-tight mb-2">
           No Products Found
-        </h3>
-        <p className="text-xs sm:text-sm text-neutral-400 max-w-sm mx-auto mb-6">
+        </h2>
+        <p className="text-xs sm:text-sm text-neutral-400 max-w-sm mx-auto mb-6 leading-relaxed">
           We couldn't find any products matching your active filters or search terms.
         </p>
         <button
           type="button"
           onClick={() => navigate('/products')}
-          className="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-white text-black text-xs font-inter font-bold uppercase tracking-wider border border-white"
+          className="inline-flex items-center justify-center px-6 py-2.5 rounded-lg bg-white text-black text-xs font-inter font-bold uppercase tracking-wider border border-white hover:bg-neutral-200 transition-colors"
         >
           Reset All Filters
         </button>

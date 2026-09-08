@@ -86,11 +86,11 @@ export const ProductFilters = ({
     selectedValue?: string;
     onChange: (value: string | undefined) => void;
   }) => (
-    <div className="border-b border-white/10 pb-3">
+    <div className="border-b border-white/10 pb-3.5">
       <button
         type="button"
         onClick={() => toggleSection(sectionKey)}
-        className="flex items-center justify-between w-full py-2 text-left"
+        className="flex items-center justify-between w-full py-1.5 text-left"
       >
         <h4 className="text-xs font-inter font-bold text-neutral-300 uppercase tracking-wide">{title}</h4>
         {expandedSections[sectionKey] ? (
@@ -103,7 +103,7 @@ export const ProductFilters = ({
       {expandedSections[sectionKey] && (
         <div className="mt-2 space-y-1.5">
           {options.map((option) => (
-            <label key={option.value} className="flex items-center cursor-pointer py-1">
+            <label key={option.value} className="flex items-center cursor-pointer py-0.5">
               <input
                 type="checkbox"
                 checked={selectedValue === option.value}
@@ -121,8 +121,8 @@ export const ProductFilters = ({
   );
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-neutral-950/40 p-4 sm:p-5 text-white select-none font-inter">
-      <div className="flex items-center justify-between mb-3 pb-2 border-b border-white/10">
+    <div className="text-white select-none font-inter">
+      <div className="flex items-center justify-between mb-4 pb-2 border-b border-white/10">
         <h3 className="text-xs font-inter font-extrabold text-white uppercase tracking-wider">Filters</h3>
         {hasActiveFilters && (
           <button
@@ -135,7 +135,7 @@ export const ProductFilters = ({
         )}
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-3.5">
         <FilterSection
           title="Price Range"
           sectionKey="price"
@@ -173,7 +173,7 @@ export const ProductFilters = ({
         <button
           type="button"
           onClick={clearAllFilters}
-          className="mt-4 w-full px-4 py-2.5 text-xs font-inter font-bold uppercase tracking-wider text-neutral-300 rounded-full border border-white/15 bg-neutral-900"
+          className="mt-5 mb-4 w-full px-4 py-2.5 text-xs font-inter font-bold uppercase tracking-wider text-neutral-300 rounded-lg border border-white/15 bg-transparent hover:border-white hover:text-white transition-colors"
         >
           Clear All Filters
         </button>

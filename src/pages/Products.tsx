@@ -1,6 +1,6 @@
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useRef, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useProducts } from '../hooks/useProducts';
+import { useInfiniteProducts } from '../hooks/useProducts';
 import {
   ProductGrid,
   ProductFilters,
@@ -11,13 +11,14 @@ import {
 } from '../components/products';
 import { ProductFiltersState } from '../components/products/ProductFilters';
 import { RetryableQuery } from '../components/common/RetryableQuery';
+import { ProductCardSkeleton } from '../components/common/LoadingSkeleton';
 
 export const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const observerTargetRef = useRef<HTMLDivElement>(null);
   
   const searchQuery = searchParams.get('search') || '';
   const sortBy = (searchParams.get('sort') || 'newest') as SortOption;
-  const currentPage = parseInt(searchParams.get('page') || '1', 10);
   
   const collection = searchParams.get('collection') || undefined;
   const filters: ProductFiltersState = useMemo(() => ({
@@ -30,7 +31,15 @@ export const Products = () => {
 
   const categoryFilter = filters.category || filters.clothingType;
   
-  const { data, isLoading, error, refetch } = useProducts({
+  const {
+    data,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    error,
+    refetch,
+  } = useInfiniteProducts({
     category: categoryFilter,
     collection: collection,
     gender: filters.gender,
@@ -38,9 +47,53 @@ export const Products = () => {
     priceRange: filters.priceRange,
     search: searchQuery || undefined,
     sortBy,
-    page: currentPage,
     limit: 12,
   });
+
+  const allProducts = useMemo(() => {
+    return data?.pages.flatMap((page) => page.products) || [];
+  }, [data]);
+
+  const isFetchingRef = useRef(isFetchingNextPage);
+  isFetchingRef.current = isFetchingNextPage;
+
+  const hasNextPageRef = useRef(hasNextPage);
+  hasNextPageRef.current = hasNextPage;
+
+  const handleFetchNext = useCallback(() => {
+    if (hasNextPageRef.current && !isFetchingRef.current) {
+      fetchNextPage();
+    }
+  }, [fetchNextPage]);
+
+  useEffect(() => {
+    const target = observerTargetRef.current;
+    if (!target) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          handleFetchNext();
+        }
+      },
+      { threshold: 0, rootMargin: '600px' }
+    );
+
+    observer.observe(target);
+
+    const handleScroll = () => {
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 700) {
+        handleFetchNext();
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [handleFetchNext]);
 
   const activeFilterCount = useMemo(() => {
     return Object.values(filters).filter(v => v !== undefined).length;
@@ -48,7 +101,7 @@ export const Products = () => {
 
   const pageTitle = useMemo(() => {
     if (searchQuery) return `Search: "${searchQuery}"`;
-    if (collection) return `${collection.toUpperCase()} DROP`;
+    if (collection) return `${collection.toUpperCase()}`;
     if (filters.category === 'upper' || filters.clothingType === 'upper') return 'T-SHIRTS & TOPS';
     if (filters.category === 'bottom' || filters.clothingType === 'bottom') return 'BOTTOMS & PANTS';
     if (filters.category === 'shoes' || filters.clothingType === 'shoes') return 'SNEAKERS & FOOTWEAR';
@@ -58,31 +111,14 @@ export const Products = () => {
   }, [searchQuery, collection, filters, categoryFilter]);
 
   const pageSubtitle = useMemo(() => {
-    if (searchQuery) return `Showing catalog matches for search query "${searchQuery}"`;
-    if (collection) return `Exclusive pieces from the ${collection} curated drop`;
-    if (categoryFilter) return 'Heavyweight cuts, relaxed drops, and tailored urban silhouettes';
-    return 'Explore heavyweight boxy cuts, custom streetwear tailored denim, and limited archive releases';
-  }, [searchQuery, collection, categoryFilter]);
-
-  const quickCategories = [
-    { id: 'all', label: 'All Products' },
-    { id: 'upper', label: 'T-Shirts & Tops' },
-    { id: 'bottom', label: 'Bottoms & Pants' },
-    { id: 'shoes', label: 'Sneakers' },
-    { id: 'accessories', label: 'Accessories' },
-  ];
-
-  const handleQuickCategory = useCallback((catId: string | undefined) => {
-    const params = new URLSearchParams(searchParams);
-    if (catId) {
-      params.set('category', catId);
-    } else {
-      params.delete('category');
-      params.delete('clothingType');
-    }
-    params.delete('page');
-    setSearchParams(params);
-  }, [searchParams, setSearchParams]);
+    if (searchQuery) return `Showing curated results for "${searchQuery}"`;
+    if (collection) return `Exclusive pieces from the ${collection.toLowerCase()} drop.`;
+    if (filters.category === 'upper' || filters.clothingType === 'upper') return 'Heavyweight tees, structured overshirts, and signature hoodies.';
+    if (filters.category === 'bottom' || filters.clothingType === 'bottom') return 'Relaxed cargos, raw denim, and tapered utility bottoms.';
+    if (filters.category === 'shoes' || filters.clothingType === 'shoes') return 'Limited-run sneakers and everyday footwear staples.';
+    if (filters.category === 'accessories' || filters.clothingType === 'accessories') return 'Essential headwear, leather accessories, and everyday carry.';
+    return 'Explore handcrafted streetwear silhouettes, premium fabrics, and limited releases.';
+  }, [searchQuery, collection, filters]);
 
   const handleFiltersChange = useCallback((newFilters: ProductFiltersState) => {
     const params = new URLSearchParams();
@@ -118,58 +154,26 @@ export const Products = () => {
   const handleSortChange = useCallback((newSort: SortOption) => {
     const params = new URLSearchParams(searchParams);
     params.set('sort', newSort);
-    params.delete('page');
     setSearchParams(params);
-  }, [searchParams, setSearchParams]);
-
-  const handlePageChange = useCallback((page: number) => {
-    const params = new URLSearchParams(searchParams);
-    if (page > 1) {
-      params.set('page', page.toString());
-    } else {
-      params.delete('page');
-    }
-    setSearchParams(params);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [searchParams, setSearchParams]);
 
   return (
     <div className="min-h-screen bg-black text-white relative overflow-x-clip select-none font-inter">
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 relative z-10">
-        <div className="mb-6 sm:mb-8 pb-5 border-b border-neutral-900">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-3">
-            <div>
+        <div className="mb-4 sm:mb-8 pb-3 sm:pb-5 border-b-0 sm:border-b sm:border-neutral-900">
+          <div>
+            {collection && (
               <span className="text-[10px] sm:text-xs font-inter font-bold tracking-[0.22em] text-neutral-400 uppercase block mb-1">
-                {collection ? `COLLECTION · ${collection.toUpperCase()}` : 'ARCHIVE · B2C 2026'}
+                COLLECTION · {collection.toUpperCase()}
               </span>
-              <h1 className="font-inter text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-white uppercase tracking-tight leading-none">
-                {pageTitle}
-              </h1>
-            </div>
-            <p className="text-xs sm:text-sm text-neutral-400 max-w-md font-normal leading-relaxed">
+            )}
+            <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-white uppercase tracking-tight leading-none">
+              {pageTitle}
+            </h1>
+            <p className="text-xs sm:text-sm text-neutral-400 font-inter mt-2.5 max-w-xl leading-relaxed">
               {pageSubtitle}
             </p>
           </div>
-        </div>
-
-        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-3 mb-4 sm:mb-6">
-          {quickCategories.map((cat) => {
-            const isActive = (!categoryFilter && cat.id === 'all') || categoryFilter === cat.id;
-            return (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => handleQuickCategory(cat.id === 'all' ? undefined : cat.id)}
-                className={`shrink-0 px-4 py-2 rounded-full text-xs font-inter font-bold ${
-                  isActive
-                    ? 'bg-white text-black border border-white'
-                    : 'bg-transparent text-neutral-400 border border-neutral-800'
-                }`}
-              >
-                {cat.label}
-              </button>
-            );
-          })}
         </div>
 
         <div className="mb-4 sm:mb-6">
@@ -180,24 +184,17 @@ export const Products = () => {
         </div>
 
         <div className="flex lg:hidden items-center justify-between gap-3 mb-5">
-          <div className="flex items-center gap-2.5">
-            <ProductFiltersWrapper activeFilterCount={activeFilterCount}>
-              <ProductFilters
-                filters={filters}
-                onFiltersChange={handleFiltersChange}
-              />
-            </ProductFiltersWrapper>
-            {!isLoading && data && (
-              <span className="text-xs font-inter text-neutral-400 font-medium">
-                {data.total} {data.total === 1 ? 'piece' : 'pieces'}
-              </span>
-            )}
-          </div>
+          <ProductFiltersWrapper activeFilterCount={activeFilterCount}>
+            <ProductFilters
+              filters={filters}
+              onFiltersChange={handleFiltersChange}
+            />
+          </ProductFiltersWrapper>
           <ProductSort value={sortBy} onChange={handleSortChange} />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <div className="hidden lg:block lg:col-span-1">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+          <div className="hidden lg:block lg:col-span-1 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto scrollbar-hide pr-1">
             <ProductFiltersWrapper activeFilterCount={activeFilterCount}>
               <ProductFilters
                 filters={filters}
@@ -213,94 +210,57 @@ export const Products = () => {
               </div>
             )}
 
-            {!isLoading && !error && data && (
+            {!isLoading && !error && allProducts.length > 0 && (
               <div className="hidden lg:flex items-center justify-between pb-3 mb-5 border-b border-white/10">
-                <p className="text-xs sm:text-sm text-neutral-400">
-                  Showing <span className="font-bold text-white">{data.products?.length || 0}</span> of <span className="font-bold text-white">{data.total}</span> products
-                  {collection && (
-                    <span className="ml-1">
-                      in <span className="font-semibold text-white capitalize">{collection} Collection</span>
-                    </span>
-                  )}
-                  {activeFilterCount > 0 && (
-                    <span className="ml-1">
-                      with <span className="font-semibold text-white">{activeFilterCount} filter{activeFilterCount > 1 ? 's' : ''}</span>
-                    </span>
-                  )}
-                  {searchQuery && (
-                    <span className="ml-1">
-                      matching <span className="font-semibold text-white">"{searchQuery}"</span>
-                    </span>
-                  )}
-                </p>
+                <div>
+                  {(collection || activeFilterCount > 0 || searchQuery) ? (
+                    <p className="text-xs sm:text-sm text-neutral-400">
+                      {collection && (
+                        <span>
+                          <span className="font-semibold text-white capitalize">{collection}</span> Collection
+                        </span>
+                      )}
+                      {activeFilterCount > 0 && (
+                        <span className="ml-1">
+                          • <span className="font-semibold text-white">{activeFilterCount} filter{activeFilterCount > 1 ? 's' : ''}</span>
+                        </span>
+                      )}
+                      {searchQuery && (
+                        <span className="ml-1">
+                          • <span className="font-semibold text-white">"{searchQuery}"</span>
+                        </span>
+                      )}
+                    </p>
+                  ) : <div />}
+                </div>
                 <ProductSort value={sortBy} onChange={handleSortChange} />
               </div>
             )}
 
             {!error && (
-              <ProductGrid
-                products={data?.products || []}
-                isLoading={isLoading}
-              />
+              <div>
+                <ProductGrid
+                  products={allProducts}
+                  isLoading={isLoading}
+                />
+
+                {isFetchingNextPage && (
+                  <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-5 mt-3 sm:mt-4 md:mt-5">
+                    {Array.from({ length: 4 }).map((_, index) => (
+                      <ProductCardSkeleton key={index} />
+                    ))}
+                  </div>
+                )}
+              </div>
             )}
 
-            {!isLoading && data && data.totalPages > 1 && (
-              <div className="mt-8 sm:mt-12 flex items-center justify-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className="px-4 py-2 rounded-full text-xs font-inter font-bold uppercase tracking-wider text-neutral-300 bg-neutral-900/70 border border-white/15 disabled:opacity-25 disabled:cursor-not-allowed"
-                >
-                  Previous
-                </button>
+            <div ref={observerTargetRef} className="h-10 w-full pointer-events-none" />
 
-                <div className="flex gap-1.5">
-                  {Array.from({ length: data.totalPages }, (_, i) => i + 1).map((page) => {
-                    const showPage =
-                      page === 1 ||
-                      page === data.totalPages ||
-                      (page >= currentPage - 1 && page <= currentPage + 1);
-
-                    if (!showPage) {
-                      if (page === currentPage - 2 || page === currentPage + 2) {
-                        return (
-                          <span
-                            key={page}
-                            className="w-9 h-9 flex items-center justify-center text-xs text-neutral-600 font-inter"
-                          >
-                            ...
-                          </span>
-                        );
-                      }
-                      return null;
-                    }
-
-                    return (
-                      <button
-                        key={page}
-                        type="button"
-                        onClick={() => handlePageChange(page)}
-                        className={`w-9 h-9 rounded-full text-xs font-inter font-bold flex items-center justify-center ${
-                          currentPage === page
-                            ? 'text-black bg-white border border-white'
-                            : 'text-neutral-400 bg-neutral-900/70 border border-white/15'
-                        }`}
-                      >
-                        {page}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === data.totalPages}
-                  className="px-4 py-2 rounded-full text-xs font-inter font-bold uppercase tracking-wider text-neutral-300 bg-neutral-900/70 border border-white/15 disabled:opacity-25 disabled:cursor-not-allowed"
-                >
-                  Next
-                </button>
+            {!isLoading && !hasNextPage && allProducts.length > 0 && (
+              <div className="py-12 text-center border-t border-white/10 mt-8">
+                <p className="text-xs font-inter font-medium tracking-wider text-neutral-500 uppercase">
+                  You have viewed all products
+                </p>
               </div>
             )}
           </div>

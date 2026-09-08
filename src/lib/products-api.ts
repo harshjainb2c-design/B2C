@@ -1,79 +1,100 @@
 import { supabase } from './supabase';
 import { Product, ProductFilters, ProductListResponse } from '../types/product';
 
-/**
- * Direct Supabase implementation for products API
- * Used for local development when Vercel functions aren't available
- */
-
 export const productsApi = {
-  /**
-   * Fetch products with filters
-   */
   async getProducts(filters?: ProductFilters): Promise<ProductListResponse> {
     try {
       const page = filters?.page || 1;
       const limit = filters?.limit || 12;
       const offset = (page - 1) * limit;
 
-      // Build query
-      let query = supabase
-        .from('products')
-        .select('*', { count: 'exact' });
-      
-      // Only filter by active status if not explicitly requesting all products
-      if (filters?.includeInactive !== true) {
-        query = query.eq('is_active', true);
+      const params = new URLSearchParams();
+      if (filters?.category) params.set('category', filters.category);
+      if (filters?.collection) params.set('collection', filters.collection);
+      if (filters?.search) params.set('search', filters.search);
+      params.set('page', String(page));
+      params.set('limit', String(limit));
+
+      let fetchedData: ProductListResponse | null = null;
+
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3500);
+        const res = await fetch(`/api/products?${params.toString()}`, {
+          signal: controller.signal,
+          headers: { 'Content-Type': 'application/json' },
+        });
+        clearTimeout(timeoutId);
+
+        if (res.ok) {
+          const json = await res.json();
+          if (json && Array.isArray(json.products)) {
+            fetchedData = json;
+          }
+        }
+      } catch {}
+
+      if (!fetchedData) {
+        let query = supabase.from('products').select('*', { count: 'exact' });
+
+        if (filters?.includeInactive !== true) {
+          query = query.eq('is_active', true);
+        }
+
+        if (filters?.category) {
+          query = query.or(`category.eq.${filters.category},categories.cs.{${filters.category}}`);
+        }
+
+        if (filters?.collection) {
+          query = query.eq('collection', filters.collection);
+        }
+
+        if (filters?.search) {
+          query = query.ilike('name', `%${filters.search}%`);
+        }
+
+        query = query
+          .order('created_at', { ascending: false })
+          .range(offset, offset + limit - 1);
+
+        const { data: products, error, count } = await query;
+
+        if (error) {
+          throw new Error(`Failed to fetch products: ${error.message}`);
+        }
+
+        const transformedProducts = (products || []).map((product: any) => ({
+          ...product,
+          isActive: product.is_active,
+          categories: product.categories || [],
+          collection: product.collection || undefined,
+        }));
+
+        fetchedData = {
+          products: transformedProducts,
+          total: count || 0,
+          page,
+          totalPages: count ? Math.ceil(count / limit) : 0,
+        };
       }
 
-      // Apply category filter - check both single category and categories array
-      if (filters?.category) {
-        // Use OR condition to check both category field and categories array
-        query = query.or(`category.eq.${filters.category},categories.cs.{${filters.category}}`);
-      }
+      let filteredProducts = fetchedData.products || [];
 
-      // Apply collection filter
-      if (filters?.collection) {
-        query = query.eq('collection', filters.collection);
-      }
-
-      // Apply search filter
-      if (filters?.search) {
-        query = query.ilike('name', `%${filters.search}%`);
-      }
-
-      // Apply pagination
-      query = query
-        .order('created_at', { ascending: false })
-        .range(offset, offset + limit - 1);
-
-      const { data: products, error, count } = await query;
-
-      if (error) {
-        throw new Error(`Failed to fetch products: ${error.message}`);
-      }
-
-      // Apply client-side filters for fields not in database
-      let filteredProducts = products || [];
-      
-      // Filter by price range
       if (filters?.priceRange && filteredProducts.length > 0) {
         const [min, max] = filters.priceRange.split('-').map(Number);
-        filteredProducts = filteredProducts.filter(p => p.price >= min && p.price <= max);
+        filteredProducts = filteredProducts.filter((p) => p.price >= min && p.price <= max);
       }
 
-      // Filter by gender (check in specifications or name)
       if (filters?.gender && filteredProducts.length > 0) {
-        filteredProducts = filteredProducts.filter(p => {
+        filteredProducts = filteredProducts.filter((p) => {
           const nameMatch = p.name.toLowerCase().includes(filters.gender!.toLowerCase());
           const specMatch = p.specifications?.gender?.toLowerCase() === filters.gender!.toLowerCase();
           return nameMatch || specMatch;
         });
       }
 
-      // Filter by item type (check in specifications, name, or category)
       if (filters?.itemType && filteredProducts.length > 0) {
-        filteredProducts = filteredProducts.filter(p => {
+        filteredProducts = filteredProducts.filter((p) => {
           const nameMatch = p.name.toLowerCase().includes(filters.itemType!.toLowerCase());
           const categoryMatch = p.category?.toLowerCase().includes(filters.itemType!.toLowerCase());
           const specMatch = p.specifications?.type?.toLowerCase() === filters.itemType!.toLowerCase();
@@ -81,10 +102,8 @@ export const productsApi = {
         });
       }
 
-      // Apply client-side sorting if sortBy is provided
-      let sortedProducts = filteredProducts;
-      if (filters?.sortBy && sortedProducts.length > 0) {
-        sortedProducts = [...sortedProducts].sort((a, b) => {
+      if (filters?.sortBy && filteredProducts.length > 0) {
+        filteredProducts = [...filteredProducts].sort((a, b) => {
           switch (filters.sortBy) {
             case 'price-asc':
               return a.price - b.price;
@@ -96,31 +115,17 @@ export const productsApi = {
               return b.name.localeCompare(a.name);
             case 'newest':
             default:
-              // Already sorted by created_at desc in query
               return 0;
           }
         });
       }
 
-      // Adjust count and pagination based on client-side filtering
-      const actualCount = sortedProducts.length;
-      const hasClientFilters = filters?.priceRange || filters?.gender || filters?.itemType;
-      
-      // If we have client-side filters, we need to recalculate pagination
-      const finalTotal = hasClientFilters ? actualCount : (count || 0);
-      const totalPages = Math.ceil(finalTotal / limit);
-
-      // Transform products to match Product type (is_active -> isActive)
-      const transformedProducts = sortedProducts.map((product: any) => ({
-        ...product,
-        isActive: product.is_active,
-        categories: product.categories || [],
-        collection: product.collection || undefined,
-      }));
+      const total = fetchedData.total || filteredProducts.length;
+      const totalPages = Math.ceil(total / limit) || 1;
 
       return {
-        products: transformedProducts,
-        total: finalTotal,
+        products: filteredProducts,
+        total,
         page,
         totalPages,
       };
@@ -129,10 +134,24 @@ export const productsApi = {
     }
   },
 
-  /**
-   * Fetch a single product by ID
-   */
   async getProduct(id: string): Promise<Product> {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3500);
+      const res = await fetch(`/api/products?id=${encodeURIComponent(id)}`, {
+        signal: controller.signal,
+        headers: { 'Content-Type': 'application/json' },
+      });
+      clearTimeout(timeoutId);
+
+      if (res.ok) {
+        const product = await res.json();
+        if (product && product.id) {
+          return product;
+        }
+      }
+    } catch {}
+
     const { data: product, error } = await supabase
       .from('products')
       .select('*')
@@ -151,7 +170,6 @@ export const productsApi = {
       throw new Error('Product not found');
     }
 
-    // Transform to match Product type (is_active -> isActive)
     return {
       ...product,
       isActive: product.is_active,

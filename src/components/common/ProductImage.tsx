@@ -39,7 +39,9 @@ export const ProductImage = ({
   return (
     <div className={`relative ${aspectClass} bg-neutral-900 overflow-hidden ${className}`}>
       {imageState === 'loading' && (
-        <div className="absolute inset-0 bg-neutral-800 animate-pulse" />
+        <div className="absolute inset-0 bg-neutral-900">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.06] to-transparent -translate-x-full animate-shimmer" />
+        </div>
       )}
 
       {imageState !== 'error' && (

@@ -16,6 +16,31 @@ export const useAuth = () => {
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginRequest): Promise<AuthResponse> => {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4000);
+        const res = await fetch('/api/auth?action=login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: credentials.email.trim(), password: credentials.password }),
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.user && data.session) {
+            try {
+              await supabase.auth.setSession({
+                access_token: data.session.accessToken,
+                refresh_token: data.session.refreshToken,
+              });
+            } catch {}
+            return data;
+          }
+        }
+      } catch {}
+
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email: credentials.email.trim(),
         password: credentials.password,
@@ -51,11 +76,9 @@ export const useAuth = () => {
               full_name: userFullName,
               role: userRole,
             });
-          } catch {
-          }
+          } catch {}
         }
-      } catch {
-      }
+      } catch {}
 
       const mappedUser: User = {
         id: authData.user.id,
@@ -83,6 +106,33 @@ export const useAuth = () => {
 
   const registerMutation = useMutation({
     mutationFn: async (data: RegisterRequest): Promise<AuthResponse> => {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4000);
+        const res = await fetch('/api/auth?action=register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+
+        if (res.ok) {
+          const resData = await res.json();
+          if (resData && resData.user) {
+            if (resData.session) {
+              try {
+                await supabase.auth.setSession({
+                  access_token: resData.session.accessToken,
+                  refresh_token: resData.session.refreshToken,
+                });
+              } catch {}
+            }
+            return resData;
+          }
+        }
+      } catch {}
+
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.email.trim(),
         password: data.password,
@@ -130,11 +180,9 @@ export const useAuth = () => {
               full_name: userFullName,
               role: userRole,
             });
-          } catch {
-          }
+          } catch {}
         }
-      } catch {
-      }
+      } catch {}
 
       const mappedUser: User = {
         id: authData.user.id,

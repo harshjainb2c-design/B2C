@@ -30,10 +30,35 @@ export const Orders = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center font-inter">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-white border-t-transparent mx-auto mb-3" />
-          <p className="text-xs text-neutral-500">Loading orders...</p>
+      <div className="min-h-screen bg-black text-white py-6 sm:py-8 font-inter select-none">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6">
+          <div className="mb-5 space-y-2">
+            <div className="h-3.5 bg-neutral-900 rounded w-12 animate-pulse" />
+            <div className="h-6 bg-neutral-900 rounded w-32 animate-pulse" />
+            <div className="h-3 bg-neutral-900 rounded w-16 animate-pulse" />
+          </div>
+          <div className="flex gap-1.5 mb-4">
+            <div className="h-7 w-16 bg-neutral-900 rounded-full animate-pulse" />
+            <div className="h-7 w-20 bg-neutral-900 rounded-full animate-pulse" />
+            <div className="h-7 w-20 bg-neutral-900 rounded-full animate-pulse" />
+          </div>
+          <div className="space-y-2.5">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="bg-neutral-950 rounded-lg p-4 space-y-3 animate-pulse">
+                <div className="flex justify-between items-start">
+                  <div className="space-y-1.5 flex-1">
+                    <div className="h-4 bg-neutral-900 rounded w-28" />
+                    <div className="h-3 bg-neutral-900 rounded w-20" />
+                  </div>
+                  <div className="h-5 bg-neutral-900 rounded w-16" />
+                </div>
+                <div className="flex gap-2 pt-1">
+                  <div className="w-10 h-12 bg-neutral-900 rounded" />
+                  <div className="w-10 h-12 bg-neutral-900 rounded" />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );

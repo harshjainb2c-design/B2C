@@ -154,6 +154,10 @@
     animation: marquee 28s linear infinite;
     will-change: transform;
   }
+
+  .animate-shimmer {
+    animation: shimmer 2s infinite linear;
+  }
 }
 
 @keyframes marquee {
@@ -162,5 +166,14 @@
   }
   100% {
     transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
   }
 }

@@ -224,9 +224,10 @@ export const ProductManager = () => {
 
         <div className="bg-neutral-950 border border-white/10 rounded-2xl overflow-hidden">
           {isLoading && (
-            <div className="text-center py-20">
-              <div className="animate-spin rounded-full h-10 w-10 border-2 border-white border-t-transparent mx-auto"></div>
-              <p className="mt-4 text-xs font-bold uppercase tracking-wider text-neutral-400">Loading catalog...</p>
+            <div className="p-6 space-y-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="h-12 bg-neutral-900 rounded-lg animate-pulse" />
+              ))}
             </div>
           )}
 

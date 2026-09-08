@@ -109,9 +109,13 @@ export const OrderManager = () => {
 
         <div className="space-y-3">
           {isLoading && (
-            <div className="bg-neutral-950 rounded-2xl border border-white/10 p-16 text-center">
-              <div className="animate-spin rounded-full h-10 w-10 border-2 border-white border-t-transparent mx-auto"></div>
-              <p className="mt-4 text-xs font-bold uppercase tracking-wider text-neutral-400">Loading orders...</p>
+            <div className="space-y-3">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="bg-neutral-950 rounded-2xl p-5 space-y-3 animate-pulse">
+                  <div className="h-5 bg-neutral-900 rounded w-1/3" />
+                  <div className="h-4 bg-neutral-900 rounded w-1/4" />
+                </div>
+              ))}
             </div>
           )}
 

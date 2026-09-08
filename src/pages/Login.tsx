@@ -36,7 +36,7 @@ export const Login = () => {
       subtitle="Complete these easy steps to access your account."
       steps={[
         { label: "Sign in to your account", active: true },
-        { label: "Access your bag & archive" },
+        { label: "Access your bag & wishlist" },
         { label: "Track orders & deliveries" },
       ]}
     >

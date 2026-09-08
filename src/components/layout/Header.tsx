@@ -8,6 +8,7 @@ import {
   Heart,
   ShoppingCart,
   Mic,
+  ChevronLeft,
   ChevronRight,
   LogOut,
   Package,
@@ -67,6 +68,7 @@ export const Header = () => {
     currentPath === "/sneakers" ||
     (currentPath === "/products" &&
       (currentCategory === "footwear" || currentCategory === "sneakers"));
+  const isProductDetailPage = /^\/products\/[^/]+$/.test(currentPath);
 
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
@@ -217,10 +219,29 @@ export const Header = () => {
         <div className="b2c-nav-shell max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-black">
           <div className="b2c-nav-grid flex items-center justify-between h-16 md:h-20 gap-2 md:gap-6 bg-black">
             <div className="b2c-left-section flex items-center gap-3 lg:gap-6 flex-1 min-w-0">
+              {isProductDetailPage ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (window.history.length > 1) {
+                      navigate(-1);
+                    } else {
+                      navigate("/products");
+                    }
+                  }}
+                  className="b2c-back-btn md:hidden p-2 -ml-2 rounded-lg text-white hover:bg-neutral-900 transition-colors flex items-center justify-center"
+                  aria-label="Back"
+                >
+                  <ChevronLeft className="w-6 h-6 stroke-[2.2]" />
+                </button>
+              ) : null}
+
               <button
                 type="button"
                 onClick={() => setIsDrawerOpen(true)}
-                className="b2c-drawer-btn p-2 -ml-2 rounded-lg text-white hover:bg-neutral-900 transition-colors"
+                className={`b2c-drawer-btn p-2 rounded-lg text-white hover:bg-neutral-900 transition-colors ${
+                  isProductDetailPage ? "hidden md:flex -ml-2" : "-ml-2"
+                }`}
                 aria-label="Open navigation menu"
               >
                 <Menu className="w-6 h-6 stroke-[2.2]" />
@@ -284,8 +305,8 @@ export const Header = () => {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder={isListening ? "Listening... Speak now" : "What are you looking for?"}
-                  className="b2c-search-input w-full bg-black text-white text-xs xl:text-sm pl-4 pr-20 py-2.5 rounded-full border border-neutral-800 focus:border-neutral-500 outline-none ring-0 placeholder:text-neutral-500"
-                  style={{ outline: "none", WebkitTapHighlightColor: "transparent" }}
+                  className="b2c-search-input w-full bg-black text-white text-xs xl:text-sm pl-4 pr-20 py-2.5 rounded-full border border-neutral-800 focus:border-neutral-800 focus:outline-none focus:ring-0 outline-none ring-0 placeholder:text-neutral-500"
+                  style={{ outline: "none", WebkitTapHighlightColor: "transparent", boxShadow: "none" }}
                 />
                 <div className="b2c-search-icons absolute right-2.5 flex items-center gap-1 text-neutral-400">
                   {searchTerm && (
@@ -427,8 +448,8 @@ export const Header = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder={isListening ? "Listening... Speak now" : "What are you looking for?"}
                   autoFocus
-                  className="w-full bg-black text-white text-sm pl-4 pr-20 py-2 rounded-full border border-neutral-800 focus:border-neutral-500 outline-none ring-0 placeholder:text-neutral-500"
-                  style={{ outline: "none", WebkitTapHighlightColor: "transparent" }}
+                  className="w-full bg-black text-white text-sm pl-4 pr-20 py-2 rounded-full border border-neutral-800 focus:border-neutral-800 focus:outline-none focus:ring-0 outline-none ring-0 placeholder:text-neutral-500"
+                  style={{ outline: "none", WebkitTapHighlightColor: "transparent", boxShadow: "none" }}
                 />
                 <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1 text-neutral-400">
                   {searchTerm && (

@@ -11,12 +11,12 @@ export const LoadingSkeleton = ({
   width,
   height,
 }: LoadingSkeletonProps) => {
-  const baseClasses = 'animate-pulse bg-neutral-800';
+  const baseClasses = 'animate-pulse bg-neutral-900';
   
   const variantClasses = {
     text: 'rounded',
     circular: 'rounded-full',
-    rectangular: 'rounded-md',
+    rectangular: 'rounded-lg',
   };
 
   const style: React.CSSProperties = {};
@@ -32,35 +32,29 @@ export const LoadingSkeleton = ({
 };
 
 export const ProductCardSkeleton = () => (
-  <div className="flex flex-col bg-transparent animate-pulse w-full">
-    <div className="relative aspect-[3/4] overflow-hidden bg-neutral-900 rounded-sm">
-      <div className="absolute top-2.5 left-2.5 w-16 h-3 bg-neutral-800 rounded-sm" />
-      <div className="absolute top-2.5 right-2.5 w-6 h-6 bg-neutral-800 rounded-full" />
-      <div className="absolute bottom-2.5 left-2.5 w-24 h-3.5 bg-neutral-800 rounded-sm" />
+  <div className="flex flex-col bg-transparent select-none font-inter w-full animate-pulse">
+    <div className="relative aspect-[3/4] overflow-hidden bg-neutral-900 rounded-lg">
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.04] to-transparent -translate-x-full animate-shimmer" />
     </div>
-    <div className="pt-3 pb-2 px-1 text-left space-y-1.5">
-      <div className="h-3.5 bg-neutral-800 rounded w-4/5" />
-      <div className="h-2.5 bg-neutral-800/70 rounded w-1/2" />
-      <div className="h-3.5 bg-neutral-800 rounded w-1/3 pt-0.5" />
+    <div className="pt-2 px-0.5 text-left font-inter space-y-1.5">
+      <div className="h-3.5 bg-neutral-900 rounded w-3/4" />
+      <div className="h-3.5 bg-neutral-900 rounded w-1/3" />
     </div>
   </div>
 );
 
 export const OrderCardSkeleton = () => (
-  <div className="bg-white rounded-lg shadow-md p-6">
-    <div className="flex justify-between items-start mb-4">
-      <div className="space-y-2 flex-1">
-        <LoadingSkeleton className="h-5 w-32" />
-        <LoadingSkeleton className="h-4 w-48" />
+  <div className="bg-neutral-950 rounded-lg p-4 space-y-3 animate-pulse">
+    <div className="flex justify-between items-start">
+      <div className="space-y-1.5 flex-1">
+        <div className="h-4 bg-neutral-900 rounded w-28" />
+        <div className="h-3 bg-neutral-900 rounded w-20" />
       </div>
-      <LoadingSkeleton className="h-6 w-24" />
+      <div className="h-5 bg-neutral-900 rounded w-16" />
     </div>
-    <div className="space-y-2">
-      <LoadingSkeleton className="h-4 w-full" />
-      <LoadingSkeleton className="h-4 w-3/4" />
-    </div>
-    <div className="mt-4 pt-4 border-t border-gray-200">
-      <LoadingSkeleton className="h-6 w-32" />
+    <div className="flex gap-2 pt-1">
+      <div className="w-10 h-12 bg-neutral-900 rounded" />
+      <div className="w-10 h-12 bg-neutral-900 rounded" />
     </div>
   </div>
 );
@@ -69,7 +63,7 @@ export const TableRowSkeleton = ({ columns = 5 }: { columns?: number }) => (
   <tr>
     {Array.from({ length: columns }).map((_, index) => (
       <td key={index} className="px-6 py-4">
-        <LoadingSkeleton className="h-4 w-full" />
+        <div className="h-4 bg-neutral-900 rounded w-full animate-pulse" />
       </td>
     ))}
   </tr>
