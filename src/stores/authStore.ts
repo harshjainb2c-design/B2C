@@ -67,7 +67,11 @@ export const useAuthStore = create<AuthStore>()(
         }
 
         try {
-          const { data: sessionData } = await supabase.auth.getSession();
+          const sessionPromise = supabase.auth.getSession();
+          const timeoutPromise = new Promise<{ data: { session: null }; error: null }>((resolve) =>
+            setTimeout(() => resolve({ data: { session: null }, error: null }), 2000)
+          );
+          const { data: sessionData } = await Promise.race([sessionPromise, timeoutPromise]);
 
           if (!sessionData?.session?.user) {
             set({ user: null, session: null, isInitialized: true, isLoading: false });
@@ -83,11 +87,15 @@ export const useAuthStore = create<AuthStore>()(
           };
 
           try {
-            const { data: profile } = await supabase
+            const profilePromise = supabase
               .from('profiles')
               .select('*')
               .eq('id', sessionData.session.user.id)
               .maybeSingle();
+            const profileTimeout = new Promise<{ data: null; error: null }>((resolve) =>
+              setTimeout(() => resolve({ data: null, error: null }), 2000)
+            );
+            const { data: profile } = await Promise.race([profilePromise, profileTimeout]);
 
             if (profile) {
               mappedUser = {
