@@ -40,10 +40,11 @@ export default async function handler(req: AuthenticatedRequest, res: VercelResp
   try {
     if (resource === 'orders') {
       if (req.method === 'GET') return await getOrders(req, res);
-      if (req.method === 'PUT') return await updateOrderStatus(req, res, id as string);
+      if (req.method === 'PUT' || req.method === 'PATCH') return await updateOrderStatus(req, res, id as string);
     } else if (resource === 'products') {
+      if (req.method === 'GET') return await getAdminProducts(req, res);
       if (req.method === 'POST') return await createProduct(req, res);
-      if (req.method === 'PUT') return await updateProduct(req, res, id as string);
+      if (req.method === 'PUT' || req.method === 'PATCH') return await updateProduct(req, res, id as string);
       if (req.method === 'DELETE') return await deleteProduct(req, res, id as string);
     }
 
@@ -81,6 +82,39 @@ async function getOrders(req: AuthenticatedRequest, res: VercelResponse) {
   return res.status(200).json({ orders: orders || [], total: count || 0, page: pageNum, totalPages: count ? Math.ceil(count / limitNum) : 0 });
 }
 
+async function getAdminProducts(req: AuthenticatedRequest, res: VercelResponse) {
+  const { category, search, page = '1', limit = '20' } = req.query;
+  const pageNum = parseInt(page as string, 10) || 1;
+  const limitNum = parseInt(limit as string, 10) || 20;
+  const offset = (pageNum - 1) * limitNum;
+
+  let query = supabase.from('products').select('*', { count: 'exact' });
+
+  if (category && typeof category === 'string') {
+    query = query.or(`category.eq.${category},categories.cs.{${category}}`);
+  }
+  if (search && typeof search === 'string') {
+    query = query.ilike('name', `%${search}%`);
+  }
+
+  query = query.order('created_at', { ascending: false }).range(offset, offset + limitNum - 1);
+  const { data: products, error, count } = await query;
+
+  if (error) {
+    console.error('Database error:', error);
+    return res.status(500).json({ error: { code: 'DATABASE_ERROR', message: 'Failed to fetch products' }, status: 500 });
+  }
+
+  const transformed = (products || []).map((p: any) => ({
+    ...p,
+    isActive: p.is_active,
+    categories: p.categories || [],
+    collection: p.collection || undefined,
+  }));
+
+  return res.status(200).json({ products: transformed, total: count || 0, page: pageNum, totalPages: count ? Math.ceil(count / limitNum) : 0 });
+}
+
 async function updateOrderStatus(req: AuthenticatedRequest, res: VercelResponse, id: string) {
   if (!id) {
     return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Order ID is required' }, status: 400 });
@@ -91,22 +125,21 @@ async function updateOrderStatus(req: AuthenticatedRequest, res: VercelResponse,
     return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Invalid order status' }, status: 400 });
   }
 
-  const { data: order, error } = await supabase.from('orders').update({ status, updated_at: new Date().toISOString() }).eq('id', id).select().single();
+  const { data: order, error } = await supabase.from('orders').update({ status, updated_at: new Date().toISOString() }).eq('id', id).select().maybeSingle();
 
   if (error) {
-    if (error.code === 'PGRST116') {
-      return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Order not found' }, status: 404 });
-    }
     return res.status(500).json({ error: { code: 'DATABASE_ERROR', message: 'Failed to update order status' }, status: 500 });
+  }
+
+  if (!order) {
+    return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Order not found' }, status: 404 });
   }
 
   return res.status(200).json(order);
 }
 
 async function createProduct(req: AuthenticatedRequest, res: VercelResponse) {
-  console.log('createProduct called with body:', req.body);
-  
-  const { name, description, price, category, images, stock, isActive = true, specifications = {} } = req.body;
+  const { name, description, price, category, categories, collection, images, stock, isActive = true, specifications = {}, sizes } = req.body;
 
   if (!name || !description || price === undefined || !category || !images || stock === undefined) {
     return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Missing required fields' }, status: 400 });
@@ -116,32 +149,39 @@ async function createProduct(req: AuthenticatedRequest, res: VercelResponse) {
     return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Invalid field values' }, status: 400 });
   }
 
-  const { data: product, error } = await supabase.from('products').insert({ name, description, price, category, images, stock, is_active: isActive, specifications }).select().single();
+  const { data: product, error } = await supabase.from('products').insert({
+    name,
+    description,
+    price,
+    category,
+    categories: categories || [],
+    collection: collection || null,
+    images,
+    stock,
+    is_active: isActive,
+    specifications,
+    sizes: sizes || null,
+  }).select().single();
 
   if (error) {
     console.error('Supabase error:', error);
     return res.status(500).json({ error: { code: 'DATABASE_ERROR', message: 'Failed to create product', details: error.message }, status: 500 });
   }
 
-  console.log('Product created successfully:', product);
-  
-  // Transform the response to match the Product type
-  const transformedProduct = {
+  return res.status(201).json({
     ...product,
     isActive: product.is_active,
-  };
-  
-  return res.status(201).json(transformedProduct);
+    categories: product.categories || [],
+    collection: product.collection || undefined,
+  });
 }
 
 async function updateProduct(req: AuthenticatedRequest, res: VercelResponse, id: string) {
-  console.log('updateProduct called with id:', id, 'body:', req.body);
-  
   if (!id) {
     return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Product ID is required' }, status: 400 });
   }
 
-  const { name, description, price, category, images, stock, isActive, specifications } = req.body;
+  const { name, description, price, category, categories, collection, images, stock, isActive, specifications, sizes } = req.body;
   const updates: any = {};
 
   if (name !== undefined) updates.name = name;
@@ -153,6 +193,8 @@ async function updateProduct(req: AuthenticatedRequest, res: VercelResponse, id:
     updates.price = price;
   }
   if (category !== undefined) updates.category = category;
+  if (categories !== undefined) updates.categories = categories;
+  if (collection !== undefined) updates.collection = collection;
   if (images !== undefined) {
     if (!Array.isArray(images) || images.length === 0) {
       return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Invalid images' }, status: 400 });
@@ -167,8 +209,7 @@ async function updateProduct(req: AuthenticatedRequest, res: VercelResponse, id:
   }
   if (isActive !== undefined) updates.is_active = isActive;
   if (specifications !== undefined) updates.specifications = specifications;
-
-  console.log('Updates to apply:', updates);
+  if (sizes !== undefined) updates.sizes = sizes;
 
   if (Object.keys(updates).length === 0) {
     return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'No fields to update' }, status: 400 });
@@ -176,45 +217,40 @@ async function updateProduct(req: AuthenticatedRequest, res: VercelResponse, id:
 
   updates.updated_at = new Date().toISOString();
 
-  const { data: product, error } = await supabase.from('products').update(updates).eq('id', id).select().single();
+  const { data: product, error } = await supabase.from('products').update(updates).eq('id', id).select().maybeSingle();
 
   if (error) {
     console.error('Supabase error:', error);
-    if (error.code === 'PGRST116') {
-      return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Product not found' }, status: 404 });
-    }
     return res.status(500).json({ error: { code: 'DATABASE_ERROR', message: 'Failed to update product', details: error.message }, status: 500 });
   }
 
-  console.log('Product updated successfully:', product);
-  
-  // Transform the response to match the Product type
-  const transformedProduct = {
+  if (!product) {
+    return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Product not found' }, status: 404 });
+  }
+
+  return res.status(200).json({
     ...product,
     isActive: product.is_active,
-  };
-  
-  return res.status(200).json(transformedProduct);
+    categories: product.categories || [],
+    collection: product.collection || undefined,
+  });
 }
 
 async function deleteProduct(req: AuthenticatedRequest, res: VercelResponse, id: string) {
-  console.log('deleteProduct called with id:', id);
-  
   if (!id) {
     return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Product ID is required' }, status: 400 });
   }
 
-  const { data: product, error } = await supabase.from('products').delete().eq('id', id).select().single();
+  const { data: product, error } = await supabase.from('products').delete().eq('id', id).select().maybeSingle();
 
   if (error) {
     console.error('Supabase error:', error);
-    if (error.code === 'PGRST116') {
-      return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Product not found' }, status: 404 });
-    }
     return res.status(500).json({ error: { code: 'DATABASE_ERROR', message: 'Failed to delete product', details: error.message }, status: 500 });
   }
 
-  console.log('Product deleted successfully:', product);
-  
+  if (!product) {
+    return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Product not found' }, status: 404 });
+  }
+
   return res.status(200).json({ message: 'Product deleted successfully', id });
 }

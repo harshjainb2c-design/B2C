@@ -9,12 +9,19 @@
     { "source": "/api/auth/login", "destination": "/api/auth?action=login" },
     { "source": "/api/auth/register", "destination": "/api/auth?action=register" },
     { "source": "/api/auth/reset-password", "destination": "/api/auth?action=reset-password" },
+    { "source": "/api/auth", "destination": "/api/auth" },
     { "source": "/api/cart/sync", "destination": "/api/cart?action=sync" },
+    { "source": "/api/cart", "destination": "/api/cart" },
     { "source": "/api/orders/:id", "destination": "/api/orders?id=:id" },
+    { "source": "/api/orders", "destination": "/api/orders" },
     { "source": "/api/products/:id", "destination": "/api/products?id=:id" },
+    { "source": "/api/products", "destination": "/api/products" },
     { "source": "/api/shiprocket/webhook", "destination": "/api/shiprocket?action=webhook" },
+    { "source": "/api/admin/orders/:id", "destination": "/api/admin?resource=orders&id=:id" },
     { "source": "/api/admin/orders", "destination": "/api/admin?resource=orders" },
+    { "source": "/api/admin/products/:id", "destination": "/api/admin?resource=products&id=:id" },
     { "source": "/api/admin/products", "destination": "/api/admin?resource=products" },
+    { "source": "/api/admin", "destination": "/api/admin" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

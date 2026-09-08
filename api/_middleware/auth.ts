@@ -1,8 +1,8 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || 'https://mujkpyeennxjkdvezpaz.supabase.co';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY!;
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
@@ -11,9 +11,6 @@ export interface AuthenticatedRequest extends VercelRequest {
   userRole?: string;
 }
 
-/**
- * Middleware to verify user authentication
- */
 export async function verifyAuth(req: AuthenticatedRequest): Promise<{ userId: string; userRole: string } | null> {
   const authHeader = req.headers.authorization;
 
@@ -24,27 +21,29 @@ export async function verifyAuth(req: AuthenticatedRequest): Promise<{ userId: s
   const token = authHeader.substring(7);
 
   try {
-    // Verify the JWT token
     const { data: { user }, error } = await supabase.auth.getUser(token);
 
     if (error || !user) {
       return null;
     }
 
-    // Fetch user profile to get role
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single();
+    let role = (user.user_metadata?.role as string) || (user.app_metadata?.role as string) || 'customer';
 
-    if (profileError || !profile) {
-      return null;
-    }
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (profile?.role) {
+        role = profile.role;
+      }
+    } catch {}
 
     return {
       userId: user.id,
-      userRole: profile.role,
+      userRole: role,
     };
   } catch (error) {
     console.error('Auth verification error:', error);
@@ -52,9 +51,6 @@ export async function verifyAuth(req: AuthenticatedRequest): Promise<{ userId: s
   }
 }
 
-/**
- * Middleware to verify admin role
- */
 export async function verifyAdmin(req: AuthenticatedRequest, res: VercelResponse): Promise<boolean> {
   const auth = await verifyAuth(req);
 
@@ -80,7 +76,6 @@ export async function verifyAdmin(req: AuthenticatedRequest, res: VercelResponse
     return false;
   }
 
-  // Attach user info to request
   req.userId = auth.userId;
   req.userRole = auth.userRole;
 

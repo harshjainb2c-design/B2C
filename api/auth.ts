@@ -58,11 +58,21 @@ async function login(req: VercelRequest, res: VercelResponse) {
     return res.status(401).json({ error: { code: 'INVALID_CREDENTIALS', message: 'Invalid email or password' }, status: 401 });
   }
 
-  const { data: profile } = await supabase.from('profiles').select('*').eq('id', authData.user.id).single();
+  const { data: profile } = await supabase.from('profiles').select('*').eq('id', authData.user.id).maybeSingle();
 
   return res.status(200).json({
-    user: { id: authData.user.id, email: authData.user.email!, fullName: profile?.full_name, role: profile?.role, createdAt: profile?.created_at },
-    session: { accessToken: authData.session.access_token, refreshToken: authData.session.refresh_token, expiresAt: authData.session.expires_at || 0 }
+    user: {
+      id: authData.user.id,
+      email: authData.user.email!,
+      fullName: profile?.full_name || authData.user.user_metadata?.full_name || authData.user.email?.split('@')[0] || 'User',
+      role: profile?.role || authData.user.user_metadata?.role || 'customer',
+      createdAt: profile?.created_at || authData.user.created_at,
+    },
+    session: {
+      accessToken: authData.session.access_token,
+      refreshToken: authData.session.refresh_token,
+      expiresAt: authData.session.expires_at || 0,
+    }
   });
 }
 
@@ -75,7 +85,11 @@ async function register(req: VercelRequest, res: VercelResponse) {
   }
 
   const { email, password, fullName } = validationResult.data;
-  const { data: authData, error: authError } = await supabase.auth.signUp({ email, password, options: { data: { full_name: fullName } } });
+  const { data: authData, error: authError } = await supabase.auth.signUp({
+    email,
+    password,
+    options: { data: { full_name: fullName } },
+  });
 
   if (authError) {
     if (authError.message.includes('already registered')) {
@@ -88,12 +102,25 @@ async function register(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'Failed to create user' }, status: 500 });
   }
 
-  await supabase.from('profiles').insert({ id: authData.user.id, full_name: fullName, role: 'customer' });
-  const { data: profile } = await supabase.from('profiles').select('*').eq('id', authData.user.id).single();
+  try {
+    await supabase.from('profiles').upsert({ id: authData.user.id, full_name: fullName, role: 'customer' }, { onConflict: 'id' });
+  } catch {}
+
+  const { data: profile } = await supabase.from('profiles').select('*').eq('id', authData.user.id).maybeSingle();
 
   return res.status(201).json({
-    user: { id: authData.user.id, email: authData.user.email!, fullName: profile?.full_name || fullName, role: profile?.role || 'customer', createdAt: authData.user.created_at },
-    session: authData.session ? { accessToken: authData.session.access_token, refreshToken: authData.session.refresh_token, expiresAt: authData.session.expires_at || 0 } : null
+    user: {
+      id: authData.user.id,
+      email: authData.user.email!,
+      fullName: profile?.full_name || fullName,
+      role: profile?.role || 'customer',
+      createdAt: authData.user.created_at,
+    },
+    session: authData.session ? {
+      accessToken: authData.session.access_token,
+      refreshToken: authData.session.refresh_token,
+      expiresAt: authData.session.expires_at || 0,
+    } : null
   });
 }
 
@@ -106,7 +133,9 @@ async function resetPassword(req: VercelRequest, res: VercelResponse) {
   }
 
   const { email } = validationResult.data;
-  await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${process.env.VITE_APP_URL || 'http://localhost:5173'}/reset-password` });
+  await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${process.env.VITE_APP_URL || 'http://localhost:3000'}/reset-password`,
+  });
 
   return res.status(200).json({ message: 'If an account exists with this email, a password reset link has been sent.' });
 }
