@@ -60,7 +60,7 @@ export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
       />
 
       <div
-        className={`fixed right-0 top-0 h-screen h-[100dvh] max-h-[100dvh] w-full sm:max-w-md bg-black z-50 flex flex-col text-white select-none overflow-hidden transform transition-transform duration-300 ease-in-out ${
+        className={`fixed right-0 top-0 h-screen h-[100dvh] max-h-[100dvh] w-full sm:max-w-md bg-black z-50 flex flex-col text-white select-none overflow-hidden transform will-change-transform transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : 'translate-x-full pointer-events-none'
         }`}
         role="dialog"

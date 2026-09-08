@@ -17,46 +17,42 @@ const PageLoader = () => (
   </div>
 );
 
-// Lazy load pages for code splitting
-const Home = lazy(() => import('./pages').then(m => ({ default: m.Home })));
-const Products = lazy(() => import('./pages').then(m => ({ default: m.Products })));
-const ProductDetailPage = lazy(() => import('./pages').then(m => ({ default: m.ProductDetailPage })));
-const Cart = lazy(() => import('./pages').then(m => ({ default: m.Cart })));
-const Checkout = lazy(() => import('./pages').then(m => ({ default: m.Checkout })));
-const Orders = lazy(() => import('./pages').then(m => ({ default: m.Orders })));
-const OrderConfirmation = lazy(() => import('./pages').then(m => ({ default: m.OrderConfirmation })));
-const Profile = lazy(() => import('./pages').then(m => ({ default: m.Profile })));
-const Login = lazy(() => import('./pages').then(m => ({ default: m.Login })));
-const Register = lazy(() => import('./pages').then(m => ({ default: m.Register })));
-const PasswordReset = lazy(() => import('./pages').then(m => ({ default: m.PasswordReset })));
-const Unauthorized = lazy(() => import('./pages').then(m => ({ default: m.Unauthorized })));
-const NotFound = lazy(() => import('./pages').then(m => ({ default: m.NotFound })));
-const HealthCheck = lazy(() => import('./pages').then(m => ({ default: m.HealthCheck })));
-const Wishlist = lazy(() => import('./pages').then(m => ({ default: m.Wishlist })));
+const Home = lazy(() => import('./pages/Home').then(m => ({ default: m.Home })));
+const Products = lazy(() => import('./pages/Products').then(m => ({ default: m.Products })));
+const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage').then(m => ({ default: m.ProductDetailPage })));
+const Cart = lazy(() => import('./pages/Cart').then(m => ({ default: m.Cart })));
+const Checkout = lazy(() => import('./pages/Checkout').then(m => ({ default: m.Checkout })));
+const Orders = lazy(() => import('./pages/Orders').then(m => ({ default: m.Orders })));
+const OrderConfirmation = lazy(() => import('./pages/OrderConfirmation').then(m => ({ default: m.OrderConfirmation })));
+const Profile = lazy(() => import('./pages/Profile').then(m => ({ default: m.Profile })));
+const Login = lazy(() => import('./pages/Login').then(m => ({ default: m.Login })));
+const Register = lazy(() => import('./pages/Register').then(m => ({ default: m.Register })));
+const PasswordReset = lazy(() => import('./pages/PasswordReset').then(m => ({ default: m.PasswordReset })));
+const Unauthorized = lazy(() => import('./pages/Unauthorized').then(m => ({ default: m.Unauthorized })));
+const NotFound = lazy(() => import('./pages/NotFound').then(m => ({ default: m.NotFound })));
+const HealthCheck = lazy(() => import('./pages/HealthCheck').then(m => ({ default: m.HealthCheck })));
+const Wishlist = lazy(() => import('./pages/Wishlist').then(m => ({ default: m.Wishlist })));
 
-// Info pages
-const About = lazy(() => import('./pages').then(m => ({ default: m.About })));
-const Contact = lazy(() => import('./pages').then(m => ({ default: m.Contact })));
-const Returns = lazy(() => import('./pages').then(m => ({ default: m.Returns })));
-const Shipping = lazy(() => import('./pages').then(m => ({ default: m.Shipping })));
-const Cancellation = lazy(() => import('./pages').then(m => ({ default: m.Cancellation })));
-const Privacy = lazy(() => import('./pages').then(m => ({ default: m.Privacy })));
-const Terms = lazy(() => import('./pages').then(m => ({ default: m.Terms })));
-const Blog = lazy(() => import('./pages').then(m => ({ default: m.Blog })));
-const Stores = lazy(() => import('./pages').then(m => ({ default: m.Stores })));
-const Sitemap = lazy(() => import('./pages').then(m => ({ default: m.Sitemap })));
+const About = lazy(() => import('./pages/About').then(m => ({ default: m.About })));
+const Contact = lazy(() => import('./pages/Contact').then(m => ({ default: m.Contact })));
+const Returns = lazy(() => import('./pages/Returns').then(m => ({ default: m.Returns })));
+const Shipping = lazy(() => import('./pages/Shipping').then(m => ({ default: m.Shipping })));
+const Cancellation = lazy(() => import('./pages/Cancellation').then(m => ({ default: m.Cancellation })));
+const Privacy = lazy(() => import('./pages/Privacy').then(m => ({ default: m.Privacy })));
+const Terms = lazy(() => import('./pages/Terms').then(m => ({ default: m.Terms })));
+const Blog = lazy(() => import('./pages/Blog').then(m => ({ default: m.Blog })));
+const Stores = lazy(() => import('./pages/Stores').then(m => ({ default: m.Stores })));
+const Sitemap = lazy(() => import('./pages/Sitemap').then(m => ({ default: m.Sitemap })));
 
-// Admin pages
-const AdminDashboard = lazy(() => import('./pages').then(m => ({ default: m.AdminDashboard })));
-const AdminProducts = lazy(() => import('./pages').then(m => ({ default: m.AdminProducts })));
-const AdminOrders = lazy(() => import('./pages').then(m => ({ default: m.AdminOrders })));
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
+const AdminProducts = lazy(() => import('./pages/admin/AdminProducts').then(m => ({ default: m.AdminProducts })));
+const AdminOrders = lazy(() => import('./pages/admin/AdminOrders').then(m => ({ default: m.AdminOrders })));
 
-// Create a client
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
+      staleTime: 5 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
       retry: 1,
       refetchOnWindowFocus: false,
     },
@@ -70,16 +66,10 @@ const AppContent = () => {
     location.pathname.toLowerCase()
   );
 
-  // Initialize auth on mount - only once, even in StrictMode
-  // But don't block the UI if it fails
   useEffect(() => {
     if (!initStartedRef.current) {
       initStartedRef.current = true;
-      
-      // Run in background without blocking UI
-      useAuthStore.getState().initialize().catch(() => {
-        // Auth initialization failed - user will need to login manually
-      });
+      useAuthStore.getState().initialize().catch(() => {});
     }
   }, []);
 
@@ -97,7 +87,6 @@ const AppContent = () => {
       <main className={`flex-1 ${isAuthPage ? 'w-full h-full overflow-hidden' : ''}`}>
         <Suspense fallback={<PageLoader />}>
           <Routes>
-          {/* Public routes */}
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<Products />} />
           <Route path="/products/:id" element={<ProductDetailPage />} />
@@ -114,7 +103,6 @@ const AppContent = () => {
           <Route path="/unauthorized" element={<Unauthorized />} />
           <Route path="/health" element={<HealthCheck />} />
           
-          {/* Info pages */}
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/returns" element={<Returns />} />
@@ -126,7 +114,6 @@ const AppContent = () => {
           <Route path="/stores" element={<Stores />} />
           <Route path="/sitemap" element={<Sitemap />} />
 
-          {/* Protected routes - require authentication */}
           <Route
             path="/checkout"
             element={
@@ -160,7 +147,6 @@ const AppContent = () => {
             }
           />
 
-          {/* Admin routes - require admin role */}
           <Route
             path="/admin"
             element={
@@ -186,7 +172,6 @@ const AppContent = () => {
             }
           />
 
-          {/* 404 Not Found - must be last */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>

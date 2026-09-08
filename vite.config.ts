@@ -28,6 +28,19 @@ export default defineConfig(({ mode }) => {
       port: 3000,
       open: true,
     },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+            'vendor-supabase': ['@supabase/supabase-js'],
+            'vendor-query': ['@tanstack/react-query'],
+            'vendor-icons': ['lucide-react'],
+          },
+        },
+      },
+      chunkSizeWarningLimit: 800,
+    },
     test: {
       globals: true,
       environment: 'jsdom',

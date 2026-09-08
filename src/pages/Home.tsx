@@ -684,6 +684,8 @@ export const Home = () => {
                 <img
                   src="/hero-spotlight.jpg?v=2"
                   alt="B2C Exports Streetwear Drop"
+                  fetchPriority="high"
+                  decoding="async"
                   className="w-full h-auto max-h-[500px] sm:max-h-[620px] lg:max-h-[calc(100vh-6.5rem)] xl:max-h-[calc(100vh-6rem)] object-contain lg:object-right select-none"
                 />
                 <div className="absolute inset-y-0 left-0 w-16 sm:w-24 bg-gradient-to-r from-black to-transparent pointer-events-none hidden lg:block" />
@@ -847,6 +849,8 @@ export const Home = () => {
               <img
                 src="/house-of-b2c.jpg?v=4"
                 alt="B2C Streetwear Duo"
+                loading="lazy"
+                decoding="async"
                 className="w-full h-auto object-cover object-center select-none block"
               />
               <div className="absolute inset-y-0 left-0 w-16 sm:w-24 bg-gradient-to-r from-black to-transparent pointer-events-none" />
