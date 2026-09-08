@@ -510,6 +510,7 @@ export const ProductDetail = ({ product, onAddToCart }: ProductDetailProps) => {
                 <g clipPath="url(#ReturnPeriod_a)">
                   <path d="M21.4395 11.8779L16.627 9.24467C16.4984 9.17362 16.3539 9.13635 16.207 9.13635C16.0601 9.13635 15.9156 9.17362 15.787 9.24467L10.9745 11.879C10.8371 11.9542 10.7224 12.0649 10.6423 12.1996C10.5623 12.3342 10.5199 12.4879 10.5195 12.6446V17.8749C10.5199 18.0316 10.5623 18.1853 10.6423 18.3199C10.7224 18.4546 10.8371 18.5653 10.9745 18.6405L15.787 21.2748C15.9156 21.3459 16.0601 21.3831 16.207 21.3831C16.3539 21.3831 16.4984 21.3459 16.627 21.2748L21.4395 18.6405C21.577 18.5653 21.6917 18.4546 21.7717 18.3199C21.8518 18.1853 21.8942 18.0316 21.8945 17.8749V12.6451C21.8945 12.4882 21.8522 12.3342 21.7721 12.1992C21.6921 12.0642 21.5772 11.9532 21.4395 11.8779ZM16.207 10.0103L20.6012 12.4165L18.9726 13.3074L14.5784 10.9012L16.207 10.0103ZM16.207 14.8228L11.8129 12.4165L13.6673 11.401L18.0615 13.8072L16.207 14.8228ZM21.0195 17.8771L16.6445 20.2719V15.5791L18.3945 14.6215V16.5728C18.3945 16.6888 18.4406 16.8001 18.5227 16.8822C18.6047 16.9642 18.716 17.0103 18.832 17.0103C18.9481 17.0103 19.0593 16.9642 19.1414 16.8822C19.2234 16.8001 19.2695 16.6888 19.2695 16.5728V14.1425L21.0195 13.1849V17.8749V17.8771Z" fill="#38bdf8" />
                 </g>
+                <line x1="8" y1="8" x2="24" y2="24" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" />
                 <defs>
                   <clipPath id="ReturnPeriod_a">
                     <rect width="14" height="14" fill="white" transform="translate(9.20703 8.26025)" />
@@ -517,7 +518,7 @@ export const ProductDetail = ({ product, onAddToCart }: ProductDetailProps) => {
                 </defs>
               </svg>
               <span className="text-[11px] font-bold text-neutral-200 leading-tight">
-                10-Day<br />Return
+                No<br />Return
               </span>
             </div>
 
@@ -529,9 +530,10 @@ export const ProductDetail = ({ product, onAddToCart }: ProductDetailProps) => {
                 <path d="M12.8623 13.6385H18.3774" stroke="#38bdf8" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
                 <path d="M12.8623 11.5405H18.3774" stroke="#38bdf8" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
                 <path d="M14.4134 11.5405C15.0076 11.5405 15.5775 11.7766 15.9977 12.1968C16.4179 12.6169 16.6539 13.1868 16.6539 13.781C16.6539 14.3752 16.4179 14.9451 15.9977 15.3653C15.5775 15.7855 15.0076 16.0215 14.4134 16.0215H12.8623L16.6539 19.4684" stroke="#38bdf8" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                <line x1="6" y1="8" x2="26" y2="24" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" />
               </svg>
               <span className="text-[11px] font-bold text-neutral-200 leading-tight">
-                Cash on<br />Delivery
+                No Cash on<br />Delivery
               </span>
             </div>
 
@@ -559,7 +561,7 @@ export const ProductDetail = ({ product, onAddToCart }: ProductDetailProps) => {
                 </defs>
               </svg>
               <span className="text-[11px] font-bold text-neutral-200 leading-tight">
-                Customer<br />support
+                Customer<br />Support
               </span>
             </div>
           </div>
