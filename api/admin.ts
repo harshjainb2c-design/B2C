@@ -1,41 +1,31 @@
 import { VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { verifyAdmin, AuthenticatedRequest } from './_middleware/auth';
+import { getRazorpayConfig, getShiprocketConfig, maskSecret } from './_lib/settings';
 
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || 'https://mujkpyeennxjkdvezpaz.supabase.co';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY!;
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 const VALID_ORDER_STATUSES = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
 
 export default async function handler(req: AuthenticatedRequest, res: VercelResponse) {
-  console.log('=== ADMIN API HANDLER CALLED ===');
-  console.log('Method:', req.method);
-  console.log('URL:', req.url);
-  console.log('Query:', req.query);
-  
-  // Set CORS headers
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization');
 
-  // Handle OPTIONS request
   if (req.method === 'OPTIONS') {
     res.status(200).end();
     return;
   }
 
-  console.log('Admin API called:', { method: req.method, query: req.query, headers: req.headers.authorization ? 'present' : 'missing' });
-  
   const isAdmin = await verifyAdmin(req, res);
   if (!isAdmin) {
-    console.log('Admin verification failed');
     return;
   }
 
   const { resource, id } = req.query;
-  console.log('Admin verified, resource:', resource, 'id:', id);
 
   try {
     if (resource === 'orders') {
@@ -46,14 +36,88 @@ export default async function handler(req: AuthenticatedRequest, res: VercelResp
       if (req.method === 'POST') return await createProduct(req, res);
       if (req.method === 'PUT' || req.method === 'PATCH') return await updateProduct(req, res, id as string);
       if (req.method === 'DELETE') return await deleteProduct(req, res, id as string);
+    } else if (resource === 'settings') {
+      if (req.method === 'GET') return await getSettings(res);
+      if (req.method === 'POST' || req.method === 'PUT') return await updateSettings(req, res);
     }
 
-    console.log('No matching route found for resource:', resource, 'method:', req.method);
     return res.status(405).json({ error: { code: 'METHOD_NOT_ALLOWED', message: 'Method not allowed' }, status: 405 });
   } catch (error) {
-    console.error('Unexpected error:', error);
+    console.error('Admin API error:', error);
     return res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' }, status: 500 });
   }
+}
+
+async function getSettings(res: VercelResponse) {
+  const razorpay = await getRazorpayConfig();
+  const shiprocket = await getShiprocketConfig();
+
+  return res.status(200).json({
+    razorpay: {
+      keyId: razorpay.keyId,
+      keySecret: maskSecret(razorpay.keySecret),
+      hasSecret: Boolean(razorpay.keySecret),
+      enabled: razorpay.enabled,
+    },
+    shiprocket: {
+      email: shiprocket.email,
+      password: maskSecret(shiprocket.password),
+      hasPassword: Boolean(shiprocket.password),
+      pickupLocation: shiprocket.pickupLocation,
+      webhookSecret: maskSecret(shiprocket.webhookSecret),
+      enabled: shiprocket.enabled,
+    },
+  });
+}
+
+async function updateSettings(req: AuthenticatedRequest, res: VercelResponse) {
+  const { razorpay, shiprocket } = req.body || {};
+
+  if (razorpay) {
+    const current = await getRazorpayConfig();
+    const finalSecret = razorpay.keySecret && !razorpay.keySecret.includes('******')
+      ? razorpay.keySecret
+      : current.keySecret;
+
+    const payload = {
+      keyId: razorpay.keyId !== undefined ? razorpay.keyId : current.keyId,
+      keySecret: finalSecret,
+      enabled: razorpay.enabled !== undefined ? Boolean(razorpay.enabled) : current.enabled,
+    };
+
+    await supabase.from('store_settings').upsert({
+      key: 'razorpay',
+      value: payload,
+      updated_at: new Date().toISOString(),
+    });
+  }
+
+  if (shiprocket) {
+    const current = await getShiprocketConfig();
+    const finalPassword = shiprocket.password && !shiprocket.password.includes('******')
+      ? shiprocket.password
+      : current.password;
+
+    const finalWebhookSecret = shiprocket.webhookSecret && !shiprocket.webhookSecret.includes('******')
+      ? shiprocket.webhookSecret
+      : current.webhookSecret;
+
+    const payload = {
+      email: shiprocket.email !== undefined ? shiprocket.email : current.email,
+      password: finalPassword,
+      pickupLocation: shiprocket.pickupLocation !== undefined ? shiprocket.pickupLocation : current.pickupLocation,
+      webhookSecret: finalWebhookSecret,
+      enabled: shiprocket.enabled !== undefined ? Boolean(shiprocket.enabled) : current.enabled,
+    };
+
+    await supabase.from('store_settings').upsert({
+      key: 'shiprocket',
+      value: payload,
+      updated_at: new Date().toISOString(),
+    });
+  }
+
+  return res.status(200).json({ success: true });
 }
 
 async function getOrders(req: AuthenticatedRequest, res: VercelResponse) {
@@ -75,7 +139,6 @@ async function getOrders(req: AuthenticatedRequest, res: VercelResponse) {
   const { data: orders, error, count } = await query;
 
   if (error) {
-    console.error('Database error:', error);
     return res.status(500).json({ error: { code: 'DATABASE_ERROR', message: 'Failed to fetch orders' }, status: 500 });
   }
 
@@ -101,18 +164,10 @@ async function getAdminProducts(req: AuthenticatedRequest, res: VercelResponse) 
   const { data: products, error, count } = await query;
 
   if (error) {
-    console.error('Database error:', error);
     return res.status(500).json({ error: { code: 'DATABASE_ERROR', message: 'Failed to fetch products' }, status: 500 });
   }
 
-  const transformed = (products || []).map((p: any) => ({
-    ...p,
-    isActive: p.is_active,
-    categories: p.categories || [],
-    collection: p.collection || undefined,
-  }));
-
-  return res.status(200).json({ products: transformed, total: count || 0, page: pageNum, totalPages: count ? Math.ceil(count / limitNum) : 0 });
+  return res.status(200).json({ products: products || [], total: count || 0, page: pageNum, totalPages: count ? Math.ceil(count / limitNum) : 0 });
 }
 
 async function updateOrderStatus(req: AuthenticatedRequest, res: VercelResponse, id: string) {
@@ -120,60 +175,67 @@ async function updateOrderStatus(req: AuthenticatedRequest, res: VercelResponse,
     return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Order ID is required' }, status: 400 });
   }
 
-  const { status } = req.body;
-  if (!status || !VALID_ORDER_STATUSES.includes(status)) {
-    return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Invalid order status' }, status: 400 });
-  }
+  const { status, fulfillment_status, tracking_status, awb_code, courier_name } = req.body || {};
 
-  const { data: order, error } = await supabase.from('orders').update({ status, updated_at: new Date().toISOString() }).eq('id', id).select().maybeSingle();
+  const updateData: any = { updated_at: new Date().toISOString() };
+  if (status) {
+    if (!VALID_ORDER_STATUSES.includes(status)) {
+      return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Invalid order status' }, status: 400 });
+    }
+    updateData.status = status;
+  }
+  if (fulfillment_status !== undefined) updateData.fulfillment_status = fulfillment_status;
+  if (tracking_status !== undefined) updateData.tracking_status = tracking_status;
+  if (awb_code !== undefined) updateData.awb_code = awb_code;
+  if (courier_name !== undefined) updateData.courier_name = courier_name;
+
+  const { data: order, error } = await supabase
+    .from('orders')
+    .update(updateData)
+    .eq('id', id)
+    .select()
+    .single();
 
   if (error) {
     return res.status(500).json({ error: { code: 'DATABASE_ERROR', message: 'Failed to update order status' }, status: 500 });
-  }
-
-  if (!order) {
-    return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Order not found' }, status: 404 });
   }
 
   return res.status(200).json(order);
 }
 
 async function createProduct(req: AuthenticatedRequest, res: VercelResponse) {
-  const { name, description, price, category, categories, collection, images, stock, isActive = true, specifications = {}, sizes } = req.body;
+  const { name, description, price, category, categories, collection, images, sizes, stock, is_active, isActive } = req.body || {};
 
-  if (!name || !description || price === undefined || !category || !images || stock === undefined) {
-    return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Missing required fields' }, status: 400 });
+  if (!name || typeof price !== 'number') {
+    return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Name and price are required' }, status: 400 });
   }
 
-  if (typeof price !== 'number' || price < 0 || typeof stock !== 'number' || stock < 0 || !Number.isInteger(stock) || !Array.isArray(images) || images.length === 0) {
-    return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Invalid field values' }, status: 400 });
-  }
+  const activeValue = is_active !== undefined ? is_active : (isActive !== undefined ? isActive : true);
 
-  const { data: product, error } = await supabase.from('products').insert({
-    name,
-    description,
-    price,
-    category,
-    categories: categories || [],
-    collection: collection || null,
-    images,
-    stock,
-    is_active: isActive,
-    specifications,
-    sizes: sizes || null,
-  }).select().single();
+  const { data: product, error } = await supabase
+    .from('products')
+    .insert({
+      name,
+      description: description || '',
+      price,
+      category: category || 'Streetwear',
+      categories: categories || (category ? [category] : ['Streetwear']),
+      collection: collection || null,
+      images: images || [],
+      sizes: sizes || ['S', 'M', 'L', 'XL'],
+      stock: stock || 0,
+      is_active: activeValue,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .select()
+    .single();
 
   if (error) {
-    console.error('Supabase error:', error);
-    return res.status(500).json({ error: { code: 'DATABASE_ERROR', message: 'Failed to create product', details: error.message }, status: 500 });
+    return res.status(500).json({ error: { code: 'DATABASE_ERROR', message: 'Failed to create product' }, status: 500 });
   }
 
-  return res.status(201).json({
-    ...product,
-    isActive: product.is_active,
-    categories: product.categories || [],
-    collection: product.collection || undefined,
-  });
+  return res.status(201).json(product);
 }
 
 async function updateProduct(req: AuthenticatedRequest, res: VercelResponse, id: string) {
@@ -181,59 +243,36 @@ async function updateProduct(req: AuthenticatedRequest, res: VercelResponse, id:
     return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Product ID is required' }, status: 400 });
   }
 
-  const { name, description, price, category, categories, collection, images, stock, isActive, specifications, sizes } = req.body;
-  const updates: any = {};
+  const { name, description, price, category, categories, collection, images, sizes, stock, is_active, isActive } = req.body || {};
 
-  if (name !== undefined) updates.name = name;
-  if (description !== undefined) updates.description = description;
-  if (price !== undefined) {
-    if (typeof price !== 'number' || price < 0) {
-      return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Invalid price' }, status: 400 });
-    }
-    updates.price = price;
+  const updateData: any = { updated_at: new Date().toISOString() };
+  if (name !== undefined) updateData.name = name;
+  if (description !== undefined) updateData.description = description;
+  if (price !== undefined) updateData.price = price;
+  if (category !== undefined) {
+    updateData.category = category;
+    if (!categories) updateData.categories = [category];
   }
-  if (category !== undefined) updates.category = category;
-  if (categories !== undefined) updates.categories = categories;
-  if (collection !== undefined) updates.collection = collection;
-  if (images !== undefined) {
-    if (!Array.isArray(images) || images.length === 0) {
-      return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Invalid images' }, status: 400 });
-    }
-    updates.images = images;
-  }
-  if (stock !== undefined) {
-    if (typeof stock !== 'number' || stock < 0 || !Number.isInteger(stock)) {
-      return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Invalid stock' }, status: 400 });
-    }
-    updates.stock = stock;
-  }
-  if (isActive !== undefined) updates.is_active = isActive;
-  if (specifications !== undefined) updates.specifications = specifications;
-  if (sizes !== undefined) updates.sizes = sizes;
+  if (categories !== undefined) updateData.categories = categories;
+  if (collection !== undefined) updateData.collection = collection;
+  if (images !== undefined) updateData.images = images;
+  if (sizes !== undefined) updateData.sizes = sizes;
+  if (stock !== undefined) updateData.stock = stock;
+  if (is_active !== undefined) updateData.is_active = is_active;
+  if (isActive !== undefined) updateData.is_active = isActive;
 
-  if (Object.keys(updates).length === 0) {
-    return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'No fields to update' }, status: 400 });
-  }
-
-  updates.updated_at = new Date().toISOString();
-
-  const { data: product, error } = await supabase.from('products').update(updates).eq('id', id).select().maybeSingle();
+  const { data: product, error } = await supabase
+    .from('products')
+    .update(updateData)
+    .eq('id', id)
+    .select()
+    .single();
 
   if (error) {
-    console.error('Supabase error:', error);
-    return res.status(500).json({ error: { code: 'DATABASE_ERROR', message: 'Failed to update product', details: error.message }, status: 500 });
+    return res.status(500).json({ error: { code: 'DATABASE_ERROR', message: 'Failed to update product' }, status: 500 });
   }
 
-  if (!product) {
-    return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Product not found' }, status: 404 });
-  }
-
-  return res.status(200).json({
-    ...product,
-    isActive: product.is_active,
-    categories: product.categories || [],
-    collection: product.collection || undefined,
-  });
+  return res.status(200).json(product);
 }
 
 async function deleteProduct(req: AuthenticatedRequest, res: VercelResponse, id: string) {
@@ -241,16 +280,14 @@ async function deleteProduct(req: AuthenticatedRequest, res: VercelResponse, id:
     return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Product ID is required' }, status: 400 });
   }
 
-  const { data: product, error } = await supabase.from('products').delete().eq('id', id).select().maybeSingle();
+  const { error } = await supabase
+    .from('products')
+    .delete()
+    .eq('id', id);
 
   if (error) {
-    console.error('Supabase error:', error);
-    return res.status(500).json({ error: { code: 'DATABASE_ERROR', message: 'Failed to delete product', details: error.message }, status: 500 });
+    return res.status(500).json({ error: { code: 'DATABASE_ERROR', message: 'Failed to delete product' }, status: 500 });
   }
 
-  if (!product) {
-    return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Product not found' }, status: 404 });
-  }
-
-  return res.status(200).json({ message: 'Product deleted successfully', id });
+  return res.status(200).json({ message: 'Product deleted successfully' });
 }

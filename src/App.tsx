@@ -9,10 +9,10 @@ import { ScrollToTop } from './components/common/ScrollToTop';
 import { useAuthStore } from './stores/authStore';
 
 const PageLoader = () => (
-  <div className="min-h-screen bg-black text-white flex items-center justify-center">
+  <div className="min-h-screen bg-black text-white flex items-center justify-center font-inter">
     <div className="text-center">
       <div className="inline-block animate-spin rounded-full h-10 w-10 border-2 border-white/20 border-t-white"></div>
-      <p className="mt-4 text-xs font-mono tracking-widest text-neutral-400 uppercase">Loading Archive...</p>
+      <p className="mt-4 text-xs font-inter font-bold tracking-widest text-neutral-400 uppercase">Loading Archive...</p>
     </div>
   </div>
 );
@@ -47,6 +47,7 @@ const Sitemap = lazy(() => import('./pages/Sitemap').then(m => ({ default: m.Sit
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
 const AdminProducts = lazy(() => import('./pages/admin/AdminProducts').then(m => ({ default: m.AdminProducts })));
 const AdminOrders = lazy(() => import('./pages/admin/AdminOrders').then(m => ({ default: m.AdminOrders })));
+const AdminSettings = lazy(() => import('./pages/admin/AdminSettings').then(m => ({ default: m.AdminSettings })));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -87,101 +88,109 @@ const AppContent = () => {
       <main className={`flex-1 ${isAuthPage ? 'w-full h-full overflow-hidden' : ''}`}>
         <Suspense fallback={<PageLoader />}>
           <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/products/:id" element={<ProductDetailPage />} />
-          <Route path="/men" element={<Navigate to="/products?gender=men" replace />} />
-          <Route path="/women" element={<Navigate to="/products?gender=women" replace />} />
-          <Route path="/sneakers" element={<Navigate to="/products?category=footwear" replace />} />
-          <Route path="/mywishlist" element={<Wishlist />} />
-          <Route path="/wishlist" element={<Wishlist />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/password-reset" element={<PasswordReset />} />
-          <Route path="/reset-password" element={<PasswordReset />} />
-          <Route path="/unauthorized" element={<Unauthorized />} />
-          <Route path="/health" element={<HealthCheck />} />
-          
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/returns" element={<Returns />} />
-          <Route path="/shipping" element={<Shipping />} />
-          <Route path="/cancellation" element={<Cancellation />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/blog" element={<Blog />} />
-          <Route path="/stores" element={<Stores />} />
-          <Route path="/sitemap" element={<Sitemap />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/products/:id" element={<ProductDetailPage />} />
+            <Route path="/men" element={<Navigate to="/products?gender=men" replace />} />
+            <Route path="/women" element={<Navigate to="/products?gender=women" replace />} />
+            <Route path="/sneakers" element={<Navigate to="/products?category=footwear" replace />} />
+            <Route path="/mywishlist" element={<Wishlist />} />
+            <Route path="/wishlist" element={<Wishlist />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/password-reset" element={<PasswordReset />} />
+            <Route path="/reset-password" element={<PasswordReset />} />
+            <Route path="/unauthorized" element={<Unauthorized />} />
+            <Route path="/health" element={<HealthCheck />} />
+            
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/returns" element={<Returns />} />
+            <Route path="/shipping" element={<Shipping />} />
+            <Route path="/cancellation" element={<Cancellation />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/stores" element={<Stores />} />
+            <Route path="/sitemap" element={<Sitemap />} />
 
-          <Route
-            path="/checkout"
-            element={
-              <ProtectedRoute>
-                <Checkout />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/orders"
-            element={
-              <ProtectedRoute>
-                <Orders />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/order-confirmation/:orderId"
-            element={
-              <ProtectedRoute>
-                <OrderConfirmation />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/checkout"
+              element={
+                <ProtectedRoute>
+                  <Checkout />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/orders"
+              element={
+                <ProtectedRoute>
+                  <Orders />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/order-confirmation/:orderId"
+              element={
+                <ProtectedRoute>
+                  <OrderConfirmation />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/admin"
-            element={
-              <AdminRoute>
-                <AdminDashboard />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/admin/products"
-            element={
-              <AdminRoute>
-                <AdminProducts />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/admin/orders"
-            element={
-              <AdminRoute>
-                <AdminOrders />
-              </AdminRoute>
-            }
-          />
+            <Route
+              path="/admin"
+              element={
+                <AdminRoute>
+                  <AdminDashboard />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/products"
+              element={
+                <AdminRoute>
+                  <AdminProducts />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/orders"
+              element={
+                <AdminRoute>
+                  <AdminOrders />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/settings"
+              element={
+                <AdminRoute>
+                  <AdminSettings />
+                </AdminRoute>
+              }
+            />
 
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Suspense>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
       </main>
-      {location.pathname === '/' && <Footer />}
+      {!isAuthPage && <Footer />}
     </div>
   );
 };
 
-export const App = () => {
+export function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
@@ -189,4 +198,4 @@ export const App = () => {
       </BrowserRouter>
     </QueryClientProvider>
   );
-};
+}

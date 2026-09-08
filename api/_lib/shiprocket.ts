@@ -1,3 +1,5 @@
+import { getShiprocketConfig } from './settings';
+
 const SHIPROCKET_BASE_URL = 'https://apiv2.shiprocket.in/v1/external';
 
 interface ShiprocketAddress {
@@ -24,6 +26,7 @@ export interface CreateShiprocketOrderInput {
   shippingAddress: ShiprocketAddress;
   items: ShiprocketOrderItem[];
   total: number;
+  paymentMethod?: 'COD' | 'Prepaid';
 }
 
 export interface ShiprocketShipment {
@@ -40,18 +43,10 @@ export class ShiprocketError extends Error {
 
 let cachedToken: { value: string; expiresAt: number } | null = null;
 
-const getRequiredEnv = (name: string): string => {
-  const value = process.env[name];
-  if (!value) {
-    throw new ShiprocketError(`Missing ${name} configuration`);
-  }
-  return value;
-};
-
 const parsePositiveEnvNumber = (name: string, fallback: number): number => {
   const value = Number(process.env[name] || fallback);
   if (!Number.isFinite(value) || value <= 0) {
-    throw new ShiprocketError(`${name} must be a positive number`);
+    return fallback;
   }
   return value;
 };
@@ -70,12 +65,17 @@ const getToken = async (): Promise<string> => {
     return cachedToken.value;
   }
 
+  const config = await getShiprocketConfig();
+  if (!config.email || !config.password) {
+    throw new ShiprocketError('Missing Shiprocket credentials');
+  }
+
   const response = await fetch(`${SHIPROCKET_BASE_URL}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      email: getRequiredEnv('SHIPROCKET_EMAIL'),
-      password: getRequiredEnv('SHIPROCKET_PASSWORD'),
+      email: config.email,
+      password: config.password,
     }),
   });
   const data = await readResponse(response);
@@ -84,8 +84,6 @@ const getToken = async (): Promise<string> => {
     throw new ShiprocketError(data.message || 'Shiprocket authentication failed');
   }
 
-  // Shiprocket documents a 10-day token lifetime. Refresh early to avoid using
-  // a token that is about to expire; a serverless function may also re-authenticate.
   cachedToken = {
     value: data.token,
     expiresAt: Date.now() + 9 * 24 * 60 * 60 * 1000,
@@ -102,8 +100,10 @@ const splitName = (fullName: string) => {
 export const createShiprocketCodShipment = async (
   input: CreateShiprocketOrderInput
 ): Promise<ShiprocketShipment> => {
+  const config = await getShiprocketConfig();
   const token = await getToken();
   const { firstName, lastName } = splitName(input.shippingAddress.fullName);
+  const paymentMethod = input.paymentMethod || 'COD';
 
   const response = await fetch(`${SHIPROCKET_BASE_URL}/orders/create/adhoc`, {
     method: 'POST',
@@ -114,7 +114,7 @@ export const createShiprocketCodShipment = async (
     body: JSON.stringify({
       order_id: input.orderId,
       order_date: new Date().toISOString().slice(0, 19).replace('T', ' '),
-      pickup_location: getRequiredEnv('SHIPROCKET_PICKUP_LOCATION'),
+      pickup_location: config.pickupLocation || 'Primary',
       billing_customer_name: firstName,
       billing_last_name: lastName,
       billing_address: input.shippingAddress.addressLine1,
@@ -135,7 +135,7 @@ export const createShiprocketCodShipment = async (
         tax: '',
         hsn: '',
       })),
-      payment_method: 'COD',
+      payment_method: paymentMethod,
       sub_total: input.total,
       length: parsePositiveEnvNumber('SHIPROCKET_DEFAULT_LENGTH_CM', 10),
       breadth: parsePositiveEnvNumber('SHIPROCKET_DEFAULT_BREADTH_CM', 10),

@@ -2,13 +2,12 @@ import { Link } from 'react-router-dom';
 import { useAdminOrders } from '../../hooks/useAdminOrders';
 import { useProducts } from '../../hooks/useProducts';
 import { OrderStatus } from '../../types/order';
-import { Package, ShoppingCart, DollarSign, Clock, Truck, CheckCircle, ArrowRight } from 'lucide-react';
+import { Package, ShoppingCart, DollarSign, Clock, Truck, CheckCircle, ArrowRight, Settings } from 'lucide-react';
 
 export const AdminDashboard = () => {
   const { data: ordersData } = useAdminOrders();
   const { data: productsData } = useProducts();
 
-  // Calculate metrics
   const totalOrders = ordersData?.total || 0;
   const totalProducts = productsData?.total || 0;
   
@@ -111,126 +110,138 @@ export const AdminDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-black text-white p-4 sm:p-6 lg:p-8 font-inter select-none">
       <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-white/10 pb-5">
           <div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">Dashboard</h1>
-            <p className="text-base sm:text-lg text-gray-600">Welcome back! Here's what's happening with your store today.</p>
+            <span className="text-[10px] font-bold tracking-[0.2em] text-neutral-400 uppercase">ADMIN CONSOLE</span>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white uppercase tracking-tight mt-1">Dashboard</h1>
+            <p className="text-xs sm:text-sm text-neutral-400 mt-1">Real-time overview of revenue, orders, and drops.</p>
           </div>
-          <div className="text-left sm:text-right">
-            <p className="text-sm text-gray-500">Last updated</p>
-            <p className="text-sm font-semibold text-gray-900">{new Date().toLocaleDateString()}</p>
+          <div className="flex items-center gap-3">
+            <Link
+              to="/admin/settings"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider text-black bg-white border border-white"
+            >
+              <Settings className="w-4 h-4" />
+              <span>API Settings</span>
+            </Link>
           </div>
         </div>
 
-        {/* Metrics Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {metrics.map((metric) => (
             <div
               key={metric.name}
-              className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100"
+              className="bg-neutral-950/60 rounded-2xl border border-white/10 p-5"
             >
-              <div className="p-5 sm:p-6">
-                <div className="flex items-start justify-between mb-3 sm:mb-4">
-                  <div className={`${metric.bgColor} rounded-xl p-2.5 sm:p-3`}>
-                    <metric.icon className={`h-5 w-5 sm:h-6 sm:w-6 ${metric.iconColor}`} />
-                  </div>
-                  <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-full">
-                    {metric.change}
-                  </span>
+              <div className="flex items-start justify-between mb-3">
+                <div className="rounded-xl p-2.5 bg-neutral-900 border border-white/10 text-white">
+                  <metric.icon className="h-5 w-5" />
                 </div>
-                <div>
-                  <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1">
-                    {metric.name}
-                  </p>
-                  <p className="text-2xl sm:text-3xl font-bold text-gray-900">{metric.value}</p>
-                </div>
+                <span className="text-[10px] font-bold text-neutral-400 bg-neutral-900 border border-white/10 px-2 py-0.5 rounded-full">
+                  {metric.change}
+                </span>
               </div>
-              <div className={`h-1 bg-gradient-to-r ${metric.gradient}`}></div>
+              <div>
+                <p className="text-xs text-neutral-400 mb-0.5">{metric.name}</p>
+                <p className="text-2xl sm:text-3xl font-extrabold text-white">{metric.value}</p>
+              </div>
             </div>
           ))}
         </div>
 
-        {/* Order Status Breakdown */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-5 sm:p-6 lg:p-8">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-5 sm:mb-6">
-              <div>
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Order Status</h2>
-                <p className="text-xs sm:text-sm text-gray-600 mt-1">Track your orders at every stage</p>
-              </div>
-              <Link 
-                to="/admin/orders"
-                className="text-xs sm:text-sm font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1 self-start sm:self-auto"
-              >
-                View all orders
-                <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4" />
-              </Link>
+        <div className="bg-neutral-950/60 rounded-2xl border border-white/10 p-5 sm:p-7">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+            <div>
+              <h2 className="text-base font-bold text-white uppercase tracking-wider">Order Status Pipeline</h2>
+              <p className="text-xs text-neutral-400 mt-0.5">Live shipment lifecycle across Indian pin codes</p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-              {orderStatusBreakdown.map((item) => (
-                <div 
-                  key={item.status} 
-                  className={`${item.bgColor} border-2 ${item.borderColor} rounded-xl p-4 sm:p-5 hover:shadow-md transition-all duration-200`}
-                >
-                  <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                    <item.icon className={`h-4 w-4 sm:h-5 sm:w-5 ${item.color}`} />
-                    <p className={`text-xs sm:text-sm font-bold ${item.color} uppercase tracking-wide`}>
-                      {item.status}
-                    </p>
-                  </div>
-                  <p className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">{item.count}</p>
-                  <div className="w-full bg-white rounded-full h-2 sm:h-2.5 overflow-hidden">
-                    <div 
-                      className={`h-2 sm:h-2.5 rounded-full ${item.barColor} transition-all duration-500`}
-                      style={{ width: `${totalOrders > 0 ? (item.count / totalOrders) * 100 : 0}%` }}
-                    ></div>
-                  </div>
-                  <p className="text-xs text-gray-600 mt-2">
-                    {totalOrders > 0 ? `${((item.count / totalOrders) * 100).toFixed(0)}% of total` : '0% of total'}
+            <Link 
+              to="/admin/orders"
+              className="text-xs font-bold uppercase tracking-wider text-white underline flex items-center gap-1"
+            >
+              View all orders
+              <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {orderStatusBreakdown.map((item) => (
+              <div 
+                key={item.status} 
+                className="bg-black border border-white/10 rounded-xl p-4"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <item.icon className="h-4 w-4 text-white" />
+                  <p className="text-xs font-bold text-white uppercase tracking-wide">
+                    {item.status}
                   </p>
                 </div>
-              ))}
-            </div>
+                <p className="text-2xl sm:text-3xl font-extrabold text-white mb-2">{item.count}</p>
+                <div className="w-full bg-neutral-900 rounded-full h-1.5 overflow-hidden">
+                  <div 
+                    className="h-1.5 rounded-full bg-white"
+                    style={{ width: `${totalOrders > 0 ? (item.count / totalOrders) * 100 : 0}%` }}
+                  />
+                </div>
+                <p className="text-[10px] text-neutral-400 mt-1.5">
+                  {totalOrders > 0 ? `${((item.count / totalOrders) * 100).toFixed(0)}% of total` : '0% of total'}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Link
             to="/admin/products"
-            className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100"
+            className="bg-neutral-950/60 rounded-2xl border border-white/10 p-6 flex flex-col justify-between"
           >
-            <div className="p-5 sm:p-6 lg:p-8">
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <div className="bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl p-3 sm:p-4 group-hover:scale-110 transition-transform duration-300">
-                  <Package className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
-                </div>
-                <ArrowRight className="h-5 w-5 sm:h-6 sm:w-6 text-gray-400 group-hover:text-gray-900 group-hover:translate-x-1 transition-all" />
+            <div>
+              <div className="w-10 h-10 rounded-xl bg-neutral-900 border border-white/10 flex items-center justify-center text-white mb-3">
+                <Package className="h-5 w-5" />
               </div>
-              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">Manage Products</h3>
-              <p className="text-sm sm:text-base text-gray-600">Add, edit, or remove products from your inventory</p>
+              <h3 className="text-base font-bold text-white uppercase tracking-wider mb-1">Manage Catalog</h3>
+              <p className="text-xs text-neutral-400">Add, edit, or adjust inventory and sizes for active drops.</p>
             </div>
-            <div className="h-1 bg-gradient-to-r from-purple-500 to-pink-600"></div>
+            <div className="pt-4 flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-white">
+              <span>Open Catalog</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </div>
           </Link>
           
           <Link
             to="/admin/orders"
-            className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100"
+            className="bg-neutral-950/60 rounded-2xl border border-white/10 p-6 flex flex-col justify-between"
           >
-            <div className="p-5 sm:p-6 lg:p-8">
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl p-3 sm:p-4 group-hover:scale-110 transition-transform duration-300">
-                  <ShoppingCart className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
-                </div>
-                <ArrowRight className="h-5 w-5 sm:h-6 sm:w-6 text-gray-400 group-hover:text-gray-900 group-hover:translate-x-1 transition-all" />
+            <div>
+              <div className="w-10 h-10 rounded-xl bg-neutral-900 border border-white/10 flex items-center justify-center text-white mb-3">
+                <ShoppingCart className="h-5 w-5" />
               </div>
-              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">Manage Orders</h3>
-              <p className="text-sm sm:text-base text-gray-600">View, update, and track all customer orders</p>
+              <h3 className="text-base font-bold text-white uppercase tracking-wider mb-1">Manage Orders</h3>
+              <p className="text-xs text-neutral-400">Track shipments, verify payments, and monitor deliveries.</p>
             </div>
-            <div className="h-1 bg-gradient-to-r from-blue-500 to-indigo-600"></div>
+            <div className="pt-4 flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-white">
+              <span>Open Orders</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </div>
+          </Link>
+
+          <Link
+            to="/admin/settings"
+            className="bg-neutral-950/60 rounded-2xl border border-white/10 p-6 flex flex-col justify-between"
+          >
+            <div>
+              <div className="w-10 h-10 rounded-xl bg-neutral-900 border border-white/10 flex items-center justify-center text-white mb-3">
+                <Settings className="h-5 w-5" />
+              </div>
+              <h3 className="text-base font-bold text-white uppercase tracking-wider mb-1">API Integrations</h3>
+              <p className="text-xs text-neutral-400">Configure Razorpay Key ID/Secret & Shiprocket API credentials.</p>
+            </div>
+            <div className="pt-4 flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-white">
+              <span>Open Settings</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </div>
           </Link>
         </div>
       </div>
