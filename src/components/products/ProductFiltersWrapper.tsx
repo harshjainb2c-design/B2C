@@ -44,13 +44,13 @@ export const ProductFiltersWrapper = ({
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="lg:hidden w-full flex items-center justify-center gap-2 px-4 py-3 text-xs sm:text-sm font-inter font-bold uppercase tracking-wider text-white bg-neutral-950 border border-neutral-800 select-none"
+        className="lg:hidden inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full text-xs font-inter font-bold uppercase tracking-wider text-white bg-neutral-900/80 border border-white/15 select-none"
         aria-label="Open filters"
       >
-        <SlidersHorizontal className="w-4 h-4" />
+        <SlidersHorizontal className="w-3.5 h-3.5 text-neutral-400" />
         <span>Filters</span>
         {activeFilterCount > 0 && (
-          <span className="ml-1 px-2 py-0.5 text-xs font-inter font-bold text-black bg-white rounded-full">
+          <span className="w-4 h-4 rounded-full text-[10px] font-inter font-bold text-black bg-white flex items-center justify-center leading-none">
             {activeFilterCount}
           </span>
         )}
@@ -68,28 +68,28 @@ export const ProductFiltersWrapper = ({
             aria-hidden="true"
           />
 
-          <div className="fixed inset-y-0 left-0 w-full max-w-sm bg-neutral-950 border-r border-neutral-900 text-white z-50 lg:hidden overflow-y-auto font-inter">
-            <div className="sticky top-0 bg-neutral-950 border-b border-neutral-900 px-4 py-4 flex items-center justify-between z-10">
-              <h2 className="text-base font-inter font-bold uppercase tracking-wider text-white">Filters</h2>
+          <div className="fixed inset-y-0 left-0 w-full max-w-sm bg-neutral-950 border-r border-white/10 text-white z-50 lg:hidden overflow-y-auto font-inter">
+            <div className="sticky top-0 bg-neutral-950 border-b border-white/10 px-5 py-4 flex items-center justify-between z-10">
+              <h2 className="text-sm font-inter font-bold uppercase tracking-wider text-white">Filters</h2>
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="p-2 -mr-2 text-neutral-400"
+                className="w-8 h-8 rounded-full border border-white/15 flex items-center justify-center text-neutral-400"
                 aria-label="Close filters"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="p-4">
+            <div className="p-5">
               {children}
             </div>
 
-            <div className="sticky bottom-0 bg-neutral-950 border-t border-neutral-900 p-4">
+            <div className="sticky bottom-0 bg-neutral-950 border-t border-white/10 p-4">
               <button
                 type="button"
                 onClick={handleApplyFilters}
-                className="w-full px-4 py-3 text-xs font-inter font-bold uppercase tracking-wider text-black bg-white border border-white"
+                className="w-full py-3 px-6 rounded-full text-xs font-inter font-bold uppercase tracking-wider text-black bg-white border border-white"
               >
                 Apply Filters
               </button>

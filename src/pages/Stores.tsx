@@ -17,7 +17,7 @@ export const Stores = () => {
         </div>
 
         <div className="max-w-3xl space-y-6">
-          <div className="bg-neutral-950 border border-neutral-800 p-5 sm:p-7 space-y-5 font-inter">
+          <div className="bg-neutral-950/50 border border-white/10 rounded-2xl p-5 sm:p-7 space-y-5 font-inter">
             <div>
               <span className="text-[10px] font-inter font-bold tracking-[0.2em] text-neutral-400 uppercase">
                 FLAGSHIP STORE 01
@@ -27,7 +27,7 @@ export const Stores = () => {
               </h2>
             </div>
 
-            <div className="space-y-4 pt-2 border-t border-neutral-900">
+            <div className="space-y-4 pt-2 border-t border-white/10">
               <div className="flex items-start gap-3.5">
                 <MapPin className="w-5 h-5 text-white mt-0.5 shrink-0" />
                 <div>
@@ -68,12 +68,12 @@ export const Stores = () => {
               </div>
             </div>
 
-            <div className="pt-4 border-t border-neutral-900 flex flex-col sm:flex-row gap-3">
+            <div className="pt-4 border-t border-white/10 flex flex-col sm:flex-row gap-3">
               <a
                 href="https://maps.google.com/?q=137+Malwa+Mill+Indore"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white text-black text-xs font-inter font-bold uppercase tracking-wider border border-white"
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white text-black text-xs font-inter font-bold uppercase tracking-wider rounded-full border border-white"
               >
                 <Navigation className="w-4 h-4" />
                 <span>Get Directions</span>
@@ -82,7 +82,7 @@ export const Stores = () => {
                 href="https://wa.me/919098178762"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 border border-neutral-800 text-white text-xs font-inter font-bold uppercase tracking-wider bg-black"
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 border border-white/15 text-white text-xs font-inter font-bold uppercase tracking-wider bg-neutral-900 rounded-full"
               >
                 <span>WhatsApp Store</span>
               </a>

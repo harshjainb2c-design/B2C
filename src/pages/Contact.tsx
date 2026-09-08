@@ -47,7 +47,7 @@ export const Contact = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           <div className="space-y-5">
-            <div className="p-5 sm:p-6 bg-neutral-950 border border-neutral-800 space-y-5 font-inter">
+            <div className="p-5 sm:p-6 rounded-2xl bg-neutral-950/50 border border-white/10 space-y-5 font-inter">
               <div className="flex items-start gap-3.5">
                 <MapPin className="w-5 h-5 text-white mt-0.5 shrink-0" />
                 <div>
@@ -107,7 +107,7 @@ export const Contact = () => {
               </div>
             </div>
 
-            <div className="p-4 bg-neutral-950 border border-neutral-800 font-inter">
+            <div className="p-4 rounded-xl bg-neutral-950/50 border border-white/10 font-inter">
               <span className="text-[11px] font-inter uppercase tracking-wider text-neutral-400 block mb-1">
                 Wholesale & Bulk Orders
               </span>
@@ -117,13 +117,13 @@ export const Contact = () => {
             </div>
           </div>
 
-          <div className="bg-neutral-950 border border-neutral-800 p-5 sm:p-7 font-inter">
+          <div className="bg-neutral-950/50 border border-white/10 rounded-2xl p-5 sm:p-7 font-inter">
             <h2 className="text-sm sm:text-base font-inter uppercase tracking-wider text-white mb-5 font-bold">
               Send Us A Message
             </h2>
 
             {submitted ? (
-              <div className="p-6 text-center border border-emerald-900/60 bg-emerald-950/20">
+              <div className="p-6 text-center rounded-2xl border border-emerald-900/60 bg-emerald-950/20">
                 <div className="w-10 h-10 rounded-full border border-emerald-500 text-emerald-400 flex items-center justify-center mx-auto mb-3">
                   <Check className="w-5 h-5" />
                 </div>
@@ -136,7 +136,7 @@ export const Contact = () => {
                 <button
                   type="button"
                   onClick={() => setSubmitted(false)}
-                  className="px-4 py-2 text-xs font-inter uppercase tracking-wider border border-neutral-800 text-white bg-black"
+                  className="px-5 py-2.5 rounded-full text-xs font-inter uppercase tracking-wider border border-white/15 text-white bg-black"
                 >
                   Send Another Message
                 </button>
@@ -153,7 +153,7 @@ export const Contact = () => {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     required
-                    className="w-full px-3.5 py-2.5 bg-black border border-neutral-800 text-white text-xs sm:text-sm placeholder-neutral-600 focus:outline-none focus:border-white font-inter"
+                    className="w-full px-4 py-2.5 rounded-xl bg-black border border-white/15 text-white text-xs sm:text-sm placeholder-neutral-600 focus:outline-none focus:border-white font-inter"
                     placeholder="John Doe"
                   />
                 </div>
@@ -168,7 +168,7 @@ export const Contact = () => {
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     required
-                    className="w-full px-3.5 py-2.5 bg-black border border-neutral-800 text-white text-xs sm:text-sm placeholder-neutral-600 focus:outline-none focus:border-white font-inter"
+                    className="w-full px-4 py-2.5 rounded-xl bg-black border border-white/15 text-white text-xs sm:text-sm placeholder-neutral-600 focus:outline-none focus:border-white font-inter"
                     placeholder="your@email.com"
                   />
                 </div>
@@ -182,7 +182,7 @@ export const Contact = () => {
                     id="phone"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-black border border-neutral-800 text-white text-xs sm:text-sm placeholder-neutral-600 focus:outline-none focus:border-white font-inter"
+                    className="w-full px-4 py-2.5 rounded-xl bg-black border border-white/15 text-white text-xs sm:text-sm placeholder-neutral-600 focus:outline-none focus:border-white font-inter"
                     placeholder="+91 90981 78762"
                   />
                 </div>
@@ -197,14 +197,14 @@ export const Contact = () => {
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                     required
-                    className="w-full px-3.5 py-2.5 bg-black border border-neutral-800 text-white text-xs sm:text-sm placeholder-neutral-600 focus:outline-none focus:border-white font-inter"
+                    className="w-full px-4 py-2.5 rounded-xl bg-black border border-white/15 text-white text-xs sm:text-sm placeholder-neutral-600 focus:outline-none focus:border-white font-inter"
                     placeholder="How can we assist you?"
                   />
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full mt-2 py-3 px-6 text-xs sm:text-sm font-inter font-bold uppercase tracking-[0.16em] text-black bg-white border border-white flex items-center justify-center gap-2"
+                  className="w-full mt-2 py-3 px-6 rounded-full text-xs sm:text-sm font-inter font-bold uppercase tracking-[0.16em] text-black bg-white border border-white flex items-center justify-center gap-2"
                 >
                   <Send className="w-4 h-4" />
                   <span>Send Message</span>

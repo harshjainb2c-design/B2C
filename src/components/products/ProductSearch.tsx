@@ -32,10 +32,10 @@ export const ProductSearch = ({
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder={placeholder}
-          className="w-full bg-neutral-950 border border-neutral-800 text-white placeholder:text-neutral-500 text-xs sm:text-sm pl-11 pr-24 py-3 focus:outline-none focus:border-neutral-600 font-inter"
+          className="w-full bg-neutral-900/60 border border-white/15 rounded-full text-white placeholder:text-neutral-500 text-xs sm:text-sm pl-11 pr-24 py-2.5 focus:outline-none focus:border-white/40 font-inter"
         />
         
-        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500 pointer-events-none">
+        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 pointer-events-none">
           <svg
             className="w-4 h-4"
             fill="none"
@@ -76,7 +76,7 @@ export const ProductSearch = ({
           <button
             type="button"
             onClick={handleClear}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 p-1 text-xs font-inter font-bold"
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-400 p-1 text-xs font-inter font-bold"
             title="Clear search"
             aria-label="Clear search"
           >

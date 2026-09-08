@@ -4,7 +4,7 @@ import { Home, ArrowLeft } from 'lucide-react';
 export const NotFound = () => {
   return (
     <div className="min-h-screen bg-black text-white flex items-center justify-center px-4 select-none font-inter">
-      <div className="max-w-md w-full text-center border border-neutral-800 p-8 sm:p-12 bg-black font-inter">
+      <div className="max-w-md w-full text-center border border-white/10 rounded-2xl p-8 sm:p-12 bg-neutral-950/50 font-inter">
         <div className="mb-6">
           <span className="text-7xl sm:text-8xl font-inter font-extrabold tracking-tight text-white block">
             404
@@ -20,7 +20,7 @@ export const NotFound = () => {
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link
             to="/"
-            className="inline-flex items-center justify-center px-6 py-2.5 bg-white text-black text-xs font-inter font-bold uppercase tracking-wider border border-white"
+            className="inline-flex items-center justify-center px-6 py-2.5 bg-white text-black text-xs font-inter font-bold uppercase tracking-wider rounded-full border border-white"
           >
             <Home className="w-4 h-4 mr-2" />
             Home
@@ -28,7 +28,7 @@ export const NotFound = () => {
           <button
             type="button"
             onClick={() => window.history.back()}
-            className="inline-flex items-center justify-center px-6 py-2.5 border border-neutral-800 text-white text-xs font-inter font-bold uppercase tracking-wider bg-black"
+            className="inline-flex items-center justify-center px-6 py-2.5 border border-white/15 text-white text-xs font-inter font-bold uppercase tracking-wider rounded-full bg-neutral-900"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Go Back

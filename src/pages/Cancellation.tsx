@@ -30,15 +30,15 @@ export const Cancellation = () => {
               02. Cancellation Stages
             </h2>
             <ul className="space-y-2.5 text-xs font-inter text-neutral-400">
-              <li className="p-3.5 bg-neutral-950 border border-neutral-800">
+              <li className="p-3.5 rounded-xl bg-neutral-950/50 border border-white/10">
                 <span className="text-white font-bold block mb-0.5">Pre-Dispatch (Within 2-4 Hours):</span>
                 Instant cancellation available from your Orders dashboard or via direct WhatsApp concierge.
               </li>
-              <li className="p-3.5 bg-neutral-950 border border-neutral-800">
+              <li className="p-3.5 rounded-xl bg-neutral-950/50 border border-white/10">
                 <span className="text-white font-bold block mb-0.5">Processing Stage:</span>
                 Contact support immediately (+91 90981 78762) to intercept packing prior to label generation.
               </li>
-              <li className="p-3.5 bg-neutral-950 border border-neutral-800">
+              <li className="p-3.5 rounded-xl bg-neutral-950/50 border border-white/10">
                 <span className="text-white font-bold block mb-0.5">In-Transit / Dispatched:</span>
                 Cannot be recalled mid-transit. You can request a 30-day exchange once the package arrives.
               </li>

@@ -23,10 +23,10 @@ export const ProductGrid = ({ products, isLoading }: ProductGridProps) => {
 
   if (products.length === 0) {
     return (
-      <div className="text-center py-12 sm:py-20 border border-neutral-900 bg-neutral-950 p-6 sm:p-10 font-inter">
-        <div className="text-neutral-500 mb-4">
+      <div className="text-center py-12 sm:py-20 rounded-2xl border border-white/10 bg-neutral-950/40 p-6 sm:p-10 font-inter">
+        <div className="w-12 h-12 rounded-full bg-neutral-900 border border-white/10 flex items-center justify-center mx-auto mb-4 text-neutral-400">
           <svg
-            className="mx-auto h-12 w-12 stroke-[1.5]"
+            className="h-6 w-6 stroke-[1.5]"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -47,7 +47,7 @@ export const ProductGrid = ({ products, isLoading }: ProductGridProps) => {
         <button
           type="button"
           onClick={() => navigate('/products')}
-          className="inline-flex items-center justify-center px-5 py-2.5 bg-white text-black text-xs font-inter font-bold uppercase tracking-wider border border-white"
+          className="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-white text-black text-xs font-inter font-bold uppercase tracking-wider border border-white"
         >
           Reset All Filters
         </button>

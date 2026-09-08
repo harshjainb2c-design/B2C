@@ -94,7 +94,7 @@ export const Privacy = () => {
             <h2 className="text-sm sm:text-base font-inter font-bold uppercase tracking-wider text-white mb-2">
               07. Contact & Grievance Officer
             </h2>
-            <div className="bg-neutral-950 border border-neutral-800 p-4 text-xs font-inter space-y-1 text-neutral-400">
+            <div className="rounded-2xl bg-neutral-950/50 border border-white/10 p-5 text-xs font-inter space-y-1 text-neutral-400">
               <p className="text-white font-bold">B2C Exports Studio</p>
               <p>137 Malwa Mill, Opposite Bank of India</p>
               <p>Indore, Madhya Pradesh - 452005</p>

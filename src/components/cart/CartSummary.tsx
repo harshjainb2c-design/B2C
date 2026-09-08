@@ -23,8 +23,8 @@ export const CartSummary = ({
   const estimatedTotal = total + estimatedTax;
 
   return (
-    <div className="bg-neutral-950 border border-neutral-900 rounded-md p-5 sm:p-6 text-white select-none">
-      <h2 className="text-xs uppercase tracking-[0.2em] text-neutral-400 font-bold pb-3.5 mb-4 border-b border-neutral-900">
+    <div className="bg-neutral-950/50 border border-white/10 rounded-2xl p-5 sm:p-6 text-white select-none font-inter">
+      <h2 className="text-xs uppercase tracking-[0.2em] text-neutral-400 font-bold pb-3.5 mb-4 border-b border-white/10">
         Order Summary
       </h2>
 
@@ -46,7 +46,7 @@ export const CartSummary = ({
           <span className="font-semibold text-emerald-400 uppercase tracking-wider text-[11px]">Free</span>
         </div>
 
-        <div className="border-t border-neutral-900 pt-3.5 mt-3.5">
+        <div className="border-t border-white/10 pt-3.5 mt-3.5">
           <div className="flex justify-between items-baseline">
             <span className="text-xs uppercase tracking-wider text-neutral-200 font-bold">
               Total
@@ -63,7 +63,7 @@ export const CartSummary = ({
           type="button"
           onClick={onCheckout}
           disabled={itemCount === 0}
-          className="w-full py-3.5 px-4 text-xs font-bold uppercase tracking-wider text-black bg-white disabled:opacity-40 disabled:cursor-not-allowed rounded-sm"
+          className="w-full py-3.5 px-4 rounded-full text-xs font-bold uppercase tracking-wider text-black bg-white disabled:opacity-40 disabled:cursor-not-allowed border border-white"
         >
           Proceed To Checkout
         </button>

@@ -15,7 +15,7 @@ export const About = () => {
         </div>
 
         <div className="space-y-8 text-xs sm:text-sm leading-relaxed text-neutral-300 font-inter">
-          <section className="p-5 sm:p-6 bg-neutral-950 border border-neutral-800 space-y-3">
+          <section className="p-5 sm:p-6 rounded-2xl bg-neutral-950/50 border border-white/10 space-y-3">
             <h2 className="text-sm sm:text-base font-inter uppercase tracking-wider text-white font-bold">
               The Genesis
             </h2>
@@ -36,26 +36,26 @@ export const About = () => {
               bio-washed for skin softness, pre-shrunk for an enduring boxy drape, and assembled with high-tensile double-needle chain stitching.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 text-xs font-inter">
-              <div className="p-4 bg-neutral-950 border border-neutral-800">
+              <div className="p-4 rounded-xl bg-neutral-950/50 border border-white/10">
                 <span className="text-white font-bold block mb-1">240+ GSM Heavyweight</span>
                 <p className="text-neutral-400">Dense structure that holds its drape through countless wears.</p>
               </div>
-              <div className="p-4 bg-neutral-950 border border-neutral-800">
+              <div className="p-4 rounded-xl bg-neutral-950/50 border border-white/10">
                 <span className="text-white font-bold block mb-1">Pre-Shrunk Bio Wash</span>
                 <p className="text-neutral-400">Zero shape deformation or fabric tightening after laundering.</p>
               </div>
-              <div className="p-4 bg-neutral-950 border border-neutral-800">
+              <div className="p-4 rounded-xl bg-neutral-950/50 border border-white/10">
                 <span className="text-white font-bold block mb-1">Direct-To-Youth Pricing</span>
                 <p className="text-neutral-400">Luxury export apparel without the artificial brand markups.</p>
               </div>
-              <div className="p-4 bg-neutral-950 border border-neutral-800">
+              <div className="p-4 rounded-xl bg-neutral-950/50 border border-white/10">
                 <span className="text-white font-bold block mb-1">Nationwide Dispatch</span>
                 <p className="text-neutral-400">Indore flagship pickup and 24-48h pan-India air express.</p>
               </div>
             </div>
           </section>
 
-          <section className="p-5 sm:p-6 bg-neutral-950 border border-neutral-800 space-y-3 text-xs font-inter">
+          <section className="p-5 sm:p-6 rounded-2xl bg-neutral-950/50 border border-white/10 space-y-3 text-xs font-inter">
             <h2 className="text-sm sm:text-base uppercase tracking-wider text-white font-bold">
               Flagship Studio Coordinates
             </h2>

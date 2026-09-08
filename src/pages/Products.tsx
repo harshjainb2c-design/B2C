@@ -172,15 +172,32 @@ export const Products = () => {
           })}
         </div>
 
-        <div className="mb-5">
+        <div className="mb-4 sm:mb-6">
           <ProductSearch 
             onSearch={handleSearch}
             initialValue={searchQuery}
           />
         </div>
 
+        <div className="flex lg:hidden items-center justify-between gap-3 mb-5">
+          <div className="flex items-center gap-2.5">
+            <ProductFiltersWrapper activeFilterCount={activeFilterCount}>
+              <ProductFilters
+                filters={filters}
+                onFiltersChange={handleFiltersChange}
+              />
+            </ProductFiltersWrapper>
+            {!isLoading && data && (
+              <span className="text-xs font-inter text-neutral-400 font-medium">
+                {data.total} {data.total === 1 ? 'piece' : 'pieces'}
+              </span>
+            )}
+          </div>
+          <ProductSort value={sortBy} onChange={handleSortChange} />
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <div className="lg:col-span-1">
+          <div className="hidden lg:block lg:col-span-1">
             <ProductFiltersWrapper activeFilterCount={activeFilterCount}>
               <ProductFilters
                 filters={filters}
@@ -191,13 +208,13 @@ export const Products = () => {
 
           <div className="lg:col-span-3">
             {error && (
-              <div className="bg-neutral-950 border border-red-900/50 p-4 mb-6">
+              <div className="rounded-2xl bg-neutral-950/60 border border-red-900/50 p-4 mb-6">
                 <RetryableQuery error={error} onRetry={() => refetch()} />
               </div>
             )}
 
             {!isLoading && !error && data && (
-              <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-neutral-950 p-3.5 sm:p-4 border border-neutral-900">
+              <div className="hidden lg:flex items-center justify-between pb-3 mb-5 border-b border-white/10">
                 <p className="text-xs sm:text-sm text-neutral-400">
                   Showing <span className="font-bold text-white">{data.products?.length || 0}</span> of <span className="font-bold text-white">{data.total}</span> products
                   {collection && (
@@ -228,12 +245,12 @@ export const Products = () => {
             )}
 
             {!isLoading && data && data.totalPages > 1 && (
-              <div className="mt-8 sm:mt-10 flex items-center justify-center gap-2">
+              <div className="mt-8 sm:mt-12 flex items-center justify-center gap-2">
                 <button
                   type="button"
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className="px-4 py-2 text-xs font-inter font-bold uppercase tracking-wider text-neutral-300 bg-neutral-950 border border-neutral-800 disabled:opacity-25 disabled:cursor-not-allowed"
+                  className="px-4 py-2 rounded-full text-xs font-inter font-bold uppercase tracking-wider text-neutral-300 bg-neutral-900/70 border border-white/15 disabled:opacity-25 disabled:cursor-not-allowed"
                 >
                   Previous
                 </button>
@@ -250,7 +267,7 @@ export const Products = () => {
                         return (
                           <span
                             key={page}
-                            className="px-3 py-2 text-xs text-neutral-600 font-inter"
+                            className="w-9 h-9 flex items-center justify-center text-xs text-neutral-600 font-inter"
                           >
                             ...
                           </span>
@@ -264,10 +281,10 @@ export const Products = () => {
                         key={page}
                         type="button"
                         onClick={() => handlePageChange(page)}
-                        className={`px-3.5 py-2 text-xs font-inter font-bold ${
+                        className={`w-9 h-9 rounded-full text-xs font-inter font-bold flex items-center justify-center ${
                           currentPage === page
                             ? 'text-black bg-white border border-white'
-                            : 'text-neutral-400 bg-neutral-950 border border-neutral-800'
+                            : 'text-neutral-400 bg-neutral-900/70 border border-white/15'
                         }`}
                       >
                         {page}
@@ -280,7 +297,7 @@ export const Products = () => {
                   type="button"
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === data.totalPages}
-                  className="px-4 py-2 text-xs font-inter font-bold uppercase tracking-wider text-neutral-300 bg-neutral-950 border border-neutral-800 disabled:opacity-25 disabled:cursor-not-allowed"
+                  className="px-4 py-2 rounded-full text-xs font-inter font-bold uppercase tracking-wider text-neutral-300 bg-neutral-900/70 border border-white/15 disabled:opacity-25 disabled:cursor-not-allowed"
                 >
                   Next
                 </button>

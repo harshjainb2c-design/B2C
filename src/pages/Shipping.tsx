@@ -30,19 +30,19 @@ export const Shipping = () => {
               02. Estimated Transit Timelines
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-inter">
-              <div className="p-4 bg-neutral-950 border border-neutral-800">
+              <div className="p-4 rounded-xl bg-neutral-950/50 border border-white/10">
                 <span className="text-white font-bold block mb-1">Within Indore:</span>
                 <p className="text-neutral-400">24 to 48 hours direct express courier dispatch.</p>
               </div>
-              <div className="p-4 bg-neutral-950 border border-neutral-800">
+              <div className="p-4 rounded-xl bg-neutral-950/50 border border-white/10">
                 <span className="text-white font-bold block mb-1">Metro Cities (Delhi, Mumbai, BLR):</span>
                 <p className="text-neutral-400">2 to 4 business days air freight delivery.</p>
               </div>
-              <div className="p-4 bg-neutral-950 border border-neutral-800">
+              <div className="p-4 rounded-xl bg-neutral-950/50 border border-white/10">
                 <span className="text-white font-bold block mb-1">Rest of India:</span>
                 <p className="text-neutral-400">3 to 6 business days with live SMS tracking.</p>
               </div>
-              <div className="p-4 bg-neutral-950 border border-neutral-800">
+              <div className="p-4 rounded-xl bg-neutral-950/50 border border-white/10">
                 <span className="text-white font-bold block mb-1">Wholesale & Bulk Shipments:</span>
                 <p className="text-neutral-400">Surface transport arranged via verified logistics fleet.</p>
               </div>

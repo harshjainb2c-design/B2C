@@ -44,17 +44,17 @@ export const Returns = () => {
               03. How To Initiate An Exchange
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-inter">
-              <div className="p-4 bg-neutral-950 border border-neutral-800">
+              <div className="p-4 rounded-xl bg-neutral-950/50 border border-white/10">
                 <span className="text-neutral-400 block mb-1">STEP 01</span>
                 <p className="text-white font-semibold mb-1">Notify Concierge</p>
                 <p className="text-neutral-400 text-[11px]">Message +91 90981 78762 with your order ID & photos.</p>
               </div>
-              <div className="p-4 bg-neutral-950 border border-neutral-800">
+              <div className="p-4 rounded-xl bg-neutral-950/50 border border-white/10">
                 <span className="text-neutral-400 block mb-1">STEP 02</span>
                 <p className="text-white font-semibold mb-1">Doorstep Pickup</p>
                 <p className="text-neutral-400 text-[11px]">Our courier arrives to inspect and collect the parcel.</p>
               </div>
-              <div className="p-4 bg-neutral-950 border border-neutral-800">
+              <div className="p-4 rounded-xl bg-neutral-950/50 border border-white/10">
                 <span className="text-neutral-400 block mb-1">STEP 03</span>
                 <p className="text-white font-semibold mb-1">Replacement Dispatched</p>
                 <p className="text-neutral-400 text-[11px]">Your new size or refund is processed within 48 hours.</p>

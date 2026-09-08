@@ -86,7 +86,7 @@ export const ProductFilters = ({
     selectedValue?: string;
     onChange: (value: string | undefined) => void;
   }) => (
-    <div className="border-b border-neutral-900 pb-3">
+    <div className="border-b border-white/10 pb-3">
       <button
         type="button"
         onClick={() => toggleSection(sectionKey)}
@@ -108,7 +108,7 @@ export const ProductFilters = ({
                 type="checkbox"
                 checked={selectedValue === option.value}
                 onChange={(e) => onChange(e.target.checked ? option.value : undefined)}
-                className="w-3.5 h-3.5 accent-white bg-neutral-900 border-neutral-700 cursor-pointer rounded-none"
+                className="w-3.5 h-3.5 accent-white bg-neutral-900 border-white/20 cursor-pointer rounded-sm"
               />
               <span className={`ml-2 text-xs font-inter ${selectedValue === option.value ? 'font-bold text-white' : 'text-neutral-400'}`}>
                 {option.label}
@@ -121,8 +121,8 @@ export const ProductFilters = ({
   );
 
   return (
-    <div className="lg:border lg:border-neutral-900 bg-neutral-950 lg:p-4 text-white select-none font-inter">
-      <div className="flex items-center justify-between mb-3 pb-2 border-b border-neutral-900">
+    <div className="rounded-2xl border border-white/10 bg-neutral-950/40 p-4 sm:p-5 text-white select-none font-inter">
+      <div className="flex items-center justify-between mb-3 pb-2 border-b border-white/10">
         <h3 className="text-xs font-inter font-extrabold text-white uppercase tracking-wider">Filters</h3>
         {hasActiveFilters && (
           <button
@@ -173,7 +173,7 @@ export const ProductFilters = ({
         <button
           type="button"
           onClick={clearAllFilters}
-          className="mt-4 w-full px-3 py-2 text-xs font-inter font-bold uppercase tracking-wider text-neutral-300 border border-neutral-800 bg-neutral-900"
+          className="mt-4 w-full px-4 py-2.5 text-xs font-inter font-bold uppercase tracking-wider text-neutral-300 rounded-full border border-white/15 bg-neutral-900"
         >
           Clear All Filters
         </button>

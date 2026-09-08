@@ -60,65 +60,73 @@ export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
       />
 
       <div
-        className={`fixed right-0 top-0 h-screen h-[100dvh] max-h-[100dvh] w-full sm:max-w-md bg-black z-50 flex flex-col text-white select-none overflow-hidden transform will-change-transform transition-transform duration-300 ease-in-out ${
+        className={`fixed right-0 top-0 h-screen h-[100dvh] max-h-[100dvh] w-full sm:max-w-md bg-black border-l border-white/10 sm:rounded-l-2xl z-50 flex flex-col text-white select-none overflow-hidden transform will-change-transform transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : 'translate-x-full pointer-events-none'
         }`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="cart-drawer-title"
       >
-        <div className="flex-shrink-0 flex items-center justify-between p-4 border-b border-neutral-900 bg-black z-10">
-          <h2 id="cart-drawer-title" className="text-sm uppercase tracking-wider text-white font-bold flex items-center gap-2">
-            <ShoppingCart className="w-4 h-4 text-white" />
-            <span>Bag ({itemCount})</span>
-          </h2>
+        <div className="flex-shrink-0 flex items-center justify-between p-4 border-b border-white/10 bg-black z-10">
+          <div className="flex items-center gap-2">
+            <h2 id="cart-drawer-title" className="text-xs font-bold uppercase tracking-[0.2em] text-white">
+              Shopping Bag
+            </h2>
+            <span className="text-xs text-neutral-400">
+              ({itemCount})
+            </span>
+          </div>
+
           <button
             type="button"
             onClick={onClose}
-            className="p-1 text-neutral-400 text-white"
-            aria-label="Close cart"
+            className="w-8 h-8 rounded-full border border-white/15 flex items-center justify-center text-neutral-400"
+            aria-label="Close bag"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="flex-1 min-h-0 overflow-y-auto p-4 scrollbar-none overscroll-contain">
+        <div className="flex-1 overflow-y-auto px-4 py-2 divide-y divide-neutral-900 scrollbar-hide">
           {items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center py-12">
-              <ShoppingCart className="w-10 h-10 text-neutral-700 mb-3" />
-              <h3 className="text-sm uppercase text-white font-bold mb-1">
-                Your Bag Is Empty
-              </h3>
-              <p className="text-xs text-neutral-400 mb-5">
-                Explore the latest drops to fill it up
+            <div className="h-full flex flex-col items-center justify-center text-center py-16 px-4">
+              <div className="w-16 h-16 rounded-full bg-neutral-900/60 border border-white/10 flex items-center justify-center mb-4 text-neutral-500">
+                <ShoppingCart className="w-6 h-6" />
+              </div>
+              <p className="text-xs font-bold uppercase tracking-wider text-white mb-1">
+                Your Bag is Empty
+              </p>
+              <p className="text-xs text-neutral-400 max-w-xs mb-6">
+                Discover pieces from our latest streetwear drops to start building your look.
               </p>
               <button
                 type="button"
-                onClick={onClose}
-                className="px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-black bg-white rounded-sm"
+                onClick={() => {
+                  onClose();
+                  navigate('/products');
+                }}
+                className="px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider text-black bg-white border border-white"
               >
-                Continue Browsing
+                Shop Archive
               </button>
             </div>
           ) : (
-            <div className="divide-y divide-neutral-900">
-              {items.map((item) => {
-                const itemKey = item.size ? `${item.productId}-${item.size}` : item.productId;
-                return (
-                  <CartDrawerItem
-                    key={itemKey}
-                    item={item}
-                    onUpdateQuantity={updateQuantity}
-                    onRemove={removeItem}
-                  />
-                );
-              })}
-            </div>
+            items.map((item) => {
+              const itemKey = item.size ? `${item.productId}-${item.size}` : item.productId;
+              return (
+                <CartDrawerItem
+                  key={itemKey}
+                  item={item}
+                  onUpdateQuantity={updateQuantity}
+                  onRemove={removeItem}
+                />
+              );
+            })
           )}
         </div>
 
         {items.length > 0 && (
-          <div className="flex-shrink-0 border-t border-neutral-900 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] space-y-2.5 bg-black z-10">
+          <div className="flex-shrink-0 border-t border-white/10 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] space-y-2.5 bg-black z-10">
             <div className="flex justify-between items-baseline mb-1">
               <span className="text-xs uppercase tracking-wider text-neutral-400">Subtotal</span>
               <span className="text-base font-bold text-white">
@@ -133,7 +141,7 @@ export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
             <button
               type="button"
               onClick={handleCheckout}
-              className="w-full py-3 px-4 text-xs font-bold uppercase tracking-wider text-white bg-red-600 rounded-sm"
+              className="w-full py-3 px-4 rounded-full text-xs font-bold uppercase tracking-wider text-white bg-red-600"
             >
               Checkout Now
             </button>
@@ -141,7 +149,7 @@ export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
             <button
               type="button"
               onClick={handleViewCart}
-              className="w-full py-3 px-4 text-xs font-bold uppercase tracking-wider text-white bg-neutral-900 rounded-sm"
+              className="w-full py-3 px-4 rounded-full text-xs font-bold uppercase tracking-wider text-white bg-neutral-900 border border-white/15"
             >
               View Shopping Bag
             </button>

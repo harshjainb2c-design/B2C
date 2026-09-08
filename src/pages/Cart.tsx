@@ -24,10 +24,12 @@ export const Cart = () => {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-black text-white pt-10 sm:pt-16 pb-16 px-4 select-none flex items-center justify-center">
+      <div className="min-h-screen bg-black text-white pt-10 sm:pt-16 pb-16 px-4 select-none flex items-center justify-center font-inter">
         <div className="max-w-md w-full p-6 text-center">
-          <ShoppingCart className="w-10 h-10 text-neutral-700 mx-auto mb-3" />
-          <h1 className="font-headline text-2xl sm:text-3xl font-bold uppercase tracking-tight text-white mb-2">
+          <div className="w-16 h-16 rounded-full bg-neutral-900/60 border border-white/10 flex items-center justify-center mx-auto mb-4 text-neutral-500">
+            <ShoppingCart className="w-7 h-7" />
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold uppercase tracking-tight text-white mb-2">
             YOUR BAG IS EMPTY
           </h1>
           <p className="text-xs text-neutral-400 mb-6 leading-relaxed">
@@ -36,7 +38,7 @@ export const Cart = () => {
           <button
             type="button"
             onClick={handleContinueShopping}
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 text-xs font-bold uppercase tracking-wider text-black bg-white rounded-sm"
+            className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider text-black bg-white border border-white"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Discover Collection</span>
@@ -47,11 +49,11 @@ export const Cart = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white pt-6 sm:pt-10 pb-16 sm:pb-24 select-none">
+    <div className="min-h-screen bg-black text-white pt-6 sm:pt-10 pb-16 sm:pb-24 select-none font-inter">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-end justify-between border-b border-neutral-900 pb-5 sm:pb-8 mb-8 sm:mb-12">
           <div>
-            <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl text-white uppercase tracking-tight">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white uppercase tracking-tight">
               Shopping Bag
             </h1>
             <p className="text-xs sm:text-sm text-neutral-500 mt-1.5 tracking-wide">
@@ -62,14 +64,14 @@ export const Cart = () => {
           <button
             type="button"
             onClick={handleContinueShopping}
-            className="text-xs uppercase tracking-wider text-neutral-500"
+            className="text-xs uppercase tracking-wider text-neutral-400"
           >
             Continue Browsing
           </button>
         </div>
 
         {hasStockIssues && (
-          <div className="mb-6 bg-red-950/20 border border-red-900/40 rounded-sm p-4 flex items-start gap-3">
+          <div className="mb-6 bg-red-950/20 border border-red-900/40 rounded-xl p-4 flex items-start gap-3">
             <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
             <div>
               <h3 className="text-xs font-bold uppercase text-red-400 mb-1">
