@@ -12,7 +12,7 @@ import {
 
 export const useAuth = () => {
   const queryClient = useQueryClient();
-  const { user, session, isLoading, setUser, setSession, setLoading, logout: storeLogout, isAdmin } = useAuthStore();
+  const { user, session, isLoading, setUser, setSession, logout: storeLogout, isAdmin } = useAuthStore();
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginRequest): Promise<AuthResponse> => {
