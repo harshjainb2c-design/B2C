@@ -72,7 +72,7 @@ export const AdminSettings = () => {
       };
 
       await apiClient.post('/admin?resource=settings', payload, { requiresAuth: true });
-      setStatusMessage({ type: 'success', message: 'Integration keys saved successfully! Changes are live immediately with zero downtime.' });
+      setStatusMessage({ type: 'success', message: 'Integration keys saved successfully. Changes are live immediately.' });
       await fetchSettings();
     } catch (err) {
       setStatusMessage({ type: 'error', message: err instanceof Error ? err.message : 'Failed to save settings' });
@@ -88,7 +88,7 @@ export const AdminSettings = () => {
           <div className="flex items-center gap-3">
             <Link
               to="/admin"
-              className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center text-neutral-400 bg-neutral-900"
+              className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center text-neutral-400 bg-neutral-900 active:bg-neutral-800"
               aria-label="Back to Admin"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -107,7 +107,7 @@ export const AdminSettings = () => {
             type="button"
             onClick={handleSave}
             disabled={isSaving || isLoading}
-            className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider text-black bg-white disabled:opacity-50 border border-white"
+            className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider text-black bg-white disabled:opacity-50 active:bg-neutral-200 transition-colors border border-white"
           >
             <Save className="w-4 h-4" />
             <span>{isSaving ? 'Saving...' : 'Save Settings'}</span>
@@ -115,25 +115,21 @@ export const AdminSettings = () => {
         </div>
 
         {statusMessage && (
-          <div className={`p-4 rounded-xl flex items-start gap-3 text-xs ${
-            statusMessage.type === 'success'
-              ? 'bg-emerald-950/40 border border-emerald-800/60 text-emerald-200'
-              : 'bg-red-950/40 border border-red-800/60 text-red-200'
-          }`}>
+          <div className="p-4 rounded-xl flex items-start gap-3 text-xs bg-neutral-950 border border-white/20 text-white">
             {statusMessage.type === 'success' ? (
-              <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+              <CheckCircle className="w-4 h-4 text-white shrink-0 mt-0.5" />
             ) : (
-              <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+              <AlertTriangle className="w-4 h-4 text-neutral-400 shrink-0 mt-0.5" />
             )}
             <span>{statusMessage.message}</span>
           </div>
         )}
 
         <form onSubmit={handleSave} className="space-y-6">
-          <div className="bg-neutral-950/50 border border-white/10 rounded-2xl p-5 sm:p-7 space-y-5">
+          <div className="bg-neutral-950 border border-white/10 rounded-2xl p-5 sm:p-7 space-y-5">
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-950/40 border border-blue-800/40 flex items-center justify-center text-blue-400">
+                <div className="w-10 h-10 rounded-xl bg-neutral-900 border border-white/15 flex items-center justify-center text-white">
                   <KeyRound className="w-5 h-5" />
                 </div>
                 <div>
@@ -169,15 +165,15 @@ export const AdminSettings = () => {
                   value={razorpayKeyId}
                   onChange={(e) => setRazorpayKeyId(e.target.value)}
                   placeholder="rzp_test_... or rzp_live_..."
-                  className="w-full px-4 py-2.5 rounded-xl bg-black border border-white/15 text-white text-xs font-inter placeholder-neutral-600 focus:outline-none focus:border-white"
+                  className="w-full px-4 py-2.5 rounded-xl bg-black border border-white/15 text-white text-xs font-inter placeholder-neutral-600 focus:outline-none focus:border-white transition-colors"
                 />
                 {razorpayKeyId.startsWith('rzp_test_') && (
-                  <span className="inline-block mt-1 text-[10px] text-amber-400 font-semibold uppercase">
+                  <span className="inline-block mt-1 text-[10px] text-neutral-400 font-semibold uppercase">
                     Test Mode Active
                   </span>
                 )}
                 {razorpayKeyId.startsWith('rzp_live_') && (
-                  <span className="inline-block mt-1 text-[10px] text-emerald-400 font-semibold uppercase">
+                  <span className="inline-block mt-1 text-[10px] text-white font-semibold uppercase">
                     Live Mode Active
                   </span>
                 )}
@@ -193,13 +189,12 @@ export const AdminSettings = () => {
                     value={razorpayKeySecret}
                     onChange={(e) => setRazorpayKeySecret(e.target.value)}
                     placeholder="Enter Secret or leave unchanged"
-                    className="w-full pl-4 pr-10 py-2.5 rounded-xl bg-black border border-white/15 text-white text-xs font-inter placeholder-neutral-600 focus:outline-none focus:border-white"
+                    className="w-full pl-4 pr-10 py-2.5 rounded-xl bg-black border border-white/15 text-white text-xs font-inter placeholder-neutral-600 focus:outline-none focus:border-white transition-colors"
                   />
                   <button
                     type="button"
                     onClick={() => setShowRazorpaySecret(!showRazorpaySecret)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500"
-                    aria-label="Toggle secret visibility"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 active:text-white"
                   >
                     {showRazorpaySecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -208,18 +203,18 @@ export const AdminSettings = () => {
             </div>
           </div>
 
-          <div className="bg-neutral-950/50 border border-white/10 rounded-2xl p-5 sm:p-7 space-y-5">
+          <div className="bg-neutral-950 border border-white/10 rounded-2xl p-5 sm:p-7 space-y-5">
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-purple-950/40 border border-purple-800/40 flex items-center justify-center text-purple-400">
+                <div className="w-10 h-10 rounded-xl bg-neutral-900 border border-white/15 flex items-center justify-center text-white">
                   <Truck className="w-5 h-5" />
                 </div>
                 <div>
                   <h2 className="text-sm sm:text-base font-bold text-white uppercase tracking-wide">
-                    Shiprocket Courier & COD Logistics
+                    Shiprocket Logistics (Prepaid + COD)
                   </h2>
                   <p className="text-xs text-neutral-400">
-                    Auto-creates multi-courier shipments (Delhivery, BlueDart), tracking links, and doorstep COD collection
+                    Automated shipping orders, AWB assignment & pickup generation
                   </p>
                 </div>
               </div>
@@ -240,20 +235,20 @@ export const AdminSettings = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1.5">
-                  Shiprocket User Email *
+                  Shiprocket Account Email *
                 </label>
                 <input
                   type="email"
                   value={shiprocketEmail}
                   onChange={(e) => setShiprocketEmail(e.target.value)}
-                  placeholder="name@store.com"
-                  className="w-full px-4 py-2.5 rounded-xl bg-black border border-white/15 text-white text-xs font-inter placeholder-neutral-600 focus:outline-none focus:border-white"
+                  placeholder="logistics@yourstore.com"
+                  className="w-full px-4 py-2.5 rounded-xl bg-black border border-white/15 text-white text-xs font-inter placeholder-neutral-600 focus:outline-none focus:border-white transition-colors"
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1.5">
-                  Shiprocket API Password *
+                  Shiprocket Password *
                 </label>
                 <div className="relative">
                   <input
@@ -261,13 +256,12 @@ export const AdminSettings = () => {
                     value={shiprocketPassword}
                     onChange={(e) => setShiprocketPassword(e.target.value)}
                     placeholder="Enter password or leave unchanged"
-                    className="w-full pl-4 pr-10 py-2.5 rounded-xl bg-black border border-white/15 text-white text-xs font-inter placeholder-neutral-600 focus:outline-none focus:border-white"
+                    className="w-full pl-4 pr-10 py-2.5 rounded-xl bg-black border border-white/15 text-white text-xs font-inter placeholder-neutral-600 focus:outline-none focus:border-white transition-colors"
                   />
                   <button
                     type="button"
                     onClick={() => setShowShiprocketPassword(!showShiprocketPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500"
-                    aria-label="Toggle password visibility"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 active:text-white"
                   >
                     {showShiprocketPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -276,14 +270,14 @@ export const AdminSettings = () => {
 
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1.5">
-                  Shiprocket Pickup Location *
+                  Pickup Location Name *
                 </label>
                 <input
                   type="text"
                   value={shiprocketPickupLocation}
                   onChange={(e) => setShiprocketPickupLocation(e.target.value)}
-                  placeholder="Primary (must match exact name in Shiprocket Settings)"
-                  className="w-full px-4 py-2.5 rounded-xl bg-black border border-white/15 text-white text-xs font-inter placeholder-neutral-600 focus:outline-none focus:border-white"
+                  placeholder="e.g. Primary, Warehouse-1"
+                  className="w-full px-4 py-2.5 rounded-xl bg-black border border-white/15 text-white text-xs font-inter placeholder-neutral-600 focus:outline-none focus:border-white transition-colors"
                 />
               </div>
 
@@ -296,14 +290,13 @@ export const AdminSettings = () => {
                     type={showShiprocketWebhook ? 'text' : 'password'}
                     value={shiprocketWebhookSecret}
                     onChange={(e) => setShiprocketWebhookSecret(e.target.value)}
-                    placeholder="Webhook secret for tracking sync"
-                    className="w-full pl-4 pr-10 py-2.5 rounded-xl bg-black border border-white/15 text-white text-xs font-inter placeholder-neutral-600 focus:outline-none focus:border-white"
+                    placeholder="Secret for tracking status callbacks"
+                    className="w-full pl-4 pr-10 py-2.5 rounded-xl bg-black border border-white/15 text-white text-xs font-inter placeholder-neutral-600 focus:outline-none focus:border-white transition-colors"
                   />
                   <button
                     type="button"
                     onClick={() => setShowShiprocketWebhook(!showShiprocketWebhook)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500"
-                    aria-label="Toggle webhook secret visibility"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 active:text-white"
                   >
                     {showShiprocketWebhook ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -316,10 +309,9 @@ export const AdminSettings = () => {
             <button
               type="submit"
               disabled={isSaving || isLoading}
-              className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-full text-xs font-bold uppercase tracking-wider text-black bg-white disabled:opacity-50 border border-white"
+              className="w-full sm:w-auto px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-wider text-black bg-white disabled:opacity-50 active:bg-neutral-200 transition-colors border border-white"
             >
-              <Save className="w-4 h-4" />
-              <span>{isSaving ? 'Saving Configurations...' : 'Save & Activate Integrations'}</span>
+              {isSaving ? 'Saving Changes...' : 'Save Integration Settings'}
             </button>
           </div>
         </form>

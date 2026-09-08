@@ -8,12 +8,12 @@ interface OrderStatusUpdateProps {
   onSuccess?: () => void;
 }
 
-const STATUS_OPTIONS: { value: OrderStatus; label: string; color: string }[] = [
-  { value: OrderStatus.PENDING, label: 'Pending', color: 'bg-yellow-100 text-yellow-800' },
-  { value: OrderStatus.PROCESSING, label: 'Processing', color: 'bg-blue-100 text-blue-800' },
-  { value: OrderStatus.SHIPPED, label: 'Shipped', color: 'bg-purple-100 text-purple-800' },
-  { value: OrderStatus.DELIVERED, label: 'Delivered', color: 'bg-green-100 text-green-800' },
-  { value: OrderStatus.CANCELLED, label: 'Cancelled', color: 'bg-red-100 text-red-800' },
+const STATUS_OPTIONS: { value: OrderStatus; label: string }[] = [
+  { value: OrderStatus.PENDING, label: 'Pending' },
+  { value: OrderStatus.PROCESSING, label: 'Processing' },
+  { value: OrderStatus.SHIPPED, label: 'Shipped' },
+  { value: OrderStatus.DELIVERED, label: 'Delivered' },
+  { value: OrderStatus.CANCELLED, label: 'Cancelled' },
 ];
 
 export const OrderStatusUpdate = ({ orderId, currentStatus, onSuccess }: OrderStatusUpdateProps) => {
@@ -34,40 +34,36 @@ export const OrderStatusUpdate = ({ orderId, currentStatus, onSuccess }: OrderSt
 
     try {
       await updateStatus.mutateAsync({ orderId, status: selectedStatus });
-      alert('Order status updated successfully!');
+      alert('Order status updated successfully');
       onSuccess?.();
     } catch (error) {
       alert(error instanceof Error ? error.message : 'Failed to update order status');
     }
   };
 
-  const currentStatusOption = STATUS_OPTIONS.find((opt) => opt.value === currentStatus);
-
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 text-white">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1.5">
           Current Status
         </label>
-        <span
-          className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${currentStatusOption?.color}`}
-        >
-          {currentStatusOption?.label}
+        <span className="inline-flex px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-full bg-neutral-900 border border-white/20 text-white">
+          {currentStatus}
         </span>
       </div>
 
       <div>
-        <label htmlFor="status" className="block text-sm font-semibold text-gray-700 mb-2">
-          New Status
+        <label htmlFor="order-status-select" className="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1.5">
+          Select New Status
         </label>
         <select
-          id="status"
+          id="order-status-select"
           value={selectedStatus}
           onChange={(e) => setSelectedStatus(e.target.value as OrderStatus)}
-          className="w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-4 py-3 border transition-all"
+          className="w-full rounded-xl bg-black border border-white/20 text-white text-xs px-4 py-3 outline-none focus:border-white transition-colors"
         >
           {STATUS_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
+            <option key={option.value} value={option.value} className="bg-black text-white">
               {option.label}
             </option>
           ))}
@@ -75,11 +71,12 @@ export const OrderStatusUpdate = ({ orderId, currentStatus, onSuccess }: OrderSt
       </div>
 
       <button
+        type="button"
         onClick={handleUpdate}
         disabled={updateStatus.isPending || selectedStatus === currentStatus}
-        className="w-full px-4 py-2 text-sm font-semibold bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md"
+        className="w-full px-5 py-3 text-xs font-bold uppercase tracking-wider bg-white text-black rounded-xl active:bg-neutral-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
-        {updateStatus.isPending ? 'Updating...' : 'Update Status'}
+        {updateStatus.isPending ? 'Updating...' : 'Confirm Update'}
       </button>
     </div>
   );

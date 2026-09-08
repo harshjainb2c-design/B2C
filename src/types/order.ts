@@ -8,8 +8,8 @@ export enum OrderStatus {
   CANCELLED = 'cancelled'
 }
 
-export type PaymentMethod = 'cod';
-export type PaymentStatus = 'pending_collection' | 'collected';
+export type PaymentMethod = 'cod' | 'online';
+export type PaymentStatus = 'pending_collection' | 'collected' | 'paid' | 'pending';
 export type FulfillmentStatus =
   | 'pending'
   | 'shipment_created'

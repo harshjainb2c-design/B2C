@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useAdminOrders } from '../../hooks/useAdminOrders';
 import { useProducts } from '../../hooks/useProducts';
 import { OrderStatus } from '../../types/order';
-import { Package, ShoppingCart, DollarSign, Clock, Truck, CheckCircle, ArrowRight, Settings } from 'lucide-react';
+import { Package, ShoppingCart, DollarSign, Clock, Truck, CheckCircle, ArrowRight, Settings, ArrowLeft } from 'lucide-react';
 
 export const AdminDashboard = () => {
   const { data: ordersData } = useAdminOrders();
@@ -10,7 +10,7 @@ export const AdminDashboard = () => {
 
   const totalOrders = ordersData?.total || 0;
   const totalProducts = productsData?.total || 0;
-  
+
   const totalRevenue = ordersData?.orders
     .filter((order) => order.status !== OrderStatus.CANCELLED)
     .reduce((sum, order) => sum + order.total, 0) || 0;
@@ -36,213 +36,186 @@ export const AdminDashboard = () => {
       name: 'Total Revenue',
       value: `₹${totalRevenue.toFixed(0)}`,
       icon: DollarSign,
-      gradient: 'from-emerald-500 to-green-600',
-      bgColor: 'bg-emerald-50',
-      iconColor: 'text-emerald-600',
-      change: '+12.5%',
+      note: 'All completed & pending orders',
     },
     {
       name: 'Total Orders',
       value: totalOrders.toString(),
       icon: ShoppingCart,
-      gradient: 'from-blue-500 to-indigo-600',
-      bgColor: 'bg-blue-50',
-      iconColor: 'text-blue-600',
-      change: '+8.2%',
+      note: 'Lifetime store orders',
     },
     {
       name: 'Total Products',
       value: totalProducts.toString(),
       icon: Package,
-      gradient: 'from-purple-500 to-pink-600',
-      bgColor: 'bg-purple-50',
-      iconColor: 'text-purple-600',
-      change: '+3',
+      note: 'Live inventory items',
     },
     {
       name: 'Pending Orders',
       value: pendingOrders.toString(),
       icon: Clock,
-      gradient: 'from-amber-500 to-orange-600',
-      bgColor: 'bg-amber-50',
-      iconColor: 'text-amber-600',
-      change: pendingOrders > 0 ? 'Needs attention' : 'All clear',
+      note: pendingOrders > 0 ? 'Requires attention' : 'All orders processed',
     },
   ];
 
   const orderStatusBreakdown = [
-    { 
-      status: 'Pending', 
-      count: pendingOrders, 
-      icon: Clock,
-      color: 'text-amber-700',
-      bgColor: 'bg-amber-50',
-      barColor: 'bg-amber-500',
-      borderColor: 'border-amber-200'
-    },
-    { 
-      status: 'Processing', 
-      count: processingOrders, 
+    { status: 'Pending', count: pendingOrders, icon: Clock },
+    { status: 'Processing', count: processingOrders, icon: Package },
+    { status: 'Shipped', count: shippedOrders, icon: Truck },
+    { status: 'Delivered', count: deliveredOrders, icon: CheckCircle },
+  ];
+
+  const quickActions = [
+    {
+      title: 'Product Catalog',
+      description: 'Add new items, update stock, manage sizes & categories',
+      link: '/admin/products',
       icon: Package,
-      color: 'text-blue-700',
-      bgColor: 'bg-blue-50',
-      barColor: 'bg-blue-500',
-      borderColor: 'border-blue-200'
     },
-    { 
-      status: 'Shipped', 
-      count: shippedOrders, 
-      icon: Truck,
-      color: 'text-purple-700',
-      bgColor: 'bg-purple-50',
-      barColor: 'bg-purple-500',
-      borderColor: 'border-purple-200'
+    {
+      title: 'Order Operations',
+      description: 'Review customer orders, update tracking & delivery status',
+      link: '/admin/orders',
+      icon: ShoppingCart,
     },
-    { 
-      status: 'Delivered', 
-      count: deliveredOrders, 
-      icon: CheckCircle,
-      color: 'text-emerald-700',
-      bgColor: 'bg-emerald-50',
-      barColor: 'bg-emerald-500',
-      borderColor: 'border-emerald-200'
+    {
+      title: 'API & Gateway Settings',
+      description: 'Configure Razorpay online payments & Shiprocket logistics',
+      link: '/admin/settings',
+      icon: Settings,
     },
   ];
 
   return (
     <div className="min-h-screen bg-black text-white p-4 sm:p-6 lg:p-8 font-inter select-none">
       <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-white/10 pb-5">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-white/10 pb-6">
           <div>
-            <span className="text-[10px] font-bold tracking-[0.2em] text-neutral-400 uppercase">ADMIN CONSOLE</span>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white uppercase tracking-tight mt-1">Dashboard</h1>
-            <p className="text-xs sm:text-sm text-neutral-400 mt-1">Real-time overview of revenue, orders, and drops.</p>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[10px] font-bold tracking-[0.2em] text-neutral-400 uppercase">
+                ADMIN PANEL
+              </span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight uppercase">
+              STORE MANAGEMENT
+            </h1>
+            <p className="text-xs sm:text-sm text-neutral-400 mt-1">
+              Real-time monitoring, catalog control, and logistics operations
+            </p>
           </div>
-          <div className="flex items-center gap-3">
+
+          <div className="flex items-center gap-2">
             <Link
-              to="/admin/settings"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider text-black bg-white border border-white"
+              to="/"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-neutral-900 border border-white/15 active:bg-neutral-800"
             >
-              <Settings className="w-4 h-4" />
-              <span>API Settings</span>
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>View Store</span>
             </Link>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          {metrics.map((metric) => (
-            <div
-              key={metric.name}
-              className="bg-neutral-950/60 rounded-2xl border border-white/10 p-5"
-            >
-              <div className="flex items-start justify-between mb-3">
-                <div className="rounded-xl p-2.5 bg-neutral-900 border border-white/10 text-white">
-                  <metric.icon className="h-5 w-5" />
-                </div>
-                <span className="text-[10px] font-bold text-neutral-400 bg-neutral-900 border border-white/10 px-2 py-0.5 rounded-full">
-                  {metric.change}
-                </span>
-              </div>
-              <div>
-                <p className="text-xs text-neutral-400 mb-0.5">{metric.name}</p>
-                <p className="text-2xl sm:text-3xl font-extrabold text-white">{metric.value}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="bg-neutral-950/60 rounded-2xl border border-white/10 p-5 sm:p-7">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
-            <div>
-              <h2 className="text-base font-bold text-white uppercase tracking-wider">Order Status Pipeline</h2>
-              <p className="text-xs text-neutral-400 mt-0.5">Live shipment lifecycle across Indian pin codes</p>
-            </div>
-            <Link 
-              to="/admin/orders"
-              className="text-xs font-bold uppercase tracking-wider text-white underline flex items-center gap-1"
-            >
-              View all orders
-              <ArrowRight className="h-3 w-3" />
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {orderStatusBreakdown.map((item) => (
-              <div 
-                key={item.status} 
-                className="bg-black border border-white/10 rounded-xl p-4"
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {metrics.map((metric) => {
+            const Icon = metric.icon;
+            return (
+              <div
+                key={metric.name}
+                className="bg-neutral-950 border border-white/10 rounded-2xl p-5 flex flex-col justify-between"
               >
-                <div className="flex items-center gap-2 mb-2">
-                  <item.icon className="h-4 w-4 text-white" />
-                  <p className="text-xs font-bold text-white uppercase tracking-wide">
-                    {item.status}
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-xs font-bold uppercase tracking-wider text-neutral-400">
+                    {metric.name}
+                  </span>
+                  <div className="w-8 h-8 rounded-xl bg-neutral-900 border border-white/15 flex items-center justify-center text-white">
+                    <Icon className="w-4 h-4" />
+                  </div>
+                </div>
+                <div>
+                  <p className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                    {metric.value}
+                  </p>
+                  <p className="text-[11px] text-neutral-500 mt-1">
+                    {metric.note}
                   </p>
                 </div>
-                <p className="text-2xl sm:text-3xl font-extrabold text-white mb-2">{item.count}</p>
-                <div className="w-full bg-neutral-900 rounded-full h-1.5 overflow-hidden">
-                  <div 
-                    className="h-1.5 rounded-full bg-white"
-                    style={{ width: `${totalOrders > 0 ? (item.count / totalOrders) * 100 : 0}%` }}
-                  />
-                </div>
-                <p className="text-[10px] text-neutral-400 mt-1.5">
-                  {totalOrders > 0 ? `${((item.count / totalOrders) * 100).toFixed(0)}% of total` : '0% of total'}
-                </p>
               </div>
-            ))}
+            );
+          })}
+        </div>
+
+        <div>
+          <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-neutral-400 mb-3">
+            MANAGEMENT MODULES
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {quickActions.map((action) => {
+              const ActionIcon = action.icon;
+              return (
+                <Link
+                  key={action.title}
+                  to={action.link}
+                  className="bg-neutral-950 border border-white/10 rounded-2xl p-5 flex flex-col justify-between active:border-white/40 transition-colors"
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-10 h-10 rounded-xl bg-neutral-900 border border-white/15 flex items-center justify-center text-white">
+                      <ActionIcon className="w-5 h-5" />
+                    </div>
+                    <div className="w-7 h-7 rounded-full border border-white/15 flex items-center justify-center text-white bg-neutral-900">
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-white uppercase tracking-wide">
+                      {action.title}
+                    </h3>
+                    <p className="text-xs text-neutral-400 mt-1 leading-relaxed">
+                      {action.description}
+                    </p>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Link
-            to="/admin/products"
-            className="bg-neutral-950/60 rounded-2xl border border-white/10 p-6 flex flex-col justify-between"
-          >
-            <div>
-              <div className="w-10 h-10 rounded-xl bg-neutral-900 border border-white/10 flex items-center justify-center text-white mb-3">
-                <Package className="h-5 w-5" />
-              </div>
-              <h3 className="text-base font-bold text-white uppercase tracking-wider mb-1">Manage Catalog</h3>
-              <p className="text-xs text-neutral-400">Add, edit, or adjust inventory and sizes for active drops.</p>
-            </div>
-            <div className="pt-4 flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-white">
-              <span>Open Catalog</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </div>
-          </Link>
-          
-          <Link
-            to="/admin/orders"
-            className="bg-neutral-950/60 rounded-2xl border border-white/10 p-6 flex flex-col justify-between"
-          >
-            <div>
-              <div className="w-10 h-10 rounded-xl bg-neutral-900 border border-white/10 flex items-center justify-center text-white mb-3">
-                <ShoppingCart className="h-5 w-5" />
-              </div>
-              <h3 className="text-base font-bold text-white uppercase tracking-wider mb-1">Manage Orders</h3>
-              <p className="text-xs text-neutral-400">Track shipments, verify payments, and monitor deliveries.</p>
-            </div>
-            <div className="pt-4 flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-white">
-              <span>Open Orders</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </div>
-          </Link>
-
-          <Link
-            to="/admin/settings"
-            className="bg-neutral-950/60 rounded-2xl border border-white/10 p-6 flex flex-col justify-between"
-          >
-            <div>
-              <div className="w-10 h-10 rounded-xl bg-neutral-900 border border-white/10 flex items-center justify-center text-white mb-3">
-                <Settings className="h-5 w-5" />
-              </div>
-              <h3 className="text-base font-bold text-white uppercase tracking-wider mb-1">API Integrations</h3>
-              <p className="text-xs text-neutral-400">Configure Razorpay Key ID/Secret & Shiprocket API credentials.</p>
-            </div>
-            <div className="pt-4 flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-white">
-              <span>Open Settings</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </div>
-          </Link>
+        <div className="bg-neutral-950 border border-white/10 rounded-2xl p-5 sm:p-6">
+          <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-neutral-400 mb-4">
+            ORDER STATUS BREAKDOWN
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {orderStatusBreakdown.map((item) => {
+              const StatusIcon = item.icon;
+              const percentage = totalOrders > 0 ? Math.round((item.count / totalOrders) * 100) : 0;
+              return (
+                <div
+                  key={item.status}
+                  className="bg-black border border-white/10 rounded-xl p-4 flex flex-col justify-between"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-bold uppercase text-neutral-400">
+                      {item.status}
+                    </span>
+                    <StatusIcon className="w-4 h-4 text-neutral-400" />
+                  </div>
+                  <p className="text-2xl font-extrabold text-white">
+                    {item.count}
+                  </p>
+                  <div className="mt-3">
+                    <div className="w-full bg-neutral-900 rounded-full h-1.5 overflow-hidden border border-white/5">
+                      <div
+                        className="bg-white h-full rounded-full"
+                        style={{ width: `${percentage}%` }}
+                      />
+                    </div>
+                    <span className="text-[10px] text-neutral-500 font-medium mt-1 block">
+                      {percentage}% of all orders
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>
