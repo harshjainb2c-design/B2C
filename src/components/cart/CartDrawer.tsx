@@ -1,8 +1,9 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { X, ShoppingCart } from 'lucide-react';
 import { useCart } from '../../hooks/useCart';
 import { CartDrawerItem } from './CartDrawerItem';
 import { useNavigate } from 'react-router-dom';
+import { ShiprocketCheckoutModal } from '../checkout/ShiprocketCheckoutModal';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ interface CartDrawerProps {
 export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
   const navigate = useNavigate();
   const { items, total, itemCount, removeItem, updateQuantity } = useCart();
+  const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -40,8 +42,7 @@ export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
   }, [isOpen, onClose]);
 
   const handleCheckout = () => {
-    onClose();
-    navigate('/checkout');
+    setIsCheckoutModalOpen(true);
   };
 
   const handleViewCart = () => {
@@ -156,6 +157,11 @@ export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
           </div>
         )}
       </div>
+
+      <ShiprocketCheckoutModal
+        isOpen={isCheckoutModalOpen}
+        onClose={() => setIsCheckoutModalOpen(false)}
+      />
     </>
   );
 };

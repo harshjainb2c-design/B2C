@@ -1,5 +1,4 @@
 import { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Product } from '../../types/product';
 import { ProductImage } from '../common/ProductImage';
 import { 
@@ -16,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '../../hooks/use-toast';
 import { useWishlistStore } from '../../stores/wishlistStore';
+import { ShiprocketCheckoutModal } from '../checkout/ShiprocketCheckoutModal';
 
 interface ProductDetailProps {
   product: Product;
@@ -24,14 +24,13 @@ interface ProductDetailProps {
 
 export const ProductDetail = ({ product, onAddToCart }: ProductDetailProps) => {
   const { toast } = useToast();
-  const navigate = useNavigate();
   const [activeMobileIndex, setActiveMobileIndex] = useState(0);
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(
     product.sizes && product.sizes.length > 0 ? product.sizes[0] : null
   );
   const [isAddingToCart, setIsAddingToCart] = useState(false);
-  const [isBuyingNow, setIsBuyingNow] = useState(false);
+  const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
   const isWishlisted = useWishlistStore((state) => state.items.some((item) => item.id === product.id));
   const toggleWishlistItem = useWishlistStore((state) => state.toggleItem);
   const [pincode, setPincode] = useState('');
@@ -70,8 +69,8 @@ export const ProductDetail = ({ product, onAddToCart }: ProductDetailProps) => {
     }
   };
 
-  const handleBuyNow = async () => {
-    if (!isOutOfStock && onAddToCart) {
+  const handleBuyNow = () => {
+    if (!isOutOfStock) {
       if (hasSizes && !selectedSize) {
         toast({
           title: 'Select Size',
@@ -81,13 +80,10 @@ export const ProductDetail = ({ product, onAddToCart }: ProductDetailProps) => {
         return;
       }
 
-      setIsBuyingNow(true);
-      try {
-        await onAddToCart(product, 1, selectedSize || undefined);
-        navigate('/checkout');
-      } finally {
-        setIsBuyingNow(false);
+      if (onAddToCart) {
+        onAddToCart(product, 1, selectedSize || undefined);
       }
+      setIsCheckoutModalOpen(true);
     }
   };
 
@@ -579,10 +575,10 @@ export const ProductDetail = ({ product, onAddToCart }: ProductDetailProps) => {
             <button
               type="button"
               onClick={handleBuyNow}
-              disabled={!canAddToCart || isBuyingNow}
+              disabled={!canAddToCart}
               className="h-[44px] px-6 rounded-[12px] text-[14px] leading-[18px] font-inter font-bold text-black bg-white hover:bg-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center shadow-md"
             >
-              {isBuyingNow ? 'Processing...' : `Buy at ₹${product.price.toLocaleString('en-IN')}`}
+              Buy at ₹{product.price.toLocaleString('en-IN')}
             </button>
           </div>
 
@@ -769,10 +765,10 @@ export const ProductDetail = ({ product, onAddToCart }: ProductDetailProps) => {
         <button
           type="button"
           onClick={handleBuyNow}
-          disabled={!canAddToCart || isBuyingNow}
+          disabled={!canAddToCart}
           className="flex-1 h-[44px] rounded-[12px] text-[14px] leading-[18px] font-inter font-bold text-black bg-white hover:bg-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center shadow-md"
         >
-          {isBuyingNow ? 'Processing...' : `Buy at ₹${product.price.toLocaleString('en-IN')}`}
+          Buy at ₹{product.price.toLocaleString('en-IN')}
         </button>
       </div>
 
@@ -911,6 +907,12 @@ export const ProductDetail = ({ product, onAddToCart }: ProductDetailProps) => {
           </div>
         </div>
       )}
+
+      <ShiprocketCheckoutModal
+        isOpen={isCheckoutModalOpen}
+        onClose={() => setIsCheckoutModalOpen(false)}
+        directItem={{ product, quantity: 1, size: selectedSize || undefined }}
+      />
     </div>
   );
 };

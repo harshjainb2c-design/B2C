@@ -1,12 +1,15 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, AlertTriangle, ArrowLeft } from 'lucide-react';
 import { useCart } from '../hooks/useCart';
 import { CartItem } from '../components/cart/CartItem';
 import { CartSummary } from '../components/cart/CartSummary';
+import { ShiprocketCheckoutModal } from '../components/checkout/ShiprocketCheckoutModal';
 
 export const Cart = () => {
   const navigate = useNavigate();
   const { items, total, itemCount, removeItem, updateQuantity, validateStock } = useCart();
+  const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
 
   const stockValidation = validateStock();
   const hasStockIssues = !stockValidation.isValid;
@@ -15,7 +18,7 @@ export const Cart = () => {
     if (hasStockIssues) {
       return;
     }
-    navigate('/checkout');
+    setIsCheckoutModalOpen(true);
   };
 
   const handleContinueShopping = () => {
@@ -121,6 +124,11 @@ export const Cart = () => {
           </div>
         </div>
       </div>
+
+      <ShiprocketCheckoutModal
+        isOpen={isCheckoutModalOpen}
+        onClose={() => setIsCheckoutModalOpen(false)}
+      />
     </div>
   );
 };
