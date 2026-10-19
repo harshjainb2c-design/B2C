@@ -20,11 +20,15 @@ export const useAuth = () => {
       const password = credentials.password;
 
       try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
         const res = await fetch('/api/auth?action=login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: cleanEmail, password }),
+          signal: controller.signal,
         });
+        clearTimeout(timeoutId);
 
         const data = await res.json();
 
@@ -43,6 +47,9 @@ export const useAuth = () => {
 
         return data;
       } catch (err: any) {
+        if (err.name === 'AbortError') {
+          throw new Error('Connection timed out. Please check your internet or Supabase service.');
+        }
         if (err.message && !err.message.includes('Failed to fetch') && !err.message.includes('NetworkError')) {
           throw err;
         }
@@ -86,11 +93,15 @@ export const useAuth = () => {
       const cleanEmail = data.email.trim().toLowerCase();
 
       try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
         const res = await fetch('/api/auth?action=register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ...data, email: cleanEmail }),
+          signal: controller.signal,
         });
+        clearTimeout(timeoutId);
 
         const resData = await res.json();
 
@@ -109,6 +120,9 @@ export const useAuth = () => {
 
         return resData;
       } catch (err: any) {
+        if (err.name === 'AbortError') {
+          throw new Error('Connection timed out. Please check your internet or Supabase service.');
+        }
         if (err.message && !err.message.includes('Failed to fetch') && !err.message.includes('NetworkError')) {
           throw err;
         }

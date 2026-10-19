@@ -33,9 +33,21 @@ async function login(req: VercelRequest, res: VercelResponse) {
   }
 
   const supabase = createClient(supabaseUrl, supabaseAnonKey);
-  const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
+  const timeoutPromise = new Promise<{ data: any; error: any }>((_, reject) =>
+    setTimeout(() => reject(new Error('Authentication service timeout. Supabase is unreachable.')), 7000)
+  );
 
-  if (authError || !authData.user || !authData.session) {
+  let authData: any = null;
+  let authError: any = null;
+  try {
+    const res = await Promise.race([supabase.auth.signInWithPassword({ email, password }), timeoutPromise]);
+    authData = res.data;
+    authError = res.error;
+  } catch (err: any) {
+    return res.status(503).json({ error: { code: 'SERVICE_UNAVAILABLE', message: err.message } });
+  }
+
+  if (authError || !authData?.user || !authData?.session) {
     return res.status(401).json({ error: { code: 'INVALID_CREDENTIALS', message: 'Invalid email or password' } });
   }
 
