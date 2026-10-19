@@ -140,15 +140,11 @@ export const useAuthStore = create<AuthStore>()(
 );
 
 supabase.auth.onAuthStateChange(async (event, session) => {
-  const store = useAuthStore.getState();
-
   if (event === 'SIGNED_OUT') {
-    store.setUser(null);
-    store.setSession(null);
-    useAuthStore.setState({ isInitialized: true, isLoading: false });
+    useAuthStore.setState({ user: null, session: null, isInitialized: true, isLoading: false });
   } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
     if (session?.user) {
-      let mappedUser: User = {
+      const baseUser: User = {
         id: session.user.id,
         email: session.user.email || '',
         fullName: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'User',
@@ -156,31 +152,29 @@ supabase.auth.onAuthStateChange(async (event, session) => {
         createdAt: session.user.created_at || new Date().toISOString(),
       };
 
-      try {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .maybeSingle();
-
-        if (profile) {
-          mappedUser = {
-            id: profile.id,
-            email: session.user.email || mappedUser.email,
-            fullName: profile.full_name || mappedUser.fullName,
-            role: profile.role || mappedUser.role,
-            createdAt: profile.created_at || mappedUser.createdAt,
-          };
-        }
-      } catch {}
-
-      store.setUser(mappedUser);
-      store.setSession({
+      const sessionData: Session = {
         accessToken: session.access_token,
         refreshToken: session.refresh_token || '',
         expiresAt: session.expires_at || 0,
-      });
-      useAuthStore.setState({ isInitialized: true, isLoading: false });
+      };
+
+      useAuthStore.setState({ user: baseUser, session: sessionData, isInitialized: true, isLoading: false });
+
+      const profileTimeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000));
+      const profileFetch = supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle().then(r => r.data).catch(() => null);
+
+      const profile = await Promise.race([profileFetch, profileTimeout]);
+      if (profile) {
+        useAuthStore.setState({
+          user: {
+            id: profile.id,
+            email: session.user.email || baseUser.email,
+            fullName: profile.full_name || baseUser.fullName,
+            role: profile.role || baseUser.role,
+            createdAt: profile.created_at || baseUser.createdAt,
+          },
+        });
+      }
     } else {
       useAuthStore.setState({ isInitialized: true, isLoading: false });
     }

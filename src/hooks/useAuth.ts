@@ -37,12 +37,10 @@ export const useAuth = () => {
         }
 
         if (data?.session) {
-          try {
-            await supabase.auth.setSession({
-              access_token: data.session.accessToken,
-              refresh_token: data.session.refreshToken,
-            });
-          } catch {}
+          supabase.auth.setSession({
+            access_token: data.session.accessToken,
+            refresh_token: data.session.refreshToken,
+          }).catch(() => {});
         }
 
         return data;
@@ -110,12 +108,10 @@ export const useAuth = () => {
         }
 
         if (resData?.session) {
-          try {
-            await supabase.auth.setSession({
-              access_token: resData.session.accessToken,
-              refresh_token: resData.session.refreshToken,
-            });
-          } catch {}
+          supabase.auth.setSession({
+            access_token: resData.session.accessToken,
+            refresh_token: resData.session.refreshToken,
+          }).catch(() => {});
         }
 
         return resData;
