@@ -161,7 +161,7 @@ supabase.auth.onAuthStateChange(async (event, session) => {
       useAuthStore.setState({ user: baseUser, session: sessionData, isInitialized: true, isLoading: false });
 
       const profileTimeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000));
-      const profileFetch = supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle().then(r => r.data).catch(() => null);
+      const profileFetch = Promise.resolve(supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle()).then(r => r.data).catch(() => null);
 
       const profile = await Promise.race([profileFetch, profileTimeout]);
       if (profile) {
