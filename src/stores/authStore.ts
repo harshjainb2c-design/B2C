@@ -64,53 +64,52 @@ export const useAuthStore = create<AuthStore>()(
         const state = get();
         if (state.isInitialized) return;
 
+        if (state.user && state.session) {
+          set({ isInitialized: true, isLoading: false });
+        }
+
         try {
-          const { data: sessionData } = await supabase.auth.getSession();
+          const timeoutPromise = new Promise<{ data: { session: null } }>((resolve) =>
+            setTimeout(() => resolve({ data: { session: null } }), 2000)
+          );
+          const sessionPromise = Promise.resolve(supabase.auth.getSession()).catch(() => ({ data: { session: null } }));
+          const { data: sessionData } = await Promise.race([sessionPromise, timeoutPromise]);
 
           if (!sessionData?.session?.user) {
             const stored = state.session;
             if (stored?.refreshToken) {
               try {
-                const { data: restored } = await supabase.auth.setSession({
+                const restoreTimeout = new Promise<{ data: { session: null } }>((resolve) =>
+                  setTimeout(() => resolve({ data: { session: null } }), 2000)
+                );
+                const restorePromise = Promise.resolve(supabase.auth.setSession({
                   access_token: stored.accessToken,
                   refresh_token: stored.refreshToken,
-                });
+                })).catch(() => ({ data: { session: null } }));
+                const { data: restored } = await Promise.race([restorePromise, restoreTimeout]);
+
                 if (restored?.session?.user) {
                   set({ isInitialized: true, isLoading: false });
                   return;
                 }
               } catch {}
             }
-            set({ user: null, session: null, isInitialized: true, isLoading: false });
+            if (!state.user) {
+              set({ user: null, session: null, isInitialized: true, isLoading: false });
+            } else {
+              set({ isInitialized: true, isLoading: false });
+            }
             return;
           }
 
           const supaUser = sessionData.session.user;
-          let mappedUser: User = {
+          const mappedUser: User = {
             id: supaUser.id,
             email: supaUser.email || '',
             fullName: supaUser.user_metadata?.full_name || supaUser.email?.split('@')[0] || 'User',
             role: (supaUser.user_metadata?.role as 'customer' | 'admin') || 'customer',
             createdAt: supaUser.created_at || new Date().toISOString(),
           };
-
-          try {
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('id', supaUser.id)
-              .maybeSingle();
-
-            if (profile) {
-              mappedUser = {
-                id: profile.id,
-                email: supaUser.email || mappedUser.email,
-                fullName: profile.full_name || mappedUser.fullName,
-                role: profile.role || mappedUser.role,
-                createdAt: profile.created_at || mappedUser.createdAt,
-              };
-            }
-          } catch {}
 
           set({
             user: mappedUser,
@@ -122,6 +121,22 @@ export const useAuthStore = create<AuthStore>()(
             isInitialized: true,
             isLoading: false,
           });
+
+          Promise.resolve(
+            supabase.from('profiles').select('*').eq('id', supaUser.id).maybeSingle()
+          ).then(({ data: profile }) => {
+            if (profile) {
+              set({
+                user: {
+                  id: profile.id,
+                  email: supaUser.email || mappedUser.email,
+                  fullName: profile.full_name || mappedUser.fullName,
+                  role: profile.role || mappedUser.role,
+                  createdAt: profile.created_at || mappedUser.createdAt,
+                },
+              });
+            }
+          }).catch(() => {});
         } catch {
           set({ isInitialized: true, isLoading: false });
         }

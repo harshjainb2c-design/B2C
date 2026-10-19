@@ -13,6 +13,10 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   useEffect(() => {
     if (!isInitialized) {
       initialize();
+      const timer = setTimeout(() => {
+        useAuthStore.setState({ isInitialized: true, isLoading: false });
+      }, 1500);
+      return () => clearTimeout(timer);
     }
   }, [isInitialized, initialize]);
 

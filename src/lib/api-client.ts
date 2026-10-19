@@ -110,29 +110,23 @@ export class APIClient {
    * Get a current authentication token for protected requests
    */
   private async getAuthToken(): Promise<string | null> {
-    // Use Supabase's session so expired access tokens are refreshed before a request.
-    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-    if (!sessionError && sessionData.session?.access_token) {
-      return sessionData.session.access_token;
-    }
-
-    // Restore sessions persisted by the app before Supabase session persistence was enabled.
     const storedSession = useAuthStore.getState().session;
-    if (!storedSession?.refreshToken) {
-      return null;
+    if (storedSession?.accessToken) {
+      return storedSession.accessToken;
     }
 
-    const { data: restoredSession, error: restoreError } = await supabase.auth.setSession({
-      access_token: storedSession.accessToken,
-      refresh_token: storedSession.refreshToken,
-    });
+    try {
+      const timeoutPromise = new Promise<{ data: any }>((resolve) =>
+        setTimeout(() => resolve({ data: { session: null } }), 1500)
+      );
+      const sessionPromise = Promise.resolve(supabase.auth.getSession()).catch(() => ({ data: { session: null } }));
+      const { data: sessionData } = await Promise.race([sessionPromise, timeoutPromise]);
+      if (sessionData?.session?.access_token) {
+        return sessionData.session.access_token;
+      }
+    } catch {}
 
-    if (!restoreError && restoredSession.session?.access_token) {
-      return restoredSession.session.access_token;
-    }
-
-    // A valid access token is still usable when session restoration is unavailable.
-    return storedSession.accessToken;
+    return null;
   }
 
   /**

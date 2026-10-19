@@ -114,22 +114,12 @@ export const useCart = () => {
     // Add to local store immediately for optimistic update
     addItem(product, quantity, size);
 
-    // If user is authenticated, try to sync with server
+    // If user is authenticated, sync with server in background (non-blocking)
     if (user) {
-      try {
-        await addToCartMutation.mutateAsync({
-          productId: product.id,
-          quantity,
-        });
-      } catch (error: any) {
-        // If API is not available (404), has server error (500), or auth fails (401), keep local state
-        if (error?.apiError?.status === 404 || error?.apiError?.status === 500 || error?.apiError?.status === 401) {
-          return;
-        }
-        // Revert local change if server update fails for other reasons
-        removeItem(product.id, size);
-        throw error;
-      }
+      addToCartMutation.mutate({
+        productId: product.id,
+        quantity,
+      });
     }
   };
 

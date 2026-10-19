@@ -111,44 +111,54 @@ export const createShiprocketCodShipment = async (
     ? input.customerEmail 
     : (config.email || 'support@b2cexports.com');
 
-  const response = await fetch(`${SHIPROCKET_BASE_URL}/orders/create/adhoc`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({
-      order_id: input.orderId,
-      order_date: new Date().toISOString().slice(0, 19).replace('T', ' '),
-      pickup_location: config.pickupLocation || 'work',
-      billing_customer_name: firstName,
-      billing_last_name: lastName,
-      billing_address: input.shippingAddress.addressLine1,
-      billing_address_2: input.shippingAddress.addressLine2 || '',
-      billing_city: input.shippingAddress.city,
-      billing_pincode: input.shippingAddress.postalCode.replace(/\s+/g, ''),
-      billing_state: input.shippingAddress.state,
-      billing_country: input.shippingAddress.country || 'India',
-      billing_email: cleanEmail,
-      billing_phone: cleanPhone,
-      shipping_is_billing: true,
-      order_items: input.items.map((item) => ({
-        name: item.name,
-        sku: item.sku || 'SKU-DEFAULT',
-        units: Math.max(1, Number(item.quantity) || 1),
-        selling_price: Math.max(1, Number(item.sellingPrice) || 1),
-        discount: '',
-        tax: '',
-        hsn: '',
-      })),
-      payment_method: paymentMethod,
-      sub_total: Math.max(1, Number(input.total) || 1),
-      length: parsePositiveEnvNumber('SHIPROCKET_DEFAULT_LENGTH_CM', 10),
-      breadth: parsePositiveEnvNumber('SHIPROCKET_DEFAULT_BREADTH_CM', 10),
-      height: parsePositiveEnvNumber('SHIPROCKET_DEFAULT_HEIGHT_CM', 10),
-      weight: parsePositiveEnvNumber('SHIPROCKET_DEFAULT_WEIGHT_KG', 0.5),
-    }),
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 7000);
+  let response: Response;
+  try {
+    response = await fetch(`${SHIPROCKET_BASE_URL}/orders/create/adhoc`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      signal: controller.signal,
+      body: JSON.stringify({
+        order_id: input.orderId,
+        order_date: new Date().toISOString().slice(0, 19).replace('T', ' '),
+        pickup_location: config.pickupLocation || 'work',
+        billing_customer_name: firstName,
+        billing_last_name: lastName,
+        billing_address: input.shippingAddress.addressLine1,
+        billing_address_2: input.shippingAddress.addressLine2 || '',
+        billing_city: input.shippingAddress.city,
+        billing_pincode: input.shippingAddress.postalCode.replace(/\s+/g, ''),
+        billing_state: input.shippingAddress.state,
+        billing_country: input.shippingAddress.country || 'India',
+        billing_email: cleanEmail,
+        billing_phone: cleanPhone,
+        shipping_is_billing: true,
+        order_items: input.items.map((item) => ({
+          name: item.name,
+          sku: item.sku || 'SKU-DEFAULT',
+          units: Math.max(1, Number(item.quantity) || 1),
+          selling_price: Math.max(1, Number(item.sellingPrice) || 1),
+          discount: '',
+          tax: '',
+          hsn: '',
+        })),
+        payment_method: paymentMethod,
+        sub_total: Math.max(1, Number(input.total) || 1),
+        length: parsePositiveEnvNumber('SHIPROCKET_DEFAULT_LENGTH_CM', 10),
+        breadth: parsePositiveEnvNumber('SHIPROCKET_DEFAULT_BREADTH_CM', 10),
+        height: parsePositiveEnvNumber('SHIPROCKET_DEFAULT_HEIGHT_CM', 10),
+        weight: parsePositiveEnvNumber('SHIPROCKET_DEFAULT_WEIGHT_KG', 0.5),
+      }),
+    });
+  } catch (fetchErr: any) {
+    clearTimeout(timeoutId);
+    throw new ShiprocketError(fetchErr.name === 'AbortError' ? 'Shiprocket API timed out' : fetchErr.message);
+  }
+  clearTimeout(timeoutId);
   const data = await readResponse(response);
 
   if (!response.ok || !data.shipment_id || !data.order_id) {
