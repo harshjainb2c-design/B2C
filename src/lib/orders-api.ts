@@ -64,12 +64,37 @@ export const ordersApi = {
       throw new Error('User not authenticated');
     }
 
+    try {
+      const { apiClient } = await import('./api-client');
+      const apiOrder = await apiClient.get<any>(`/orders?id=${orderId}`, { requiresAuth: true });
+      if (apiOrder && apiOrder.id) {
+        return {
+          id: apiOrder.id,
+          userId: apiOrder.user_id || user.id,
+          items: apiOrder.items,
+          total: apiOrder.total,
+          status: apiOrder.status,
+          shippingAddress: apiOrder.shipping_address,
+          paymentMethod: apiOrder.payment_method || 'cod',
+          paymentStatus: apiOrder.payment_status || 'pending_collection',
+          fulfillmentStatus: apiOrder.fulfillment_status || 'pending',
+          shiprocketOrderId: apiOrder.shiprocket_order_id || undefined,
+          shiprocketShipmentId: apiOrder.shiprocket_shipment_id || undefined,
+          awbCode: apiOrder.awb_code || undefined,
+          courierName: apiOrder.courier_name || undefined,
+          trackingStatus: apiOrder.tracking_status || undefined,
+          createdAt: apiOrder.created_at,
+          updatedAt: apiOrder.updated_at,
+        };
+      }
+    } catch {}
+
     const { data: order, error } = await supabase
       .from('orders')
       .select('*')
       .eq('id', orderId)
       .eq('user_id', user.id)
-      .single();
+      .maybeSingle();
 
     if (error) {
       if (error.code === 'PGRST116') {

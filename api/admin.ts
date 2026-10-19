@@ -86,10 +86,11 @@ async function updateSettings(req: AuthenticatedRequest, res: VercelResponse) {
     };
 
     await supabase.from('store_settings').upsert({
-      key: 'razorpay',
-      value: payload,
+      id: 'default',
+      razorpay_key_id: payload.keyId,
+      razorpay_key_secret: payload.keySecret,
       updated_at: new Date().toISOString(),
-    });
+    }, { onConflict: 'id' });
   }
 
   if (shiprocket) {
@@ -111,10 +112,13 @@ async function updateSettings(req: AuthenticatedRequest, res: VercelResponse) {
     };
 
     await supabase.from('store_settings').upsert({
-      key: 'shiprocket',
-      value: payload,
+      id: 'default',
+      shiprocket_email: payload.email,
+      shiprocket_password: payload.password,
+      shiprocket_pickup_location: payload.pickupLocation,
+      shiprocket_webhook_secret: payload.webhookSecret,
       updated_at: new Date().toISOString(),
-    });
+    }, { onConflict: 'id' });
   }
 
   return res.status(200).json({ success: true });

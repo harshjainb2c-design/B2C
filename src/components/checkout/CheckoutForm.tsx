@@ -17,7 +17,7 @@ type CheckoutStep = 'shipping' | 'review';
 type PaymentOption = 'online' | 'cod';
 
 interface CheckoutFormProps {
-  onSuccess: (orderId: string) => void;
+  onSuccess: (order: any) => void;
 }
 
 const loadRazorpayScript = (): Promise<boolean> => {
@@ -117,7 +117,7 @@ export const CheckoutForm = ({ onSuccess }: CheckoutFormProps) => {
       };
       const order = await apiClient.post<Order>('/orders', request, { requiresAuth: true });
       clearCart();
-      onSuccess(order.id);
+      onSuccess(order);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to place your COD order');
     } finally {

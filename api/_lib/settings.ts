@@ -28,15 +28,17 @@ export const getRazorpayConfig = async (): Promise<RazorpayConfig> => {
   try {
     const { data } = await supabase
       .from('store_settings')
-      .select('value')
-      .eq('key', 'razorpay')
+      .select('*')
+      .limit(1)
       .maybeSingle();
 
-    if (data?.value) {
+    if (data) {
+      const keyId = data.razorpay_key_id || data.value?.keyId || envConfig.keyId;
+      const keySecret = data.razorpay_key_secret || data.value?.keySecret || envConfig.keySecret;
       return {
-        keyId: data.value.keyId || envConfig.keyId,
-        keySecret: data.value.keySecret || envConfig.keySecret,
-        enabled: data.value.enabled !== undefined ? Boolean(data.value.enabled) : envConfig.enabled,
+        keyId,
+        keySecret,
+        enabled: Boolean(keyId && keySecret),
       };
     }
   } catch {}
@@ -48,7 +50,7 @@ export const getShiprocketConfig = async (): Promise<ShiprocketConfig> => {
   const envConfig: ShiprocketConfig = {
     email: process.env.SHIPROCKET_EMAIL || '',
     password: process.env.SHIPROCKET_PASSWORD || '',
-    pickupLocation: process.env.SHIPROCKET_PICKUP_LOCATION || 'Primary',
+    pickupLocation: process.env.SHIPROCKET_PICKUP_LOCATION || 'work',
     webhookSecret: process.env.SHIPROCKET_WEBHOOK_SECRET || '',
     enabled: Boolean(process.env.SHIPROCKET_EMAIL && process.env.SHIPROCKET_PASSWORD),
   };
@@ -56,17 +58,21 @@ export const getShiprocketConfig = async (): Promise<ShiprocketConfig> => {
   try {
     const { data } = await supabase
       .from('store_settings')
-      .select('value')
-      .eq('key', 'shiprocket')
+      .select('*')
+      .limit(1)
       .maybeSingle();
 
-    if (data?.value) {
+    if (data) {
+      const email = data.shiprocket_email || data.value?.email || envConfig.email;
+      const password = data.shiprocket_password || data.value?.password || envConfig.password;
+      const pickupLocation = data.shiprocket_pickup_location || data.value?.pickupLocation || envConfig.pickupLocation;
+      const webhookSecret = data.shiprocket_webhook_secret || data.value?.webhookSecret || envConfig.webhookSecret;
       return {
-        email: data.value.email || envConfig.email,
-        password: data.value.password || envConfig.password,
-        pickupLocation: data.value.pickupLocation || envConfig.pickupLocation,
-        webhookSecret: data.value.webhookSecret || envConfig.webhookSecret,
-        enabled: data.value.enabled !== undefined ? Boolean(data.value.enabled) : envConfig.enabled,
+        email,
+        password,
+        pickupLocation,
+        webhookSecret,
+        enabled: Boolean(email && password),
       };
     }
   } catch {}

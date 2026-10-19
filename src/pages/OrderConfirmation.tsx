@@ -1,19 +1,22 @@
 import { useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { useOrder } from '../hooks/useOrders';
 import { useCartStore } from '../stores/cartStore';
 import { formatCurrency } from '../lib/currency';
 
 export const OrderConfirmation = () => {
   const { orderId } = useParams<{ orderId: string }>();
-  const { data: order, isLoading, error } = useOrder(orderId || '');
+  const location = useLocation();
+  const stateOrder = (location.state as any)?.order;
+  const { data: fetchedOrder, isLoading, error } = useOrder(orderId || '');
+  const order = stateOrder || fetchedOrder;
   const clearCart = useCartStore((state) => state.clearCart);
 
   useEffect(() => {
     clearCart();
   }, [clearCart]);
 
-  if (isLoading) {
+  if (!order && isLoading) {
     return (
       <div className="min-h-screen bg-black py-12 text-white font-inter select-none">
         <div className="max-w-4xl mx-auto px-4">
@@ -146,7 +149,7 @@ export const OrderConfirmation = () => {
           <div>
             <h3 className="text-xs font-mono uppercase tracking-wider text-neutral-400 mb-4 font-semibold">Order Items</h3>
             <div className="space-y-4">
-              {order.items.map((item) => {
+              {order.items.map((item: any) => {
                 const itemKey = item.size ? `${item.productId}-${item.size}` : item.productId;
                 return (
                   <div key={itemKey} className="flex items-center gap-4">
