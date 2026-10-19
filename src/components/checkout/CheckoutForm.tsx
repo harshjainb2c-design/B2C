@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { PackageCheck, CreditCard, Banknote, ShieldCheck } from 'lucide-react';
+import { PackageCheck, CreditCard, Banknote, ShieldCheck, Truck } from 'lucide-react';
 import { ShippingForm } from './ShippingForm';
 import { OrderSummary } from './OrderSummary';
 import { apiClient } from '../../lib/api-client';
@@ -41,6 +41,12 @@ export const CheckoutForm = ({ onSuccess }: CheckoutFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isOnlineAvailable, setIsOnlineAvailable] = useState(true);
+  const [courierInfo, setCourierInfo] = useState<{
+    checked: boolean;
+    serviceable: boolean;
+    courierName?: string;
+    etd?: string;
+  }>({ checked: false, serviceable: true });
   const { items, getTotal, clearCart } = useCartStore();
   const { user } = useAuthStore();
   const total = getTotal();
@@ -58,6 +64,29 @@ export const CheckoutForm = ({ onSuccess }: CheckoutFormProps) => {
         setPaymentOption('cod');
       });
   }, []);
+
+  useEffect(() => {
+    if (step === 'review' && shippingAddress?.postalCode) {
+      apiClient.get<any>(`/shiprocket?action=serviceability&pincode=${shippingAddress.postalCode}&cod=${paymentOption === 'cod' ? '1' : '0'}`)
+        .then((res) => {
+          const couriers = res?.data?.available_courier_companies;
+          if (Array.isArray(couriers) && couriers.length > 0) {
+            const best = couriers[0];
+            setCourierInfo({
+              checked: true,
+              serviceable: true,
+              courierName: best.courier_name,
+              etd: best.etd || `${best.estimated_delivery_days || 3} days`,
+            });
+          } else {
+            setCourierInfo({ checked: true, serviceable: false });
+          }
+        })
+        .catch(() => {
+          setCourierInfo({ checked: true, serviceable: true });
+        });
+    }
+  }, [step, shippingAddress?.postalCode, paymentOption]);
 
   const handleShippingSubmit = (address: ShippingAddress) => {
     setShippingAddress(address);
@@ -239,6 +268,20 @@ export const CheckoutForm = ({ onSuccess }: CheckoutFormProps) => {
                         {shippingAddress?.city}, {shippingAddress?.state} {shippingAddress?.postalCode}<br />
                         {shippingAddress?.phone}
                       </p>
+                      {courierInfo.checked && (
+                        <div className="mt-3 pt-2.5 border-t border-white/10 flex items-center gap-2 text-xs">
+                          <Truck className="w-4 h-4 text-emerald-400 shrink-0" />
+                          {courierInfo.serviceable ? (
+                            <span className="text-neutral-300">
+                              Serviceable via <strong className="text-white">{courierInfo.courierName || 'Shiprocket'}</strong> {courierInfo.etd ? `· Est. Delivery: ${courierInfo.etd}` : ''}
+                            </span>
+                          ) : (
+                            <span className="text-neutral-400">
+                              Standard delivery available for PIN {shippingAddress?.postalCode}
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
                     <button type="button" onClick={() => setStep('shipping')} className="text-xs font-bold uppercase tracking-wider text-neutral-400 underline">
                       Edit

@@ -1,32 +1,13 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import { z } from 'zod';
 
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-const loginSchema = z.object({
-  email: z.string().email('Invalid email format'),
-  password: z.string().min(1, 'Password is required'),
-});
-
-const registerSchema = z.object({
-  email: z.string().email('Invalid email format'),
-  password: z.string().min(8, 'Password must be at least 8 characters')
-    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-    .regex(/[0-9]/, 'Password must contain at least one number'),
-  fullName: z.string().min(2, 'Full name must be at least 2 characters'),
-});
-
-const resetPasswordSchema = z.object({
-  email: z.string().email('Invalid email format'),
-});
+const supabaseUrl = process.env.SUPABASE_URL || 'https://mujkpyeennxjkdvezpaz.supabase.co';
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || supabaseAnonKey;
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: { code: 'METHOD_NOT_ALLOWED', message: 'Method not allowed' }, status: 405 });
+    return res.status(405).json({ error: { code: 'METHOD_NOT_ALLOWED', message: 'Method not allowed' } });
   }
 
   const { action } = req.query;
@@ -36,35 +17,50 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (action === 'register') return await register(req, res);
     if (action === 'reset-password') return await resetPassword(req, res);
 
-    return res.status(400).json({ error: { code: 'INVALID_ACTION', message: 'Invalid action' }, status: 400 });
-  } catch (error) {
-    console.error('Unexpected error:', error);
-    return res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' }, status: 500 });
+    return res.status(400).json({ error: { code: 'INVALID_ACTION', message: 'Invalid action' } });
+  } catch (error: any) {
+    console.error('Auth handler error:', error);
+    return res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: error?.message || 'Internal server error' } });
   }
 }
 
 async function login(req: VercelRequest, res: VercelResponse) {
-  const supabase = createClient(supabaseUrl, supabaseAnonKey);
-  const validationResult = loginSchema.safeParse(req.body);
+  const email = String(req.body?.email || '').trim().toLowerCase();
+  const password = String(req.body?.password || '');
 
-  if (!validationResult.success) {
-    return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Validation failed', details: validationResult.error.issues }, status: 400 });
+  if (!email || !password) {
+    return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Email and password are required' } });
   }
 
-  const { email, password } = validationResult.data;
+  const supabase = createClient(supabaseUrl, supabaseAnonKey);
   const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
 
   if (authError || !authData.user || !authData.session) {
-    return res.status(401).json({ error: { code: 'INVALID_CREDENTIALS', message: 'Invalid email or password' }, status: 401 });
+    return res.status(401).json({ error: { code: 'INVALID_CREDENTIALS', message: 'Invalid email or password' } });
   }
 
-  const { data: profile } = await supabase.from('profiles').select('*').eq('id', authData.user.id).maybeSingle();
+  const adminClient = createClient(supabaseUrl, supabaseServiceKey);
+  let profile: any = null;
+  try {
+    const { data } = await adminClient.from('profiles').select('*').eq('id', authData.user.id).maybeSingle();
+    profile = data;
+    if (!profile) {
+      const fallbackName = authData.user.user_metadata?.full_name || email.split('@')[0] || 'User';
+      const { data: createdProfile } = await adminClient.from('profiles').upsert({
+        id: authData.user.id,
+        full_name: fallbackName,
+        role: 'customer',
+        email,
+      }, { onConflict: 'id' }).select().maybeSingle();
+      profile = createdProfile;
+    }
+  } catch {}
 
   return res.status(200).json({
     user: {
       id: authData.user.id,
       email: authData.user.email!,
-      fullName: profile?.full_name || authData.user.user_metadata?.full_name || authData.user.email?.split('@')[0] || 'User',
+      fullName: profile?.full_name || authData.user.user_metadata?.full_name || email.split('@')[0] || 'User',
       role: profile?.role || authData.user.user_metadata?.role || 'customer',
       createdAt: profile?.created_at || authData.user.created_at,
     },
@@ -77,62 +73,72 @@ async function login(req: VercelRequest, res: VercelResponse) {
 }
 
 async function register(req: VercelRequest, res: VercelResponse) {
-  const supabase = createClient(supabaseUrl, supabaseServiceKey);
-  const validationResult = registerSchema.safeParse(req.body);
+  const email = String(req.body?.email || '').trim().toLowerCase();
+  const password = String(req.body?.password || '');
+  const rawName = String(req.body?.fullName || '').trim();
+  const fullName = rawName || email.split('@')[0] || 'User';
 
-  if (!validationResult.success) {
-    return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Validation failed', details: validationResult.error.issues }, status: 400 });
+  if (!email || !email.includes('@')) {
+    return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Valid email is required' } });
   }
 
-  const { email, password, fullName } = validationResult.data;
-  const { data: authData, error: authError } = await supabase.auth.signUp({
+  if (!password || password.length < 6) {
+    return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Password must be at least 6 characters' } });
+  }
+
+  const adminClient = createClient(supabaseUrl, supabaseServiceKey);
+  const { data: adminData, error: adminError } = await adminClient.auth.admin.createUser({
     email,
     password,
-    options: { data: { full_name: fullName } },
+    email_confirm: true,
+    user_metadata: { full_name: fullName, role: 'customer' },
   });
 
-  if (authError) {
-    if (authError.message.includes('already registered')) {
-      return res.status(409).json({ error: { code: 'ALREADY_EXISTS', message: 'User with this email already exists' }, status: 409 });
+  if (adminError) {
+    const msg = adminError.message.toLowerCase();
+    if (msg.includes('already') || msg.includes('exists')) {
+      return res.status(409).json({ error: { code: 'ALREADY_EXISTS', message: 'User with this email already exists' } });
     }
-    return res.status(400).json({ error: { code: 'INVALID_INPUT', message: authError.message }, status: 400 });
+    return res.status(400).json({ error: { code: 'REGISTRATION_FAILED', message: adminError.message } });
   }
 
-  if (!authData.user) {
-    return res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'Failed to create user' }, status: 500 });
-  }
+  const userId = adminData.user.id;
 
   try {
-    await supabase.from('profiles').upsert({ id: authData.user.id, full_name: fullName, role: 'customer' }, { onConflict: 'id' });
+    await adminClient.from('profiles').upsert({
+      id: userId,
+      full_name: fullName,
+      role: 'customer',
+      email,
+    }, { onConflict: 'id' });
   } catch {}
 
-  const { data: profile } = await supabase.from('profiles').select('*').eq('id', authData.user.id).maybeSingle();
+  const anonClient = createClient(supabaseUrl, supabaseAnonKey);
+  const { data: signInData } = await anonClient.auth.signInWithPassword({ email, password });
 
   return res.status(201).json({
     user: {
-      id: authData.user.id,
-      email: authData.user.email!,
-      fullName: profile?.full_name || fullName,
-      role: profile?.role || 'customer',
-      createdAt: authData.user.created_at,
+      id: userId,
+      email: adminData.user.email!,
+      fullName,
+      role: 'customer',
+      createdAt: adminData.user.created_at,
     },
-    session: authData.session ? {
-      accessToken: authData.session.access_token,
-      refreshToken: authData.session.refresh_token,
-      expiresAt: authData.session.expires_at || 0,
-    } : null
+    session: signInData?.session ? {
+      accessToken: signInData.session.access_token,
+      refreshToken: signInData.session.refresh_token,
+      expiresAt: signInData.session.expires_at || 0,
+    } : null,
   });
 }
 
 async function resetPassword(req: VercelRequest, res: VercelResponse) {
-  const supabase = createClient(supabaseUrl, supabaseAnonKey);
-  const validationResult = resetPasswordSchema.safeParse(req.body);
-
-  if (!validationResult.success) {
-    return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Validation failed', details: validationResult.error.issues }, status: 400 });
+  const email = String(req.body?.email || '').trim().toLowerCase();
+  if (!email || !email.includes('@')) {
+    return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Valid email is required' } });
   }
 
-  const { email } = validationResult.data;
+  const supabase = createClient(supabaseUrl, supabaseAnonKey);
   await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${process.env.VITE_APP_URL || 'http://localhost:3000'}/reset-password`,
   });

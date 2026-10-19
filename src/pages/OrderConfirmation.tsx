@@ -93,6 +93,38 @@ export const OrderConfirmation = () => {
                 <p className="text-xs font-mono uppercase tracking-wider text-neutral-500">Total</p>
                 <p className="font-semibold text-white">{formatCurrency(order.total)}</p>
               </div>
+              {order.shiprocketOrderId && (
+                <div>
+                  <p className="text-xs font-mono uppercase tracking-wider text-neutral-500">Shiprocket Order</p>
+                  <p className="font-semibold text-white">#{order.shiprocketOrderId}</p>
+                </div>
+              )}
+              {order.shiprocketShipmentId && (
+                <div>
+                  <p className="text-xs font-mono uppercase tracking-wider text-neutral-500">Shipment ID</p>
+                  <p className="font-semibold text-white">{order.shiprocketShipmentId}</p>
+                </div>
+              )}
+              {order.awbCode && (
+                <div className="col-span-2 bg-neutral-900/60 border border-neutral-800 p-3 rounded-lg flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-mono uppercase tracking-wider text-emerald-400 font-semibold">
+                      AWB: {order.awbCode} {order.courierName ? `(${order.courierName})` : ''}
+                    </p>
+                    <p className="text-xs text-neutral-400 mt-0.5">
+                      Status: {order.trackingStatus || 'Dispatched via Shiprocket'}
+                    </p>
+                  </div>
+                  <a
+                    href={`https://shiprocket.co//tracking/${order.awbCode}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs uppercase font-bold text-black bg-white px-3 py-1.5 rounded-sm hover:bg-neutral-200"
+                  >
+                    Track Shipment
+                  </a>
+                </div>
+              )}
             </div>
           </div>
 

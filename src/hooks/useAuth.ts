@@ -16,89 +16,66 @@ export const useAuth = () => {
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginRequest): Promise<AuthResponse> => {
+      const cleanEmail = credentials.email.trim().toLowerCase();
+      const password = credentials.password;
+
       try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 4000);
         const res = await fetch('/api/auth?action=login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: credentials.email.trim(), password: credentials.password }),
-          signal: controller.signal,
+          body: JSON.stringify({ email: cleanEmail, password }),
         });
-        clearTimeout(timeoutId);
 
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.user && data.session) {
-            try {
-              await supabase.auth.setSession({
-                access_token: data.session.accessToken,
-                refresh_token: data.session.refreshToken,
-              });
-            } catch {}
-            return data;
-          }
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data?.error?.message || 'Invalid email or password');
         }
-      } catch {}
 
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email: credentials.email.trim(),
-        password: credentials.password,
-      });
-
-      if (authError) {
-        throw new Error(authError.message || 'Invalid email or password');
-      }
-
-      if (!authData?.user || !authData?.session) {
-        throw new Error('Invalid email or password');
-      }
-
-      let userRole: 'customer' | 'admin' = (authData.user.user_metadata?.role as 'customer' | 'admin') || 'customer';
-      let userFullName = authData.user.user_metadata?.full_name || authData.user.email?.split('@')[0] || 'User';
-      let userCreatedAt = authData.user.created_at || new Date().toISOString();
-
-      try {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', authData.user.id)
-          .maybeSingle();
-
-        if (profile) {
-          userFullName = profile.full_name || userFullName;
-          userRole = profile.role || userRole;
-          userCreatedAt = profile.created_at || userCreatedAt;
-        } else {
+        if (data?.session) {
           try {
-            await supabase.from('profiles').insert({
-              id: authData.user.id,
-              full_name: userFullName,
-              role: userRole,
+            await supabase.auth.setSession({
+              access_token: data.session.accessToken,
+              refresh_token: data.session.refreshToken,
             });
           } catch {}
         }
-      } catch {}
 
-      const mappedUser: User = {
-        id: authData.user.id,
-        email: authData.user.email || '',
-        fullName: userFullName,
-        role: userRole,
-        createdAt: userCreatedAt,
-      };
+        return data;
+      } catch (err: any) {
+        if (err.message && !err.message.includes('Failed to fetch') && !err.message.includes('NetworkError')) {
+          throw err;
+        }
 
-      const mappedSession: Session = {
-        accessToken: authData.session.access_token,
-        refreshToken: authData.session.refresh_token || '',
-        expiresAt: authData.session.expires_at || 0,
-      };
+        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+          email: cleanEmail,
+          password,
+        });
 
-      return { user: mappedUser, session: mappedSession };
+        if (authError || !authData?.user || !authData?.session) {
+          throw new Error(authError?.message || 'Invalid email or password');
+        }
+
+        const mappedUser: User = {
+          id: authData.user.id,
+          email: authData.user.email || cleanEmail,
+          fullName: authData.user.user_metadata?.full_name || cleanEmail.split('@')[0] || 'User',
+          role: (authData.user.user_metadata?.role as 'customer' | 'admin') || 'customer',
+          createdAt: authData.user.created_at || new Date().toISOString(),
+        };
+
+        const mappedSession: Session = {
+          accessToken: authData.session.access_token,
+          refreshToken: authData.session.refresh_token || '',
+          expiresAt: authData.session.expires_at || 0,
+        };
+
+        return { user: mappedUser, session: mappedSession };
+      }
     },
     onSuccess: (data) => {
       setUser(data.user);
-      setSession(data.session);
+      if (data.session) setSession(data.session);
       useAuthStore.setState({ isInitialized: true, isLoading: false });
       queryClient.invalidateQueries({ queryKey: ['user'] });
     },
@@ -106,103 +83,77 @@ export const useAuth = () => {
 
   const registerMutation = useMutation({
     mutationFn: async (data: RegisterRequest): Promise<AuthResponse> => {
+      const cleanEmail = data.email.trim().toLowerCase();
+
       try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 4000);
         const res = await fetch('/api/auth?action=register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
-          signal: controller.signal,
+          body: JSON.stringify({ ...data, email: cleanEmail }),
         });
-        clearTimeout(timeoutId);
 
-        if (res.ok) {
-          const resData = await res.json();
-          if (resData && resData.user) {
-            if (resData.session) {
-              try {
-                await supabase.auth.setSession({
-                  access_token: resData.session.accessToken,
-                  refresh_token: resData.session.refreshToken,
-                });
-              } catch {}
-            }
-            return resData;
-          }
+        const resData = await res.json();
+
+        if (!res.ok) {
+          throw new Error(resData?.error?.message || 'Failed to create account');
         }
-      } catch {}
 
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: data.email.trim(),
-        password: data.password,
-        options: {
-          data: {
-            full_name: data.fullName,
-          },
-        },
-      });
-
-      if (authError) {
-        if (authError.message.toLowerCase().includes('already registered') || authError.message.toLowerCase().includes('already exists')) {
-          throw new Error('User with this email already exists');
-        }
-        throw new Error(authError.message || 'Failed to create account');
-      }
-
-      if (!authData.user) {
-        throw new Error('Failed to create account');
-      }
-
-      if (!authData.session) {
-        throw new Error('Account created. Please confirm your email before signing in.');
-      }
-
-      let userRole: 'customer' | 'admin' = (authData.user.user_metadata?.role as 'customer' | 'admin') || 'customer';
-      let userFullName = data.fullName || authData.user.user_metadata?.full_name || 'User';
-      let userCreatedAt = authData.user.created_at || new Date().toISOString();
-
-      try {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', authData.user.id)
-          .maybeSingle();
-
-        if (profile) {
-          userFullName = profile.full_name || userFullName;
-          userRole = profile.role || userRole;
-          userCreatedAt = profile.created_at || userCreatedAt;
-        } else {
+        if (resData?.session) {
           try {
-            await supabase.from('profiles').insert({
-              id: authData.user.id,
-              full_name: userFullName,
-              role: userRole,
+            await supabase.auth.setSession({
+              access_token: resData.session.accessToken,
+              refresh_token: resData.session.refreshToken,
             });
           } catch {}
         }
-      } catch {}
 
-      const mappedUser: User = {
-        id: authData.user.id,
-        email: authData.user.email || '',
-        fullName: userFullName,
-        role: userRole,
-        createdAt: userCreatedAt,
-      };
+        return resData;
+      } catch (err: any) {
+        if (err.message && !err.message.includes('Failed to fetch') && !err.message.includes('NetworkError')) {
+          throw err;
+        }
 
-      const mappedSession: Session = {
-        accessToken: authData.session.access_token,
-        refreshToken: authData.session.refresh_token || '',
-        expiresAt: authData.session.expires_at || 0,
-      };
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: cleanEmail,
+          password: data.password,
+          options: {
+            data: {
+              full_name: data.fullName,
+            },
+          },
+        });
 
-      return { user: mappedUser, session: mappedSession };
+        if (authError) {
+          if (authError.message.toLowerCase().includes('already')) {
+            throw new Error('User with this email already exists');
+          }
+          throw new Error(authError.message || 'Failed to create account');
+        }
+
+        if (!authData?.user) {
+          throw new Error('Failed to create account');
+        }
+
+        const mappedUser: User = {
+          id: authData.user.id,
+          email: authData.user.email || cleanEmail,
+          fullName: data.fullName || 'User',
+          role: 'customer',
+          createdAt: authData.user.created_at || new Date().toISOString(),
+        };
+
+        const mappedSession: Session | null = authData.session ? {
+          accessToken: authData.session.access_token,
+          refreshToken: authData.session.refresh_token || '',
+          expiresAt: authData.session.expires_at || 0,
+        } : null;
+
+        return { user: mappedUser, session: mappedSession as any };
+      }
     },
     onSuccess: (data) => {
       setUser(data.user);
-      setSession(data.session);
+      if (data.session) setSession(data.session);
       useAuthStore.setState({ isInitialized: true, isLoading: false });
       queryClient.invalidateQueries({ queryKey: ['user'] });
     },

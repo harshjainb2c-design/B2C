@@ -93,8 +93,10 @@ const getToken = async (): Promise<string> => {
 };
 
 const splitName = (fullName: string) => {
-  const [firstName, ...lastName] = fullName.trim().split(/\s+/);
-  return { firstName: firstName || 'Customer', lastName: lastName.join(' ') || 'Customer' };
+  const parts = fullName.trim().split(/\s+/);
+  const firstName = parts[0] || 'Customer';
+  const lastName = parts.slice(1).join(' ') || '.';
+  return { firstName, lastName };
 };
 
 export const createShiprocketCodShipment = async (
@@ -104,6 +106,10 @@ export const createShiprocketCodShipment = async (
   const token = await getToken();
   const { firstName, lastName } = splitName(input.shippingAddress.fullName);
   const paymentMethod = input.paymentMethod || 'COD';
+  const cleanPhone = input.shippingAddress.phone.replace(/\D/g, '').slice(-10) || '9999999999';
+  const cleanEmail = (input.customerEmail && input.customerEmail.includes('@')) 
+    ? input.customerEmail 
+    : (config.email || 'support@b2cexports.com');
 
   const response = await fetch(`${SHIPROCKET_BASE_URL}/orders/create/adhoc`, {
     method: 'POST',
@@ -114,29 +120,29 @@ export const createShiprocketCodShipment = async (
     body: JSON.stringify({
       order_id: input.orderId,
       order_date: new Date().toISOString().slice(0, 19).replace('T', ' '),
-      pickup_location: config.pickupLocation || 'Primary',
+      pickup_location: config.pickupLocation || 'work',
       billing_customer_name: firstName,
       billing_last_name: lastName,
       billing_address: input.shippingAddress.addressLine1,
       billing_address_2: input.shippingAddress.addressLine2 || '',
       billing_city: input.shippingAddress.city,
-      billing_pincode: input.shippingAddress.postalCode,
+      billing_pincode: input.shippingAddress.postalCode.replace(/\s+/g, ''),
       billing_state: input.shippingAddress.state,
-      billing_country: input.shippingAddress.country,
-      billing_email: input.customerEmail || '',
-      billing_phone: input.shippingAddress.phone,
+      billing_country: input.shippingAddress.country || 'India',
+      billing_email: cleanEmail,
+      billing_phone: cleanPhone,
       shipping_is_billing: true,
       order_items: input.items.map((item) => ({
         name: item.name,
-        sku: item.sku,
-        units: item.quantity,
-        selling_price: item.sellingPrice,
+        sku: item.sku || 'SKU-DEFAULT',
+        units: Math.max(1, Number(item.quantity) || 1),
+        selling_price: Math.max(1, Number(item.sellingPrice) || 1),
         discount: '',
         tax: '',
         hsn: '',
       })),
       payment_method: paymentMethod,
-      sub_total: input.total,
+      sub_total: Math.max(1, Number(input.total) || 1),
       length: parsePositiveEnvNumber('SHIPROCKET_DEFAULT_LENGTH_CM', 10),
       breadth: parsePositiveEnvNumber('SHIPROCKET_DEFAULT_BREADTH_CM', 10),
       height: parsePositiveEnvNumber('SHIPROCKET_DEFAULT_HEIGHT_CM', 10),
@@ -146,11 +152,54 @@ export const createShiprocketCodShipment = async (
   const data = await readResponse(response);
 
   if (!response.ok || !data.shipment_id || !data.order_id) {
-    throw new ShiprocketError(data.message || 'Shiprocket could not create the shipment');
+    const errorMsg = typeof data.errors === 'object' 
+      ? JSON.stringify(data.errors) 
+      : (data.message || 'Shiprocket could not create shipment');
+    throw new ShiprocketError(errorMsg);
   }
 
   return {
     orderId: String(data.order_id),
     shipmentId: String(data.shipment_id),
   };
+};
+
+export const checkShiprocketServiceability = async (
+  deliveryPostcode: string,
+  cod: boolean = true,
+  weight: number = 0.5
+) => {
+  const token = await getToken();
+  const pickupPostcode = '452003';
+  const url = `${SHIPROCKET_BASE_URL}/courier/serviceability/?pickup_postcode=${pickupPostcode}&delivery_postcode=${deliveryPostcode.replace(/\s+/g, '')}&cod=${cod ? 1 : 0}&weight=${weight}`;
+
+  const response = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await readResponse(response);
+  return data;
+};
+
+export const trackShiprocketShipment = async (shipmentId: string) => {
+  const token = await getToken();
+  const response = await fetch(`${SHIPROCKET_BASE_URL}/courier/track/shipment/${shipmentId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return await readResponse(response);
+};
+
+export const generateShiprocketAWB = async (shipmentId: string, courierId?: number) => {
+  const token = await getToken();
+  const body: Record<string, any> = { shipment_id: shipmentId };
+  if (courierId) body.courier_id = courierId;
+
+  const response = await fetch(`${SHIPROCKET_BASE_URL}/courier/assign/awb`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(body),
+  });
+  return await readResponse(response);
 };

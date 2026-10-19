@@ -62,52 +62,55 @@ export const useAuthStore = create<AuthStore>()(
 
       initialize: async () => {
         const state = get();
-        if (state.isInitialized) {
-          return;
-        }
+        if (state.isInitialized) return;
 
         try {
-          const sessionPromise = supabase.auth.getSession();
-          const timeoutPromise = new Promise<{ data: { session: null }; error: null }>((resolve) =>
-            setTimeout(() => resolve({ data: { session: null }, error: null }), 2000)
-          );
-          const { data: sessionData } = await Promise.race([sessionPromise, timeoutPromise]);
+          const { data: sessionData } = await supabase.auth.getSession();
 
           if (!sessionData?.session?.user) {
+            const stored = state.session;
+            if (stored?.refreshToken) {
+              try {
+                const { data: restored } = await supabase.auth.setSession({
+                  access_token: stored.accessToken,
+                  refresh_token: stored.refreshToken,
+                });
+                if (restored?.session?.user) {
+                  set({ isInitialized: true, isLoading: false });
+                  return;
+                }
+              } catch {}
+            }
             set({ user: null, session: null, isInitialized: true, isLoading: false });
             return;
           }
 
+          const supaUser = sessionData.session.user;
           let mappedUser: User = {
-            id: sessionData.session.user.id,
-            email: sessionData.session.user.email || '',
-            fullName: sessionData.session.user.user_metadata?.full_name || sessionData.session.user.email?.split('@')[0] || 'User',
-            role: (sessionData.session.user.user_metadata?.role as 'customer' | 'admin') || 'customer',
-            createdAt: sessionData.session.user.created_at || new Date().toISOString(),
+            id: supaUser.id,
+            email: supaUser.email || '',
+            fullName: supaUser.user_metadata?.full_name || supaUser.email?.split('@')[0] || 'User',
+            role: (supaUser.user_metadata?.role as 'customer' | 'admin') || 'customer',
+            createdAt: supaUser.created_at || new Date().toISOString(),
           };
 
           try {
-            const profilePromise = supabase
+            const { data: profile } = await supabase
               .from('profiles')
               .select('*')
-              .eq('id', sessionData.session.user.id)
+              .eq('id', supaUser.id)
               .maybeSingle();
-            const profileTimeout = new Promise<{ data: null; error: null }>((resolve) =>
-              setTimeout(() => resolve({ data: null, error: null }), 2000)
-            );
-            const { data: profile } = await Promise.race([profilePromise, profileTimeout]);
 
             if (profile) {
               mappedUser = {
                 id: profile.id,
-                email: sessionData.session.user.email || '',
+                email: supaUser.email || mappedUser.email,
                 fullName: profile.full_name || mappedUser.fullName,
                 role: profile.role || mappedUser.role,
                 createdAt: profile.created_at || mappedUser.createdAt,
               };
             }
-          } catch {
-          }
+          } catch {}
 
           set({
             user: mappedUser,
@@ -120,7 +123,7 @@ export const useAuthStore = create<AuthStore>()(
             isLoading: false,
           });
         } catch {
-          set({ user: null, session: null, isInitialized: true, isLoading: false });
+          set({ isInitialized: true, isLoading: false });
         }
       },
 
@@ -158,19 +161,18 @@ supabase.auth.onAuthStateChange(async (event, session) => {
           .from('profiles')
           .select('*')
           .eq('id', session.user.id)
-          .single();
+          .maybeSingle();
 
         if (profile) {
           mappedUser = {
             id: profile.id,
-            email: session.user.email || '',
+            email: session.user.email || mappedUser.email,
             fullName: profile.full_name || mappedUser.fullName,
             role: profile.role || mappedUser.role,
             createdAt: profile.created_at || mappedUser.createdAt,
           };
         }
-      } catch {
-      }
+      } catch {}
 
       store.setUser(mappedUser);
       store.setSession({

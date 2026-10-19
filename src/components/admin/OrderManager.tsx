@@ -254,8 +254,18 @@ export const OrderManager = () => {
                             Payment: <span className="text-white font-semibold uppercase">{order.paymentMethod === 'online' ? 'Online (Razorpay)' : 'Cash on Delivery'}</span> · {order.paymentStatus.replace('_', ' ')}
                           </div>
                           {order.shiprocketShipmentId && (
-                            <div className="font-mono text-neutral-300">
-                              Shiprocket ID: {order.shiprocketShipmentId} {order.awbCode ? `· AWB: ${order.awbCode}` : ''}
+                            <div className="font-mono text-neutral-300 flex items-center gap-2">
+                              <span>Shiprocket ID: {order.shiprocketShipmentId}</span>
+                              {order.awbCode && (
+                                <a
+                                  href={`https://shiprocket.co//tracking/${order.awbCode}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-emerald-400 hover:text-emerald-300 underline"
+                                >
+                                  Track AWB ({order.awbCode})
+                                </a>
+                              )}
                             </div>
                           )}
                         </div>
